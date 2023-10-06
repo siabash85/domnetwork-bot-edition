@@ -14,6 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $dd = "aa";
         return view('user::index');
     }
 
