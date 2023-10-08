@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('username');
             $table->string('first_name');
-            $table->string('uid');
+            $table->string('uid')->nullable();
             $table->string('email')->nullable()->unique();
+            $table->string('mobile')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('section')->nullable();
+            $table->string('step')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

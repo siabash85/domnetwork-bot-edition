@@ -6,6 +6,8 @@ use Illuminate\Support\Str;
 use Modules\User\Entities\User;
 use Telegram\Bot\Commands\Command;
 use Illuminate\Support\Facades\Hash;
+use Telegram\Bot\Keyboard\Keyboard;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class StartCommand extends Command
 {
@@ -30,8 +32,8 @@ class StartCommand extends Command
                 'password' => Hash::make(Str::random(8)),
             ]);
         }
-        $services = ['text' => '🛒 خرید سرویس'];
-        $purchase_service = ['text' => '🛍 سرویس های من'];
+        $purchase_service = ['text' => '🛒 خرید سرویس'];
+        $services = ['text' => '🛍 سرویس های من'];
         $charge = ['text' => '💸 شارژ حساب'];
         $pricing = ['text' => '🛒 تعرفه خدمات'];
         $profile = ['text' => '👤 پروفایل'];
@@ -42,7 +44,6 @@ class StartCommand extends Command
             [$charge, $pricing, $profile],
             [$support, $guide],
         ];
-
         $replyMarkup = json_encode([
             'keyboard' => $keyboard,
             'resize_keyboard' => true,

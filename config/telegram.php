@@ -1,5 +1,6 @@
 <?php
 
+use App\Telegram\Commands\PurchaseServiceCommand;
 use Telegram\Bot\Commands\HelpCommand;
 use App\Telegram\Commands\StartCommand;
 
@@ -38,8 +39,8 @@ return [
             'webhook_url' => env('TELEGRAM_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
             'commands' => [
                 //Acme\Project\Commands\MyTelegramBot\BotCommand::class,
-                StartCommand::class
-
+                StartCommand::class,
+                PurchaseServiceCommand::class,
             ],
         ],
 

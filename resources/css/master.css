@@ -1,0 +1,107 @@
+@font-face {
+    font-family: YekanBakh;
+    font-style: normal;
+    font-weight: 100;
+    font-display: swap;
+    src: url("../fonts/YekanBakh/YekanBakh-Regular.woff2") format("woff2"),
+        url("../fonts/YekanBakh/YekanBakh-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: YekanBakh;
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("../fonts/YekanBakh/YekanBakh-Medium.woff2") format("woff2"),
+        url("../fonts/YekanBakh/YekanBakh-Medium.ttf") format("truetype");
+}
+
+body {
+    font-family: YekanBakh !important;
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+.v-btn {
+    letter-spacing: 0px !important;
+}
+.v-label {
+    transform-origin: right center !important;
+    right: 0 !important;
+}
+input {
+    outline: 0 !important;
+    text-align: right;
+}
+input:focus {
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+.vpd-icon-btn {
+    display: none !important;
+}
+.vpd-input-group input {
+    line-height: 44px !important;
+    border-right: 0 !important;
+    border-left: 0 !important;
+    border-top: 0 !important;
+    border-color: #6b7280 !important;
+}
+.invalid-feedback {
+    /* color: red; */
+    color: rgb(var(--v-theme-error));
+    margin-top: 0.3rem;
+    font-size: 12px;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+[type="text"],
+input:where(:not([type])),
+[type="email"],
+[type="url"],
+[type="password"],
+[type="number"],
+[type="date"],
+[type="datetime-local"],
+[type="month"],
+[type="search"],
+[type="tel"],
+[type="time"],
+[type="week"],
+[multiple],
+textarea,
+select {
+    background-color: unset;
+}
+
+.form-detail-module {
+    /* height: 297mm; */
+    width: 210mm;
+    height: 296mm;
+}
+.form-detail-logo {
+    width: 110px;
+}
+.form-detail-module__items {
+    direction: ltr;
+}
+.form-detail-module__items > div {
+    direction: rtl;
+}
+.zzz:first-of-type > .divider-value {
+    display: none !important;
+}
+@media only screen and (max-width: 767px) {
+    .login-card {
+        margin: 1rem !important;
+    }
+}
+
+.dir-ltr {
+    direction: ltr !important;
+}

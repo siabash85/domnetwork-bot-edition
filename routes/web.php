@@ -17,14 +17,6 @@ use App\Http\Controllers\WebhookController;
 |
 */
 
-Route::get('/', function () {
-    // $res = Http::get("https://api.telegram.org/bot6627556212:AAHLM2Z_iUJTVmKyyXmsXSyzpRiFpc9umSs/getMe");
-    // dd($res);
-    // Http::asForm()->post("https://api.telegram.org/bot6627556212:AAHLM2Z_iUJTVmKyyXmsXSyzpRiFpc9umSs/sendMessage", [
-    //     "chat_id"  => "1669306764",
-    //     "text"  => "test message ee"
-    // ]);
-
+Route::fallback(function () {
     return view('welcome');
-});
-// Route::post('/webhook/callback', [WebhookController::class, 'callback']);
+})->name('welcome');
