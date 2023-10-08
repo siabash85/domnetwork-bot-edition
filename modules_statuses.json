@@ -1,4 +1,6 @@
 {
     "User": true,
-    "Bot": true
+    "Bot": true,
+    "Server": true,
+    "Common": true
 }
