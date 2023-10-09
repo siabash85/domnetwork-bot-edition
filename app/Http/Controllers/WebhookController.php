@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Modules\User\Entities\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Modules\Order\Entities\PreOrder;
 use Modules\Server\Entities\Package;
 use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Entities\Server;
@@ -30,6 +31,7 @@ class WebhookController extends Controller
             switch ($update->getMessage()->text) {
                 case Keyboards::PURCHASE_SERVICE:
                     $servers = Server::query()->where('is_active', true)->where('stock', '>=', 1)->get();
+
 
                     if (count($servers) == 0) {
                         $user->update([
@@ -78,8 +80,22 @@ class WebhookController extends Controller
                 default:
                     $servers = Server::query()->pluck('name')->toArray();
                     $durations = PackageDuration::query()->pluck('name')->toArray();
+                    $packages = Package::query()->pluck('name')->toArray();
                     if (in_array($update->getMessage()->text, $servers)) {
                         if ($user->step == "1" && $user->section == Keyboards::PURCHASE_SERVICE) {
+                            $selected_server = Server::query()->where('name', $update->getMessage()->text)->first();
+                            // PreOrder::query()->where('user_id', $user->id)->delete();
+                            // $pre_order = PreOrder::query()->firstOrCreate([
+                            //     'user_id' => $user->id,
+                            //     'server_id' => $selected_server->id,
+                            // ]);
+                            $pre_order = PreOrder::firstOrCreate(
+                                ['user_id' => $user->id],
+                                [
+                                    'user_id' => $user->id,
+                                    'server_id' => $selected_server->id,
+                                ]
+                            );
                             $durations = PackageDuration::query()->get();
                             $durationButtons = collect($durations)->map(function ($duration) {
                                 return ['text' => $duration->name];
@@ -94,6 +110,8 @@ class WebhookController extends Controller
                                 'section' => Keyboards::PURCHASE_SERVICE,
                                 'step' => 2
                             ]);
+
+
                             Telegram::sendMessage([
                                 'text' => "⏳ مدت زمان سرویس را انتخاب کنید:",
                                 "chat_id" => $sender->id,
@@ -116,10 +134,32 @@ class WebhookController extends Controller
                                 'section' => Keyboards::PURCHASE_SERVICE,
                                 'step' => 3
                             ]);
+                            $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
+                            $selected_duration = PackageDuration::query()->where('name', $update->getMessage()->text)->first();
+                            $pre_order->update([
+                                'package_duration_id' => $selected_duration->id
+                            ]);
                             Telegram::sendMessage([
                                 'text' => "🔰لطفا یکی از پلن های زیر را انتخاب کنید :",
                                 "chat_id" => $sender->id,
                                 'reply_markup' => $encodedMarkup,
+                            ]);
+                        }
+                    } else if (in_array($update->getMessage()->text, $packages)) {
+                        if ($user->step == "3" && $user->section == Keyboards::PURCHASE_SERVICE) {
+                            $user->update([
+                                'section' => Keyboards::PURCHASE_SERVICE,
+                                'step' => 4
+                            ]);
+                            $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
+                            $selected_package = Package::query()->where('name', $update->getMessage()->text)->first();
+                            $pre_order->update([
+                                'package_id' => $selected_package->id
+                            ]);
+                            Telegram::sendMessage([
+                                'text' => "مرحله ایجاد فاکتور",
+                                "chat_id" => $sender->id,
+                                // 'reply_markup' => $encodedMarkup,
                             ]);
                         }
                     }
