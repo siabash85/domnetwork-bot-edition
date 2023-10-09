@@ -24,8 +24,9 @@ class StartCommand extends Command
         );
 
         $user = User::where('uid', $sender->id)->first();
+
         if (!$user) {
-            User::query()->create([
+            $user =    User::query()->create([
                 'username' => $sender->username,
                 'first_name' =>  $sender->first_name,
                 'uid' => $sender->id,
@@ -44,6 +45,10 @@ class StartCommand extends Command
             [$charge, $pricing, $profile],
             [$support, $guide],
         ];
+        $user->update([
+            'section' => null,
+            'step' => null
+        ]);
         $replyMarkup = json_encode([
             'keyboard' => $keyboard,
             'resize_keyboard' => true,
