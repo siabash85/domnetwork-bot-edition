@@ -1,8 +1,9 @@
-// @ts-nocheck
-import { App } from "vue";
+import type { App } from "vue";
+import type { AxiosResponse } from "axios";
 import axios from "axios";
-import { AxiosResponse, AxiosRequestConfig } from "axios";
-import { createApp } from "vue";
+import VueAxios from "vue-axios";
+import JwtService from "@/Core/services/JwtService";
+
 
 /**
  * @description service to call HTTP request via Axios
@@ -13,49 +14,35 @@ class ApiService {
      */
     public static vueInstance: App;
 
-    constructor(app: any) {
+    /**
+     * @description initialize vue axios
+     */
+    public static init(app: any) {
+        console.log("app", app);
+
+        // ApiService.vueInstance = app;
+        // ApiService.vueInstance.use(VueAxios, axios);
+        // ApiService.vueInstance.axios.defaults.baseURL =
+        //   import.meta.env.VITE_APP_API_URL;
+
         ApiService.vueInstance = app;
         ApiService.vueInstance.axios = axios;
         // ApiService.vueInstance.axios.defaults.baseURL = process.env.API_URL;
         ApiService.vueInstance.axios.defaults.withCredentials = true;
-        // ApiService.vueInstance.axios.interceptors.response.use(
-        //     response => {
-        //         return response;
-        //     },
-        //     error => {
-        //         if (error.response.status == 404) {
-        //             router.push({ name: "not-found" });
-        //         }
-
-        //         return Promise.reject(error);
-        //     }
-        // );
-    }
-
-    /**
-     * @description initialize vue axios
-     */
-    public static init(app: App<Element>) {
-        // ApiService.vueInstance = app;
-        // ApiService.vueInstance.axios = axios;
-        // ApiService.vueInstance.axios.defaults.baseURL = process.env.API_URL
-        // ApiService.vueInstance.axios.interceptors.response.use(
-        //     response => {
-        //         return response;
-        //     },
-        //     error => {
-        //         if (error.response.status == 404) {
-        //             router.push({ name: "not-found" });
-        //         }
-        //         return Promise.reject(error);
-        //     }
-        // );
     }
 
     /**
      * @description set the default HTTP request headers
      */
-    public static setHeader(): void { }
+    public static setHeader(): void {
+        console.log("toekn", JwtService.getToken());
+
+        ApiService.vueInstance.axios.defaults.headers.common[
+            "Authorization"
+        ] = `Token ${JwtService.getToken()}`;
+        ApiService.vueInstance.axios.defaults.headers.common["Accept"] =
+            "application/json";
+    }
 
     /**
      * @description send the GET HTTP request
@@ -63,25 +50,21 @@ class ApiService {
      * @param params: AxiosRequestConfig
      * @returns Promise<AxiosResponse>
      */
-    public static query(
-        resource: string,
-        params: AxiosRequestConfig
-    ): Promise<AxiosResponse> {
-        return ApiService.vueInstance.axios.get(resource, params).catch((error) => {
-            throw new Error(`ApiService ${error}`);
-        });
+    public static query(resource: string, params: any): Promise<AxiosResponse> {
+        return ApiService.vueInstance.axios.get(resource, params);
     }
 
     /**
      * @description send the GET HTTP request
      * @param resource: string
+     * @param slug: string
      * @returns Promise<AxiosResponse>
      */
-    public static get(resource: string) {
-        return ApiService.vueInstance.axios.get(`${resource}`);
-        // .catch((error) => {
-        //     throw new Error(`ApiService ${error}`);
-        // });
+    public static get(
+        resource: string,
+        slug = "" as string
+    ): Promise<AxiosResponse> {
+        return ApiService.vueInstance.axios.get(`${resource}/${slug}`);
     }
 
     /**
@@ -104,7 +87,7 @@ class ApiService {
     public static update(
         resource: string,
         slug: string,
-        params: AxiosRequestConfig
+        params: any
     ): Promise<AxiosResponse> {
         return ApiService.vueInstance.axios.put(`${resource}/${slug}`, params);
     }
@@ -117,7 +100,7 @@ class ApiService {
      */
     public static put(
         resource: string,
-        params: AxiosRequestConfig,
+        params: any,
     ): Promise<AxiosResponse> {
         return ApiService.vueInstance.axios.post(`${resource}`, params, {
             params: {
@@ -132,13 +115,8 @@ class ApiService {
      * @returns Promise<AxiosResponse>
      */
     public static delete(resource: string): Promise<AxiosResponse> {
-        return ApiService.vueInstance.axios.delete(resource).catch((error) => {
-            throw new Error(`ApiService ${error}`);
-        });
+        return ApiService.vueInstance.axios.delete(resource);
     }
 }
-
-const app = createApp({});
-new ApiService(app);
 
 export default ApiService;

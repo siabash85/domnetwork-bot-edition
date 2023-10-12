@@ -44,26 +44,26 @@ class WebhookController extends Controller
             if ($update->getMessage()->text == Keyboards::PURCHASE_SERVICE) {
                 $servers = Server::query()->where('is_active', true)->where('stock', '>=', 1)->get();
                 if (count($servers) == 0) {
-                    // $user->update([
-                    //     'section' => Keyboards::PURCHASE_SERVICE,
-                    //     'step' => 2
-                    // ]);
-                    // $durations = PackageDuration::query()->get();
-                    // $durationButtons = collect($durations)->map(function ($duration) {
-                    //     return ['text' => $duration->name];
-                    // })->chunk(3)->toArray();
-                    // $replyMarkup = [
-                    //     'keyboard' => $durationButtons,
-                    //     'resize_keyboard' => true,
-                    //     'one_time_keyboard' => false,
-                    // ];
-                    // $encodedMarkup = json_encode($replyMarkup);
+                    $user->update([
+                        'section' => Keyboards::PURCHASE_SERVICE,
+                        'step' => 2
+                    ]);
+                    $durations = PackageDuration::query()->get();
+                    $durationButtons = collect($durations)->map(function ($duration) {
+                        return ['text' => $duration->name];
+                    })->chunk(3)->toArray();
+                    $replyMarkup = [
+                        'keyboard' => $durationButtons,
+                        'resize_keyboard' => true,
+                        'one_time_keyboard' => false,
+                    ];
+                    $encodedMarkup = json_encode($replyMarkup);
 
-                    // Telegram::sendMessage([
-                    //     'text' => "⏳ مدت زمان سرویس را انتخاب کنید:",
-                    //     "chat_id" => $sender->id,
-                    //     'reply_markup' => $encodedMarkup,
-                    // ]);
+                    Telegram::sendMessage([
+                        'text' => "⏳ مدت زمان سرویس را انتخاب کنید:",
+                        "chat_id" => $sender->id,
+                        'reply_markup' => $encodedMarkup,
+                    ]);
                 } else {
                     $keyboards = [];
                     $keyboards_keyboards = $servers->chunk(2);
