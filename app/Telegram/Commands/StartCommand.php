@@ -16,6 +16,7 @@ class StartCommand extends Command
 
     public function handle()
     {
+
         $sender = $this->getUpdate()->getMessage()->from;
         $fallbackUsername = $this->getUpdate()->getMessage()->from->username;
         $username = $this->argument(
@@ -45,10 +46,7 @@ class StartCommand extends Command
             [$charge, $pricing, $profile],
             [$support, $guide],
         ];
-        $user->update([
-            'section' => null,
-            'step' => null
-        ]);
+
         $replyMarkup = json_encode([
             'keyboard' => $keyboard,
             'resize_keyboard' => true,
@@ -57,6 +55,10 @@ class StartCommand extends Command
         $this->replyWithMessage([
             'text' => "سلام {$username} عزیز، به ربات ما خوش آمدید. 🚀\nیکی از دکمه های زیر را انتخاب کنید !",
             'reply_markup' => $replyMarkup,
+        ]);
+        $user->update([
+            'section' => null,
+            'step' => null
         ]);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Modules\Payment\Http\Controllers\Client\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/payment', function (Request $request) {
-    return $request->user();
+Route::prefix('/client')->group(function () {
+    Route::get("payment/generate/{order}/{id}", [PaymentController::class, 'generate'])->name('payment.generate');
+    Route::post("payment/callback", [PaymentController::class, 'callback'])->name('payment.callback');
 });

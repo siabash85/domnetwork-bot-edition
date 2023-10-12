@@ -10,7 +10,3 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::prefix('bot')->group(function() {
-    Route::get('/', 'BotController@index');
-});
