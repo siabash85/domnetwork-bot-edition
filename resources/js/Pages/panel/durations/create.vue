@@ -10,12 +10,14 @@
                 @submit.prevent="handleCreate"
             >
                 <v-text-field
+                    type="number"
                     v-model="form.name"
                     :rules="rules"
-                    label="نام"
+                    label="روز به عدد"
                     density="compact"
                     single-line
                     variant="solo"
+                    hint="بازه زمانی را تعداد روز وارد کنید"
                 ></v-text-field>
 
                 <v-btn

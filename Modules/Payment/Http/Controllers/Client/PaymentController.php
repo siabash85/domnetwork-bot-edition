@@ -11,6 +11,7 @@ use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Illuminate\Contracts\Support\Renderable;
 use Modules\Common\Http\Controllers\Api\ApiController;
+use Modules\Server\Entities\Subscription;
 
 class PaymentController extends ApiController
 {
@@ -43,6 +44,13 @@ class PaymentController extends ApiController
             // dd($dd);
             if ($code == "1") {
                 $payment->update(['status' => 'success']);
+                $payment->paymentable->service()->update(['status' => "purchased"]);
+                Subscription::query()->create([
+                    'user_id' => $payment->user_id,
+                    'service_id' => $payment->paymentable->service->id,
+                    'status' => "active",
+                    "expire_at" => now()
+                ]);
                 Telegram::sendMessage([
                     'text' => "پرداخت موفق",
                     "chat_id" => $payment->user->uid,

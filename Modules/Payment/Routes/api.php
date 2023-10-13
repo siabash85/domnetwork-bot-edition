@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Payment\Http\Controllers\Client\PaymentController;
+use Modules\Payment\Http\Controllers\Panel\PaymentController as PanelPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,4 +19,8 @@ use Modules\Payment\Http\Controllers\Client\PaymentController;
 Route::prefix('/client')->group(function () {
     Route::get("payment/generate/{order}/{id}", [PaymentController::class, 'generate'])->name('payment.generate');
     Route::post("payment/callback", [PaymentController::class, 'callback'])->name('payment.callback');
+});
+
+Route::prefix('/panel')->group(function () {
+    Route::apiResource("payments", PanelPaymentController::class);
 });

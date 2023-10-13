@@ -10,7 +10,7 @@
                 <v-list-item
                     lines="two"
                     prepend-avatar="/panel/media/avatars/blank.png"
-                    title="کیان دقانی نیا"
+                    :title="user?.username"
                     subtitle="کاربر ادمین"
                 ></v-list-item>
             </template>
@@ -76,8 +76,10 @@ import { onMounted, ref } from "vue";
 import { useDisplay } from "vuetify";
 import { useAuthStore, type User } from "@/stores/auth";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 const router = useRouter();
 const store = useAuthStore();
+const { user } = storeToRefs(store);
 
 const { mobile, smAndDown, mdAndDown } = useDisplay();
 

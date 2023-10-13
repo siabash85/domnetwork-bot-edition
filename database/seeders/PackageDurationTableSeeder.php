@@ -14,9 +14,9 @@ class PackageDurationTableSeeder extends Seeder
     public function run(): void
     {
         $durations = [
-            ['name' => "7 روز"],
-            ['name' => "14 روز"],
-            ['name' => "30 روز"],
+            ['name' => 7],
+            ['name' => 14],
+            ['name' => 30],
         ];
 
         PackageDuration::insert($durations);

@@ -50,8 +50,13 @@
                                     فعال
                                 </v-chip>
                             </template>
-                            <template v-else>
-                                <v-chip color="red" text-color="white">
+                            <template v-if="item.status == 'purchased'">
+                                <v-chip color="warning" text-color="white">
+                                    خریداری شده
+                                </v-chip>
+                            </template>
+                            <template v-if="item.status == 'inactive'">
+                                <v-chip color="green" text-color="white">
                                     غیرفعال
                                 </v-chip>
                             </template>

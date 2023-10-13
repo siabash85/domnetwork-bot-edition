@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Server\Entities\Package;
 use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Entities\Server;
+use Modules\Server\Entities\Service;
 
 class Order extends Model
 {
@@ -16,9 +17,7 @@ class Order extends Model
 
     protected $fillable = [
         "user_id",
-        "server_id",
-        "package_duration_id",
-        "package_id",
+        "service_id",
         "reference_code",
         "status",
         "payable_price",
@@ -40,17 +39,9 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function server()
+    public function service()
     {
-        return $this->belongsTo(Server::class);
-    }
-    public function package_duration()
-    {
-        return $this->belongsTo(PackageDuration::class);
-    }
-    public function package()
-    {
-        return $this->belongsTo(Package::class);
+        return $this->belongsTo(Service::class);
     }
     // protected static function newFactory()
     // {

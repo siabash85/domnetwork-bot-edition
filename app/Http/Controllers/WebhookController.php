@@ -13,6 +13,7 @@ use Modules\Order\Entities\PreOrder;
 use Modules\Server\Entities\Package;
 use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Entities\Server;
+use Modules\Server\Entities\Service;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 class WebhookController extends Controller
@@ -127,7 +128,7 @@ class WebhookController extends Controller
                     $encodedMarkup = json_encode($replyMarkup);
 
                     Telegram::sendMessage([
-                        'text' => "⏳ مدت زمان سرویس را انتخاب کنید:",
+                        'text' => "⏳ مدت زمان (تعداد روز)  سرویس را  انتخاب کنید:",
                         "chat_id" => $sender->id,
                         'reply_markup' => $encodedMarkup,
                     ]);
@@ -177,57 +178,67 @@ class WebhookController extends Controller
                     $pre_order->update([
                         'package_id' => $selected_package->id
                     ]);
-                    $order =   Order::query()->create([
-                        "user_id" => $user->id,
-                        "server_id" => $pre_order->server_id,
-                        "package_duration_id" =>  $pre_order->package_duration_id,
-                        "package_id" =>  $selected_package->id,
-                        "status" =>  "pending",
-                        "payable_price" =>  $selected_package->price,
-                        "price" =>  $selected_package->price,
-                    ]);
+                    $service = Service::query()
+                        ->where('server_id', $pre_order->server_id)
+                        ->where('package_duration_id', $pre_order->package_duration_id)
+                        ->where('package_id', $selected_package->id)
+                        ->where('status', "active")
+                        ->first();
+                    if (!is_null($service)) {
+                        $order =   Order::query()->create([
+                            "user_id" => $user->id,
+                            "service_id" => $service->id,
+                            "status" =>  "pending",
+                            "payable_price" =>  $service->price,
+                            "price" =>  $service->price,
+                        ]);
+                        $location = $service->server->name;
+                        $volume = $service->package->name;
+                        $date = $service->package_duration->name;
+                        $trackingCode = $order->reference_code;
+                        $price = round($service->price);
+                        $amount = "{$price} تومان";
+                        $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
+                            "⬅️ لوکیشن : $location\n" .
+                            "⬅️ حجم : $volume\n" .
+                            "⬅️ تاریخ : $date\n" .
+                            "⬅️ کد پیگیری : $trackingCode\n\n" .
+                            "💸 مبلغ سرویس شما : $amount\n\n" .
+                            " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
 
-
-                    $location = $order->server->name;
-                    $volume = $order->package->name;
-                    $date = $order->package_duration->name;
-                    $trackingCode = $order->reference_code;
-                    $amount = "{$order->package->price} تومان";
-                    $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
-                        "⬅️ لوکیشن : $location\n" .
-                        "⬅️ حجم : $volume\n" .
-                        "⬅️ تاریخ : $date\n" .
-                        "⬅️ کد پیگیری : $trackingCode\n\n" .
-                        "💸 مبلغ سرویس شما : $amount\n\n" .
-                        " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
-
-                    $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
-                        "pin" => "sandbox",
-                        "amount" => $order->price,
-                        "callback" => "https://pashmak-titab.store/api/client/payment/callback",
-                    ]);
-                    $dd = json_decode($res->body());
-                    $transid = $dd->transid;
-                    $inlineKeyboard = [
-                        [
+                        $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
+                            "pin" => "sandbox",
+                            "amount" => $order->price,
+                            "callback" => "https://pashmak-titab.store/api/client/payment/callback",
+                        ]);
+                        $dd = json_decode($res->body());
+                        $transid = $dd->transid;
+                        $inlineKeyboard = [
                             [
-                                'text' => 'درگاه پرداخت',
-                                'url' => route('payment.generate', ['order' => $order->id, 'id' => $transid])
+                                [
+                                    'text' => 'درگاه پرداخت',
+                                    'url' => route('payment.generate', ['order' => $order->id, 'id' => $transid])
+                                ],
                             ],
-                        ],
+                        ];
+                        $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                        Telegram::sendMessage([
+                            'text' => $message,
+                            "chat_id" => $sender->id,
+                            'reply_markup' => $encodedKeyboard,
+                        ]);
 
-                    ];
-                    $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
-                    Telegram::sendMessage([
-                        'text' => $message,
-                        "chat_id" => $sender->id,
-                        'reply_markup' => $encodedKeyboard,
-                    ]);
-
-                    $user->update([
-                        'section' => Keyboards::PURCHASE_SERVICE,
-                        'step' => 4
-                    ]);
+                        $user->update([
+                            'section' => Keyboards::PURCHASE_SERVICE,
+                            'step' => 4
+                        ]);
+                    } else {
+                        Telegram::sendMessage([
+                            'text' => "ظرفیت سرور موردنظر تکمیل شده و یا در دسترس نمی باشد",
+                            "chat_id" => $sender->id,
+                            // 'reply_markup' => $encodedKeyboard,
+                        ]);
+                    }
                 }
             }
         }

@@ -15,7 +15,9 @@ class Subscription extends Model
         'service_id',
         'expire_at',
         'status'
-
+    ];
+    protected $casts = [
+        'expire_at' => 'datetime'
     ];
 
     public function user()
