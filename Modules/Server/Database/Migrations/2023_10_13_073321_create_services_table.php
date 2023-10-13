@@ -13,16 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->foreignId("server_id")->constrained("servers")->cascadeOnDelete();
             $table->foreignId("package_duration_id")->constrained("package_durations")->cascadeOnDelete();
             $table->foreignId("package_id")->constrained("packages")->cascadeOnDelete();
-            $table->string("reference_code");
+            $table->decimal('price', $precision = 64, $scale = 4)->default(0);
+            $table->text("link")->nullable();
             $table->string("status");
-            $table->string("payable_price");
-            $table->string("price");
             $table->timestamps();
         });
     }
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('services');
     }
 };

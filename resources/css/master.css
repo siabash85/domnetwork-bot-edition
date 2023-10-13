@@ -50,8 +50,8 @@ input:focus {
 .invalid-feedback {
     /* color: red; */
     color: rgb(var(--v-theme-error));
-    margin-top: 0.3rem;
-    font-size: 12px;
+    margin-top: 0.5rem;
+    font-size: 14px;
 }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {

@@ -2,29 +2,141 @@
     <div>
         <v-sheet>
             <div class="mb-6">
-                <h2 class="text-xl">ویرایش پکیج</h2>
+                <h2 class="text-xl">ویرایش سرویس</h2>
             </div>
-            <v-form
-                ref="formRef"
-                validate-on="submit"
-                @submit.prevent="handleUpdate"
-            >
-                <v-text-field
-                    v-model="form.name"
-                    :rules="rules"
-                    label="نام"
-                    density="compact"
-                    single-line
-                    variant="solo"
-                ></v-text-field>
 
-                <v-radio-group v-model="form.is_active">
-                    <template v-slot:label>
-                        <div>وضعیت</div>
-                    </template>
-                    <v-radio label="فعال" value="1"></v-radio>
-                    <v-radio label="غیرفعال" value="0"></v-radio>
-                </v-radio-group>
+            <Form ref="formRef" @submit="handleUpdate">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4">
+                        <Field
+                            mode="passive"
+                            name="server_id"
+                            v-slot="{ field }"
+                            rules="required"
+                            label="سرور"
+                        >
+                            <v-select
+                                v-bind="field"
+                                v-model="form.server_id"
+                                label="انتخاب  سرور"
+                                :items="servers"
+                                item-title="name"
+                                item-value="id"
+                                single-line
+                                variant="solo-filled"
+                                hide-details="auto"
+                            ></v-select>
+                        </Field>
+                        <div class="invalid-feedback d-block">
+                            <ErrorMessage name="server_id" />
+                        </div>
+                    </div>
+                    <div class="col-span-4">
+                        <Field
+                            mode="passive"
+                            name="package_duration_id"
+                            v-slot="{ field }"
+                            rules="required"
+                            label="بازه زمانی"
+                        >
+                            <v-select
+                                v-bind="field"
+                                v-model="form.package_duration_id"
+                                label="انتخاب  بازه زمانی"
+                                :items="durations"
+                                item-title="name"
+                                item-value="id"
+                                single-line
+                                variant="solo-filled"
+                                hide-details="auto"
+                            ></v-select>
+                        </Field>
+                        <div class="invalid-feedback d-block">
+                            <ErrorMessage name="package_duration_id" />
+                        </div>
+                    </div>
+                    <div class="col-span-4">
+                        <Field
+                            mode="passive"
+                            name="package_id"
+                            v-slot="{ field }"
+                            rules="required"
+                            label="بازه پکیج"
+                        >
+                            <v-select
+                                v-model="form.package_id"
+                                label="انتخاب  پکیج"
+                                :items="packages"
+                                item-title="name"
+                                item-value="id"
+                                single-line
+                                variant="solo-filled"
+                                v-bind="field"
+                                hide-details="auto"
+                            ></v-select>
+                        </Field>
+                        <div class="invalid-feedback d-block">
+                            <ErrorMessage name="package_id" />
+                        </div>
+                    </div>
+
+                    <div class="col-span-6">
+                        <v-select
+                            v-model="form.status"
+                            label="انتخاب  وضعیت"
+                            :items="statuses"
+                            item-title="state"
+                            item-value="value"
+                            single-line
+                            variant="solo-filled"
+                        ></v-select>
+                    </div>
+                    <div class="col-span-6">
+                        <Field
+                            mode="passive"
+                            name="price"
+                            v-slot="{ field }"
+                            rules="required"
+                            label=" قیمت"
+                        >
+                            <v-text-field
+                                type="number"
+                                v-model="form.price"
+                                label="قیمت"
+                                single-line
+                                variant="solo-filled"
+                                size="large"
+                                v-bind="field"
+                                hide-details="auto"
+                            ></v-text-field>
+                        </Field>
+                        <div class="invalid-feedback d-block">
+                            <ErrorMessage name="price" />
+                        </div>
+                    </div>
+                    <div class="col-span-12">
+                        <Field
+                            mode="passive"
+                            name="link"
+                            v-slot="{ field }"
+                            rules="required"
+                            label=" لینک"
+                        >
+                            <v-textarea
+                                v-model="form.link"
+                                label="لینک کانفیگ"
+                                single-line
+                                variant="solo-filled"
+                                size="large"
+                                v-bind="field"
+                                hide-details="auto"
+                            ></v-textarea>
+                        </Field>
+                        <div class="invalid-feedback d-block">
+                            <ErrorMessage name="link" />
+                        </div>
+                    </div>
+                </div>
 
                 <v-btn
                     :loading="loading"
@@ -34,10 +146,10 @@
                     class="mt-2"
                     >ویرایش</v-btn
                 >
-            </v-form>
+            </Form>
         </v-sheet>
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
-            پکیج با موفقیت ویرایش شد.
+            سرویس با موفقیت ویرایش شد.
         </v-snackbar>
     </div>
 </template>
@@ -46,19 +158,31 @@
 import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
+import { ErrorMessage, Field, Form } from "vee-validate";
 
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
-    name: null,
-    is_active: "active",
+    server_id: null,
+    package_duration_id: null,
+    package_id: null,
+    status: "active",
+    price: null,
+    link: null,
 });
 const visible_success_message = ref(false);
 const rules = ref([
     (value) => {
         if (value) return true;
-        return "نام   پکیج  الزامی می باشد";
+        return "نام   سرویس  الزامی می باشد";
     },
+]);
+const servers = ref([]);
+const durations = ref([]);
+const packages = ref([]);
+const statuses = ref([
+    { state: "فعال", value: "active" },
+    { state: "غیرفعال", value: "inactive" },
 ]);
 const router = useRouter();
 const route = useRoute();
@@ -67,25 +191,45 @@ const handleUpdate = async (event) => {
     if (valid) {
         loading.value = true;
         const form_data = new FormData();
-        form_data.append("name", form.value.name);
-        form_data.append("is_active", form.value.is_active);
+        form_data.append("server_id", form.value.server_id);
+        form_data.append("package_duration_id", form.value.package_duration_id);
+        form_data.append("package_id", form.value.package_id);
+        form_data.append("status", form.value.status);
+        form_data.append("price", form.value.price);
+        form_data.append("link", form.value.link);
         const { data } = await ApiService.put(
-            `/api/panel/packages/${route.params.id}`,
+            `/api/panel/services/${route.params.id}`,
             form_data
         );
         if (data.status == 200) {
             visible_success_message.value = true;
-            router.push({ name: "panel-packages-index" });
+            router.push({ name: "panel-services-index" });
         }
     }
 };
 
 const fetchData = async () => {
-    const { data } = await ApiService.get(
-        `/api/panel/packages/${route.params.id}`
+    let { data: servers_res } = await ApiService.get(`/api/panel/servers`);
+    servers.value = servers_res.data;
+    let { data: durations_res } = await ApiService.get(
+        `/api/panel/package/durations`
     );
-    form.value.name = data.data.name;
-    form.value.is_active = data.data.is_active.toString();
+    durations.value = durations_res.data;
+    let { data: packages_res } = await ApiService.get(`/api/panel/packages`);
+    packages.value = packages_res.data;
+
+    let { data } = await ApiService.get(
+        `/api/panel/services/${route.params.id}`
+    );
+    form.value.server_id = data.data.server?.id;
+    form.value.package_duration_id = data.data.package_duration?.id;
+    form.value.package_id = data.data.package?.id;
+    form.value.status = data.data.status;
+    form.value.price = data.data.price;
+    form.value.link = data.data.link;
+    formRef.value.setValues({
+        ...form.value,
+    });
 };
 
 onMounted(() => {
