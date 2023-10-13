@@ -10,6 +10,7 @@ use Modules\Server\Transformers\Panel\PaymentResource;
 
 class PaymentController extends ApiController
 {
+
     /**
      * Display a listing of the resource.
      * @return Response

@@ -22,5 +22,6 @@ Route::prefix('/client')->group(function () {
 });
 
 Route::prefix('/panel')->group(function () {
+
     Route::apiResource("payments", PanelPaymentController::class);
 });

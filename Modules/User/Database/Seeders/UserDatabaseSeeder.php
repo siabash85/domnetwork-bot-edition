@@ -25,6 +25,16 @@ class UserDatabaseSeeder extends Seeder
             'email' => 'admin@info.com',
             'mobile' => "09010105397",
             'uid' => "1669306764",
+            'password' => Hash::make('admin4030@A'),
+            // 'is_superuser' => true
+        ]);
+
+        User::query()->create([
+            'username' => 'dev',
+            'first_name' => 'test',
+            'email' => 'test@info.com',
+            'mobile' => "09224729521",
+            'uid' => "1669306762",
             'password' => Hash::make('password'),
             // 'is_superuser' => true
         ]);

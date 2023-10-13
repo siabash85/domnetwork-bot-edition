@@ -85,11 +85,7 @@ export default {
             name: "panel-payments-index",
             component: () => import("@/Pages/panel/payments/index.vue"),
         },
-        {
-            path: "payments/create",
-            name: "panel-payments-create",
-            component: () => import("@/Pages/panel/payments/create.vue"),
-        },
+
         {
             path: "payments/edit/:id",
             name: "panel-payments-edit",

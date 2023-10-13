@@ -13,7 +13,10 @@ Homestead.json
 Homestead.yaml
 auth.json
 npm-debug.log
+vendor.zip
+/vendor.zip
 yarn-error.log
 /.fleet
 /.idea
 /.vscode
+*.zip

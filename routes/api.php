@@ -16,12 +16,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::prefix('/auth')->group(function () {
     Route::post("login", [AuthenticatedSessionController::class, 'store']);
-    Route::post("logout", [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:sanctum');
+    Route::post("logout", [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:api');
 });
 
 Route::post('/webhook/callback', [WebhookController::class, 'callback']);
