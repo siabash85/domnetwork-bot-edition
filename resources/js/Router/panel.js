@@ -11,22 +11,74 @@ export default {
             component: () => import("@/Pages/panel/dashboard.vue"),
         },
 
-        // movements
+        // servers
         {
-            path: "movements",
-            name: "panel-movements-index",
-            component: () => import("@/Pages/panel/movements/index.vue"),
+            path: "servers",
+            name: "panel-servers-index",
+            component: () => import("@/Pages/panel/servers/index.vue"),
         },
         {
-            path: "movements/create",
-            name: "panel-movements-create",
-            component: () => import("@/Pages/panel/movements/create.vue"),
+            path: "servers/create",
+            name: "panel-servers-create",
+            component: () => import("@/Pages/panel/servers/create.vue"),
         },
         {
-            path: "movements/edit/:id",
-            name: "panel-movements-edit",
-            component: () => import("@/Pages/panel/movements/edit.vue"),
+            path: "servers/edit/:id",
+            name: "panel-servers-edit",
+            component: () => import("@/Pages/panel/servers/edit.vue"),
         },
+
+        // durations
+        {
+            path: "durations",
+            name: "panel-durations-index",
+            component: () => import("@/Pages/panel/durations/index.vue"),
+        },
+        {
+            path: "durations/create",
+            name: "panel-durations-create",
+            component: () => import("@/Pages/panel/durations/create.vue"),
+        },
+        {
+            path: "durations/edit/:id",
+            name: "panel-durations-edit",
+            component: () => import("@/Pages/panel/durations/edit.vue"),
+        },
+
+        // packages
+        {
+            path: "packages",
+            name: "panel-packages-index",
+            component: () => import("@/Pages/panel/packages/index.vue"),
+        },
+        {
+            path: "packages/create",
+            name: "panel-packages-create",
+            component: () => import("@/Pages/panel/packages/create.vue"),
+        },
+        {
+            path: "packages/edit/:id",
+            name: "panel-packages-edit",
+            component: () => import("@/Pages/panel/packages/edit.vue"),
+        },
+
+        // packages
+        {
+            path: "services",
+            name: "panel-services-index",
+            component: () => import("@/Pages/panel/services/index.vue"),
+        },
+        {
+            path: "services/create",
+            name: "panel-services-create",
+            component: () => import("@/Pages/panel/services/create.vue"),
+        },
+        {
+            path: "services/edit/:id",
+            name: "panel-services-edit",
+            component: () => import("@/Pages/panel/services/edit.vue"),
+        },
+
 
     ],
 };

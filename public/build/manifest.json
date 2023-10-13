@@ -1,0 +1,148 @@
+{
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot": {
+    "file": "assets/materialdesignicons-webfont-5159a347.eot",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.eot"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf": {
+    "file": "assets/materialdesignicons-webfont-be825c12.ttf",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.ttf"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff": {
+    "file": "assets/materialdesignicons-webfont-28c8f97f.woff",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff"
+  },
+  "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2": {
+    "file": "assets/materialdesignicons-webfont-31010194.woff2",
+    "src": "node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2"
+  },
+  "resources/css/fonts/YekanBakh/YekanBakh-Medium.ttf": {
+    "file": "assets/YekanBakh-Medium-a8c837b1.ttf",
+    "src": "resources/css/fonts/YekanBakh/YekanBakh-Medium.ttf"
+  },
+  "resources/css/fonts/YekanBakh/YekanBakh-Medium.woff2": {
+    "file": "assets/YekanBakh-Medium-ba8e915c.woff2",
+    "src": "resources/css/fonts/YekanBakh/YekanBakh-Medium.woff2"
+  },
+  "resources/css/fonts/YekanBakh/YekanBakh-Regular.ttf": {
+    "file": "assets/YekanBakh-Regular-a11983a6.ttf",
+    "src": "resources/css/fonts/YekanBakh/YekanBakh-Regular.ttf"
+  },
+  "resources/css/fonts/YekanBakh/YekanBakh-Regular.woff2": {
+    "file": "assets/YekanBakh-Regular-e911b9a5.woff2",
+    "src": "resources/css/fonts/YekanBakh/YekanBakh-Regular.woff2"
+  },
+  "resources/js/Layouts/Auth.vue": {
+    "file": "assets/Auth-501c1312.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Layouts/Auth.vue"
+  },
+  "resources/js/Layouts/Panel.vue": {
+    "file": "assets/Panel-94731ff7.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Layouts/Panel.vue"
+  },
+  "resources/js/Pages/auth/login.vue": {
+    "file": "assets/login-d5e3a60d.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/auth/login.vue"
+  },
+  "resources/js/Pages/panel/dashboard.vue": {
+    "file": "assets/dashboard-8c0c6d4d.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/dashboard.vue"
+  },
+  "resources/js/Pages/panel/durations/create.vue": {
+    "file": "assets/create-526b3234.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/durations/create.vue"
+  },
+  "resources/js/Pages/panel/durations/edit.vue": {
+    "file": "assets/edit-2a7f0f97.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/durations/edit.vue"
+  },
+  "resources/js/Pages/panel/durations/index.vue": {
+    "file": "assets/index-2d785291.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/durations/index.vue"
+  },
+  "resources/js/Pages/panel/servers/create.vue": {
+    "file": "assets/create-3c8223b7.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/servers/create.vue"
+  },
+  "resources/js/Pages/panel/servers/edit.vue": {
+    "file": "assets/edit-4dd10b96.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/servers/edit.vue"
+  },
+  "resources/js/Pages/panel/servers/index.vue": {
+    "file": "assets/index-e4c1b062.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/Pages/panel/servers/index.vue"
+  },
+  "resources/js/app.css": {
+    "file": "assets/app-e6c7352f.css",
+    "src": "resources/js/app.css"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/YekanBakh-Regular-e911b9a5.woff2",
+      "assets/YekanBakh-Regular-a11983a6.ttf",
+      "assets/YekanBakh-Medium-ba8e915c.woff2",
+      "assets/YekanBakh-Medium-a8c837b1.ttf",
+      "assets/materialdesignicons-webfont-5159a347.eot",
+      "assets/materialdesignicons-webfont-31010194.woff2",
+      "assets/materialdesignicons-webfont-28c8f97f.woff",
+      "assets/materialdesignicons-webfont-be825c12.ttf"
+    ],
+    "css": [
+      "assets/app-e6c7352f.css"
+    ],
+    "dynamicImports": [
+      "resources/js/Layouts/Panel.vue",
+      "resources/js/Pages/panel/dashboard.vue",
+      "resources/js/Pages/panel/servers/index.vue",
+      "resources/js/Pages/panel/servers/create.vue",
+      "resources/js/Pages/panel/servers/edit.vue",
+      "resources/js/Pages/panel/durations/index.vue",
+      "resources/js/Pages/panel/durations/create.vue",
+      "resources/js/Pages/panel/durations/edit.vue",
+      "resources/js/Layouts/Auth.vue",
+      "resources/js/Pages/auth/login.vue"
+    ],
+    "file": "assets/app-4cf9c326.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}

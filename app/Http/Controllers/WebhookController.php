@@ -42,7 +42,7 @@ class WebhookController extends Controller
 
 
             if ($update->getMessage()->text == Keyboards::PURCHASE_SERVICE) {
-                $servers = Server::query()->where('is_active', true)->where('stock', '>=', 1)->get();
+                $servers = Server::query()->where('is_active', true)->get();
                 if (count($servers) == 0) {
                     $user->update([
                         'section' => Keyboards::PURCHASE_SERVICE,

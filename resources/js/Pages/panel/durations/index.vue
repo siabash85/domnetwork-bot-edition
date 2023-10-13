@@ -1,12 +1,12 @@
 <template>
     <div>
         <div class="flex justify-between mb-12 items-center">
-            <h2 class="text-xl">لیست حرکات</h2>
+            <h2 class="text-xl">لیست بازه های زمانی</h2>
             <v-btn
-                :to="{ name: 'panel-movements-create' }"
+                :to="{ name: 'panel-durations-create' }"
                 color="blue-accent-2"
             >
-                ایجاد حرکت
+                ایجاد بازه زمانی
             </v-btn>
         </div>
         <v-table fixed-header height="700px">
@@ -17,17 +17,18 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in movements" :key="item.name">
+                <tr v-for="item in durations" :key="item.name">
                     <td>
                         <div class="whitespace-nowrap">
                             {{ item.name }}
                         </div>
                     </td>
+
                     <td>
                         <div class="flex items-center">
                             <v-btn
                                 :to="{
-                                    name: 'panel-movements-edit',
+                                    name: 'panel-durations-edit',
                                     params: { id: item.id },
                                 }"
                                 prepend-icon="mdi-pencil-box-outline"
@@ -72,7 +73,7 @@
             </v-card>
         </v-dialog>
         <v-snackbar v-model="visible_delete_message" :timeout="2000">
-            نوع تمرین با موفقیت حذف شد.
+            بازه زمانی با موفقیت حذف شد.
         </v-snackbar>
     </div>
 </template>
@@ -83,11 +84,11 @@ import ApiService from "@/Core/services/ApiService";
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
 
-const movements = ref([]);
+const durations = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/movements");
-    movements.value = data.data;
+    const { data } = await ApiService.get("/api/panel/package/durations");
+    durations.value = data.data;
 };
 const handleShowDeleteMessage = (item) => {
     visible_delete_confirmation.value = true;
@@ -96,9 +97,9 @@ const handleShowDeleteMessage = (item) => {
 
 const handleDelete = async () => {
     const { data } = await ApiService.delete(
-        `/api/panel/movements/${selected_item.value.id}`
+        `/api/panel/package/durations/${selected_item.value.id}`
     );
-    if (data.success) {
+    if (data.status == 200) {
         visible_delete_confirmation.value = false;
         fetchData();
         visible_delete_message.value = true;

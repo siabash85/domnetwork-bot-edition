@@ -31,12 +31,31 @@
                 >
                 </v-list-item>
 
-                <!-- <v-list-item
+                <v-list-item
                     prepend-icon="mdi-form-select"
-                    title="برنامه ها"
-                    value="forms"
-                    :to="{ name: 'panel-forms-index' }"
-                ></v-list-item> -->
+                    title="سرورها"
+                    value="servers"
+                    :to="{ name: 'panel-servers-index' }"
+                ></v-list-item>
+
+                <v-list-item
+                    prepend-icon="mdi-form-select"
+                    title="بازه های زمانی"
+                    value="durations"
+                    :to="{ name: 'panel-durations-index' }"
+                ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-form-select"
+                    title="پکیج ها"
+                    value="packages"
+                    :to="{ name: 'panel-packages-index' }"
+                ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-form-select"
+                    title=" مدیریت سرویس ها"
+                    value="services"
+                    :to="{ name: 'panel-services-index' }"
+                ></v-list-item>
             </v-list>
         </v-navigation-drawer>
         <v-app-bar title="">
