@@ -32,29 +32,35 @@
                 </v-list-item>
 
                 <v-list-item
-                    prepend-icon="mdi-form-select"
+                    prepend-icon="mdi-server-outline"
                     title="سرورها"
                     value="servers"
                     :to="{ name: 'panel-servers-index' }"
                 ></v-list-item>
 
                 <v-list-item
-                    prepend-icon="mdi-form-select"
+                    prepend-icon="mdi-calendar-clock"
                     title="بازه های زمانی"
                     value="durations"
                     :to="{ name: 'panel-durations-index' }"
                 ></v-list-item>
                 <v-list-item
-                    prepend-icon="mdi-form-select"
+                    prepend-icon="mdi-package-variant-closed"
                     title="پکیج ها"
                     value="packages"
                     :to="{ name: 'panel-packages-index' }"
                 ></v-list-item>
                 <v-list-item
-                    prepend-icon="mdi-form-select"
+                    prepend-icon="mdi-access-point"
                     title=" مدیریت سرویس ها"
                     value="services"
                     :to="{ name: 'panel-services-index' }"
+                ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-credit-card-outline"
+                    title=" مدیریت تراکنش ها"
+                    value="payments"
+                    :to="{ name: 'panel-payments-index' }"
                 ></v-list-item>
             </v-list>
         </v-navigation-drawer>

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Common\Http\Controllers\Api\ApiController;
 use Modules\Payment\Entities\Payment;
-
+use Modules\Server\Transformers\Panel\PaymentResource;
 
 class PaymentController extends ApiController
 {
@@ -17,6 +17,7 @@ class PaymentController extends ApiController
     public function index()
     {
         $payments = Payment::query()->get();
+        $payments = PaymentResource::collection($payments);
         return $this->successResponse($payments, "");
     }
 
@@ -28,6 +29,7 @@ class PaymentController extends ApiController
     public function show($id)
     {
         $payment = Payment::query()->find($id);
+        $payment = new PaymentResource($payment);
         return $this->successResponse($payment, "");
     }
 
@@ -41,8 +43,7 @@ class PaymentController extends ApiController
     {
         $payment = Payment::query()->find($id);
         $payment->update([
-            'name' => $request->name,
-            'is_active' => $request->is_active
+            'status' => $request->status,
         ]);
         return $this->successResponse($payment, "ویرایش  با موفقیت انجام شد");
     }
