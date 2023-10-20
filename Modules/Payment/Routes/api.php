@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Payment\Http\Controllers\Client\PaymentController;
 use Modules\Payment\Http\Controllers\Panel\PaymentController as PanelPaymentController;
+use Modules\User\Http\Controllers\Client\WalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,7 @@ use Modules\Payment\Http\Controllers\Panel\PaymentController as PanelPaymentCont
 Route::prefix('/client')->group(function () {
     Route::get("payment/generate/{order}/{id}", [PaymentController::class, 'generate'])->name('payment.generate');
     Route::post("payment/callback", [PaymentController::class, 'callback'])->name('payment.callback');
+    Route::post("wallet/payment/callback", [WalletController::class, 'callback'])->name('wallet.payment.callback');
 });
 
 Route::prefix('/panel')->group(function () {

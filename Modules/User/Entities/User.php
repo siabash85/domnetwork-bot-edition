@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 // use Laravel\Sanctum\HasApiTokens;
 use Modules\Order\Entities\PreOrder;
 use Laravel\Passport\HasApiTokens;
-
+use Modules\Server\Entities\Subscription;
 
 class User extends Authenticatable
 {
@@ -29,7 +29,8 @@ class User extends Authenticatable
         'password',
         'section',
         'step',
-        'mobile'
+        'mobile',
+        'wallet'
     ];
 
     /**
@@ -55,5 +56,9 @@ class User extends Authenticatable
     public function pre_order()
     {
         return $this->hasOne(PreOrder::class);
+    }
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
     }
 }
