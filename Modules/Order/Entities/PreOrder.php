@@ -18,6 +18,7 @@ class PreOrder extends Model
         'server_id',
         'package_id',
         'package_duration_id',
+        "service_name"
     ];
 
     public function user()

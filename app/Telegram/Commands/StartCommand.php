@@ -26,6 +26,7 @@ class StartCommand extends Command
 
         $user = User::where('uid', $sender->id)->first();
 
+
         if (!$user) {
             $user =    User::query()->create([
                 'username' => $sender->username,

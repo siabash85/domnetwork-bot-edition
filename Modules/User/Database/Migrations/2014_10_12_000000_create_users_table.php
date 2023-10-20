@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('section')->nullable();
             $table->string('step')->nullable();
+            $table->boolean("is_superuser")->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

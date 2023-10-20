@@ -20,25 +20,17 @@ class WebhookController extends Controller
 {
     public function callback(Request $request)
     {
-
-
-
         $update = Telegram::commandsHandler(true);
 
         http_response_code(200);
         $sender = $update->getMessage()->from;
         $user = User::query()->where('uid', $sender->id)->first();
-
-
         // Telegram::sendMessage([
         //     'text' => "⏳ aa",
         //     "chat_id" => $sender->id,
 
         // ]);
         // return true;
-
-
-
         if ($update->getMessage()->text !== "/start") {
 
 

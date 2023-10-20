@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId("server_id")->nullable()->constrained("servers")->cascadeOnDelete();
             $table->foreignId("package_id")->nullable()->constrained("packages")->cascadeOnDelete();
             $table->foreignId("package_duration_id")->nullable()->constrained("package_durations")->cascadeOnDelete();
+            $table->string("service_name")->nullable();
             $table->timestamps();
         });
     }

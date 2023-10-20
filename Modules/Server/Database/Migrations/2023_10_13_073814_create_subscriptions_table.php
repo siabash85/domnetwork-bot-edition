@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->foreignId("service_id")->constrained("services")->cascadeOnDelete();
             $table->string("status")->nullable();
+            $table->string("name")->nullable();
+            $table->string("code")->nullable();
             $table->timestamp("expire_at")->nullable();
             $table->timestamps();
         });

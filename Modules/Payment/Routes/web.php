@@ -10,3 +10,11 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+use Illuminate\Support\Facades\Route;
+use Modules\Payment\Http\Controllers\Client\PaymentController;
+
+Route::prefix('payment')->group(function () {
+    Route::get("success/{id}", [PaymentController::class, 'success'])->name('payment.success');
+    Route::get("failed/{id}", [PaymentController::class, 'failed'])->name('payment.failed');
+});

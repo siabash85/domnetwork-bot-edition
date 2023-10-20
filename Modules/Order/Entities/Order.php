@@ -22,6 +22,7 @@ class Order extends Model
         "status",
         "payable_price",
         "price",
+        "service_name"
 
     ];
 
