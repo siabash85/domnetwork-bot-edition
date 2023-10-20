@@ -4,5 +4,6 @@
     "Server": true,
     "Common": true,
     "Order": true,
-    "Payment": true
+    "Payment": true,
+    "Guide": true
 }
