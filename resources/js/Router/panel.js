@@ -93,5 +93,41 @@ export default {
         },
 
 
+        // guide platforms
+
+        {
+            path: "guide/platforms",
+            name: "panel-platforms-index",
+            component: () => import("@/Pages/panel/platforms/index.vue"),
+        },
+        {
+            path: "guide/platforms/create",
+            name: "panel-platforms-create",
+            component: () => import("@/Pages/panel/platforms/create.vue"),
+        },
+        {
+            path: "guide/platforms/edit/:id",
+            name: "panel-platforms-edit",
+            component: () => import("@/Pages/panel/platforms/edit.vue"),
+        },
+
+        // guide platform cients
+
+        {
+            path: "guide/platform/:id/clients",
+            name: "panel-platforms-clients-index",
+            component: () => import("@/Pages/panel/platforms/clients/index.vue"),
+        },
+        {
+            path: "guide/platform/:id/clients/create",
+            name: "panel-platforms-clients-create",
+            component: () => import("@/Pages/panel/platforms/clients/create.vue"),
+        },
+        {
+            path: "guide/platform/:platform/clients/edit/:id",
+            name: "panel-platforms-clients-edit",
+            component: () => import("@/Pages/panel/platforms/clients/edit.vue"),
+        },
+
     ],
 };
