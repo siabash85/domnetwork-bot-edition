@@ -129,5 +129,18 @@ export default {
             component: () => import("@/Pages/panel/platforms/clients/edit.vue"),
         },
 
+        // support messages
+        {
+            path: "support/messages",
+            name: "panel-messages-index",
+            component: () => import("@/Pages/panel/messages/index.vue"),
+        },
+
+        {
+            path: "support/messages/edit/:id",
+            name: "panel-messages-edit",
+            component: () => import("@/Pages/panel/messages/edit.vue"),
+        },
+
     ],
 };

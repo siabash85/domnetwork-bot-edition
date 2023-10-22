@@ -63,10 +63,16 @@
                     :to="{ name: 'panel-payments-index' }"
                 ></v-list-item>
                 <v-list-item
-                    prepend-icon="mdi-credit-card-outline"
+                    prepend-icon="mdi-connection"
                     title="راهنمای اتصال"
                     value="platforms"
                     :to="{ name: 'panel-platforms-index' }"
+                ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-lifebuoy"
+                    title="پیام های پشتیبانی"
+                    value="messages"
+                    :to="{ name: 'panel-messages-index' }"
                 ></v-list-item>
             </v-list>
         </v-navigation-drawer>

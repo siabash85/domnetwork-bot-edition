@@ -20,6 +20,7 @@ use Modules\Guide\Entities\GuidePlatformClient;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
+use Modules\Support\Entities\SupportMessage;
 use Modules\User\Entities\WalletTransaction;
 use Telegram\Bot\FileUpload\InputFile;
 
@@ -175,7 +176,6 @@ class WebhookController extends Controller
                     'reply_markup' => KeyboardHandler::home(),
                 ]);
             }
-
             if ($update->getMessage()->text == Keyboards::GUIDE) {
                 $platforms = GuidePlatform::query()->get();
                 $keyboards = [];
@@ -203,6 +203,17 @@ class WebhookController extends Controller
                     'section' => Keyboards::GUIDE,
                     'step' => 1
                 ]);
+            }
+            if ($update->getMessage()->text == Keyboards::SUPPORT) {
+                Telegram::sendMessage([
+                    'text' => "📞 پیام خود را در قالب یک پیام جهت برسی مشکل ارسال کنید : ",
+                    'chat_id' => $sender->id,
+                ]);
+                $user->update([
+                    'section' => Keyboards::SUPPORT,
+                    'step' => 1
+                ]);
+                return true;
             }
 
             $servers = Server::query()->pluck('name')->toArray();
@@ -429,7 +440,20 @@ class WebhookController extends Controller
                     'section' => Keyboards::GUIDE,
                     'step' => 3
                 ]);
-            } else {
+            } else if ($user->step == "1" && $user->section == Keyboards::SUPPORT) {
+                SupportMessage::query()->create([
+                    'user_id' => $user->id,
+                    'message' => $update->getMessage()->text,
+                    'status' => "pending"
+                ]);
+                Telegram::sendMessage([
+                    'text' => "✅ پیام شما با موفقیت به ادمین های ربات ارسال شد !",
+                    'chat_id' => $sender->id,
+                ]);
+                $user->update([
+                    'section' => Keyboards::SUPPORT,
+                    'step' => 2
+                ]);
             }
         }
 

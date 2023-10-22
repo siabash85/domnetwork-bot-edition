@@ -1,44 +1,56 @@
 <template>
     <div>
         <div class="flex justify-between mb-12 items-center">
-            <h2 class="text-xl">لیست بازه های زمانی</h2>
-            <v-btn
-                :to="{ name: 'panel-durations-create' }"
-                color="blue-accent-2"
-            >
-                ایجاد بازه زمانی
-            </v-btn>
+            <h2 class="text-xl">لیست پیام های پشتیبانی</h2>
         </div>
         <v-table fixed-header height="700px">
             <thead>
                 <tr>
-                    <th class="text-right">نام</th>
+                    <th class="text-right">کاربر</th>
+                    <th class="text-right">وضعیت</th>
+                    <th class="text-right">زمان ایجاد</th>
                     <th class="text-right">عملیات</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in durations" :key="item.name">
+                <tr v-for="item in messages" :key="item.id">
                     <td>
-                        <div class="whitespace-nowrap">{{ item.name }} روز</div>
+                        <div class="whitespace-nowrap">
+                            {{ item?.user?.username }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="whitespace-nowrap">
+                            <template v-if="item.status == 'pending'">
+                                <v-chip color="warning" text-color="white">
+                                    در حال انتظار
+                                </v-chip>
+                            </template>
+                            <template v-if="item.status == 'answered'">
+                                <v-chip color="green" text-color="white">
+                                    پاسخ داده شده
+                                </v-chip>
+                            </template>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="whitespace-nowrap">
+                            {{ item?.created_at }}
+                        </div>
                     </td>
 
                     <td>
                         <div class="flex items-center">
                             <v-btn
                                 :to="{
-                                    name: 'panel-durations-edit',
+                                    name: 'panel-messages-edit',
                                     params: { id: item.id },
                                 }"
                                 prepend-icon="mdi-pencil-box-outline"
-                            >
-                                ویرایش
-                            </v-btn>
-                            <v-btn
-                                @click="handleShowDeleteMessage(item)"
-                                prepend-icon="mdi-trash-can-outline"
                                 class="mr-4"
                             >
-                                حذف
+                                مشاهده
                             </v-btn>
                         </div>
                     </td>
@@ -71,7 +83,7 @@
             </v-card>
         </v-dialog>
         <v-snackbar v-model="visible_delete_message" :timeout="2000">
-            بازه زمانی با موفقیت حذف شد.
+            پلتفرم با موفقیت حذف شد.
         </v-snackbar>
     </div>
 </template>
@@ -82,11 +94,11 @@ import ApiService from "@/Core/services/ApiService";
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
 
-const durations = ref([]);
+const messages = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/package/durations");
-    durations.value = data.data;
+    const { data } = await ApiService.get("/api/panel/support/messages");
+    messages.value = data.data;
 };
 const handleShowDeleteMessage = (item) => {
     visible_delete_confirmation.value = true;
@@ -95,7 +107,7 @@ const handleShowDeleteMessage = (item) => {
 
 const handleDelete = async () => {
     const { data } = await ApiService.delete(
-        `/api/panel/package/durations/${selected_item.value.id}`
+        `/api/panel/support/messages/${selected_item.value.id}`
     );
     if (data.status == 200) {
         visible_delete_confirmation.value = false;
