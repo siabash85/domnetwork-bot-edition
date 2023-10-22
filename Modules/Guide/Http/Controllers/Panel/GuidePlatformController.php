@@ -10,6 +10,7 @@ use Modules\Guide\Http\Requests\Panel\GudeiPlatformRequest;
 
 class GuidePlatformController extends ApiController
 {
+
     /**
      * Display a listing of the resource.
      * @return Response

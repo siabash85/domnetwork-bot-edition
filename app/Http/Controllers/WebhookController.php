@@ -15,10 +15,13 @@ use Modules\Server\Entities\Package;
 use Modules\Server\Entities\Service;
 use Modules\Payment\Entities\Payment;
 use App\Telegram\Keyboard\KeyboardHandler;
+use Modules\Guide\Entities\GuidePlatform;
+use Modules\Guide\Entities\GuidePlatformClient;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
 use Modules\User\Entities\WalletTransaction;
+use Telegram\Bot\FileUpload\InputFile;
 
 class WebhookController extends Controller
 {
@@ -173,11 +176,40 @@ class WebhookController extends Controller
                 ]);
             }
 
+            if ($update->getMessage()->text == Keyboards::GUIDE) {
+                $platforms = GuidePlatform::query()->get();
+                $keyboards = [];
+                $keyboards_keyboards = $platforms->chunk(2);
+                foreach ($keyboards_keyboards as $chunk) {
+                    $row = [];
+                    foreach ($chunk as $platform) {
+                        $row[] = ['text' => $platform->name];
+                    }
+                    $keyboards[] = $row;
+                }
+
+                $replyMarkup = [
+                    'keyboard' => $keyboards,
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                ];
+                $encodedMarkup = json_encode($replyMarkup);
+                Telegram::sendMessage([
+                    'text' => "🖥 سیستم عامل خود را انتخاب کنید: ",
+                    'chat_id' => $sender->id,
+                    'reply_markup' => $encodedMarkup,
+                ]);
+                $user->update([
+                    'section' => Keyboards::GUIDE,
+                    'step' => 1
+                ]);
+            }
+
             $servers = Server::query()->pluck('name')->toArray();
             $durations = PackageDuration::query()->pluck('name')->toArray();
             $packages = Package::query()->pluck('name')->toArray();
-
-
+            $platforms = GuidePlatform::query()->pluck('name')->toArray();
+            $platform_clients = GuidePlatformClient::query()->pluck('name')->toArray();
 
             if (in_array($update->getMessage()->text, $servers)) {
 
@@ -352,8 +384,55 @@ class WebhookController extends Controller
                     'reply_markup' => $replyMarkup,
 
                 ]);
+            } else if (in_array($update->getMessage()->text, $platforms)) {
+                $selected_platform = GuidePlatform::query()->where('name', $update->getMessage()->text)->first();
+                $clients = GuidePlatformClient::query()->where('guide_platform_id', $selected_platform->id)->get();
+                $keyboards = [];
+                $keyboards_keyboards = $clients->chunk(2);
+                foreach ($keyboards_keyboards as $chunk) {
+                    $row = [];
+                    foreach ($chunk as $duration) {
+                        $row[] = ['text' => $duration->name];
+                    }
+                    $keyboards[] = $row;
+                }
+                $replyMarkup = [
+                    'keyboard' => $keyboards,
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                ];
+                $encodedMarkup = json_encode($replyMarkup);
+
+                Telegram::sendMessage([
+                    'text' => "⁉️ با کدوم نرم افزار می خواهید به سرویس متصل بشید؟",
+                    "chat_id" => $sender->id,
+                    'reply_markup' => $encodedMarkup,
+                ]);
+                $user->update([
+                    'section' => Keyboards::GUIDE,
+                    'step' => 2
+                ]);
+            } else if (in_array($update->getMessage()->text, $platform_clients)) {
+                $selected_client = GuidePlatformClient::query()->where('name', $update->getMessage()->text)->first();
+
+                Telegram::sendVideo([
+                    "chat_id" => $sender->id,
+                    "video" => InputFile::create("https://pashmak-titab.store/test.mp4"),
+                    'caption' => 'Your video caption',
+
+                ]);
+                // Telegram::sendMessage([
+                //     'text' => $selected_client->video,
+                //     "chat_id" => $sender->id,
+                // ]);
+                $user->update([
+                    'section' => Keyboards::GUIDE,
+                    'step' => 3
+                ]);
+            } else {
             }
         }
+
         return "ok";
     }
 }
