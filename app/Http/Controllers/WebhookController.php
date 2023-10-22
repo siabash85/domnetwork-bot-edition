@@ -414,17 +414,17 @@ class WebhookController extends Controller
                 ]);
             } else if (in_array($update->getMessage()->text, $platform_clients)) {
                 $selected_client = GuidePlatformClient::query()->where('name', $update->getMessage()->text)->first();
-
+                $platform = $selected_client->guide_platform->name;
+                $markdownText = "📚 آموزش اتصال در $platform با $selected_client->name\n📌 [لینک دانلود نرم افزارهای استفاده شده در این آموزش: $selected_client->name]($selected_client->link)";
                 Telegram::sendVideo([
                     "chat_id" => $sender->id,
-                    "video" => InputFile::create("https://pashmak-titab.store/test.mp4"),
-                    'caption' => 'Your video caption',
+                    "video" => InputFile::create(public_path($selected_client->video)),
+                    'parse_mode' => 'MarkdownV2',
+                    'caption' => $markdownText,
+                    'width' => 1280,
+                    'height' => 720,
 
                 ]);
-                // Telegram::sendMessage([
-                //     'text' => $selected_client->video,
-                //     "chat_id" => $sender->id,
-                // ]);
                 $user->update([
                     'section' => Keyboards::GUIDE,
                     'step' => 3

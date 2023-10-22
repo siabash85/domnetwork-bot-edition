@@ -11,6 +11,7 @@ class GuidePlatformClient extends Model
 
     protected $fillable = [
         'guide_platform_id',
+        'file_id',
         'name',
         'description',
         'status',

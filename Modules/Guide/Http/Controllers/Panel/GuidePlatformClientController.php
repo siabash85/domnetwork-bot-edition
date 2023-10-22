@@ -4,8 +4,10 @@ namespace Modules\Guide\Http\Controllers\Panel;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Telegram\Bot\FileUpload\InputFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Guide\Entities\GuidePlatform;
+use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Guide\Entities\GuidePlatformClient;
 use Modules\Common\Http\Controllers\Api\ApiController;
 use Modules\Guide\Http\Requests\Panel\GudeiPlatformRequest;
@@ -39,7 +41,9 @@ class GuidePlatformClientController extends ApiController
             'guide_platform_id' => $id,
             'description' => $request->description,
             'link' => $request->link,
-            'video' => asset('/storage/videos/' . $filename),
+            // 'video' => asset('/storage/videos/' . $filename),
+            'video' => 'storage/videos/' . $filename,
+
         ]);
         return $this->successResponse($platform, "ایجاد  با موفقیت انجام شد");
     }
@@ -77,7 +81,8 @@ class GuidePlatformClientController extends ApiController
             $file = $request->file('video');
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs('videos', $filename, 'public');
-            $data['video'] = asset('/storage/videos/' . $filename);
+            // $data['video'] = asset('/storage/videos/' . $filename);
+            $data['video'] = 'storage/videos/' . $filename;
         }
         $client->update($data);
         return $this->successResponse($client, "ویرایش  با موفقیت انجام شد");
