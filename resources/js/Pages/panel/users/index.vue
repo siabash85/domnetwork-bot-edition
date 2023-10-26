@@ -3,7 +3,7 @@
         <div class="flex justify-between mb-12 items-center">
             <h2 class="text-xl">لیست کاربران</h2>
         </div>
-        <v-table fixed-header height="700px">
+        <v-table fixed-header>
             <thead>
                 <tr>
                     <th class="text-right whitespace-nowrap">نام کاربری</th>

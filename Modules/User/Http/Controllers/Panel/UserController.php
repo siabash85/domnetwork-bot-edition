@@ -61,7 +61,7 @@ class UserController extends ApiController
             'username' => $request->username,
             'fist_name' => $request->fist_name,
             'email' => $request->email,
-            'mobile' => $request->mobile,
+            // 'mobile' => $request->mobile,
             'wallet' => $request->wallet,
 
         ];

@@ -31,7 +31,8 @@ class User extends Authenticatable
         'step',
         'mobile',
         'wallet',
-        'status'
+        'status',
+        'is_superuser'
     ];
 
     /**
