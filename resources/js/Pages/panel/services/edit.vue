@@ -7,7 +7,7 @@
 
             <Form ref="formRef" @submit="handleUpdate">
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="server_id"
@@ -31,7 +31,7 @@
                             <ErrorMessage name="server_id" />
                         </div>
                     </div>
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="package_duration_id"
@@ -55,7 +55,7 @@
                             <ErrorMessage name="package_duration_id" />
                         </div>
                     </div>
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="package_id"
@@ -80,7 +80,7 @@
                         </div>
                     </div>
 
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <v-select
                             v-model="form.status"
                             label="انتخاب  وضعیت"
@@ -91,7 +91,7 @@
                             variant="solo-filled"
                         ></v-select>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="price"

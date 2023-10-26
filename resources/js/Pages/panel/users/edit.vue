@@ -7,7 +7,7 @@
 
             <Form ref="formRef" @submit="handleUpdate">
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="username"
@@ -28,7 +28,7 @@
                             <ErrorMessage name="username" />
                         </div>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="first_name"
@@ -49,7 +49,7 @@
                             <ErrorMessage name="first_name" />
                         </div>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="uid"
@@ -70,7 +70,7 @@
                             <ErrorMessage name="uid" />
                         </div>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="email"
@@ -91,7 +91,7 @@
                             <ErrorMessage name="email" />
                         </div>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="wallet"
@@ -112,7 +112,7 @@
                             <ErrorMessage name="wallet" />
                         </div>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <v-select
                             v-model="form.status"
                             label="انتخاب  وضعیت"
@@ -124,7 +124,7 @@
                         ></v-select>
                     </div>
 
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="password"
@@ -146,7 +146,7 @@
                         </div>
                     </div>
 
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="password_confirmation"

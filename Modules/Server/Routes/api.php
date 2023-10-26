@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Server\Http\Controllers\Panel\PackageController;
 use Modules\Server\Http\Controllers\Panel\PackageDurationController;
+use Modules\Server\Http\Controllers\Panel\PricingController;
 use Modules\Server\Http\Controllers\Panel\ServerController;
 use Modules\Server\Http\Controllers\Panel\ServiceController;
 
@@ -23,4 +24,5 @@ Route::prefix('/panel')->group(function () {
     Route::apiResource("package/durations", PackageDurationController::class);
     Route::apiResource("packages", PackageController::class);
     Route::apiResource("services", ServiceController::class);
+    Route::apiResource("pricing", PricingController::class);
 });

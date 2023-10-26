@@ -75,6 +75,12 @@
                     :to="{ name: 'panel-messages-index' }"
                 ></v-list-item>
                 <v-list-item
+                    prepend-icon="mdi-cash-multiple"
+                    title="تعرفه ها"
+                    value="pricing"
+                    :to="{ name: 'panel-pricing-index' }"
+                ></v-list-item>
+                <v-list-item
                     prepend-icon="mdi-account-group"
                     title="کاربران"
                     value="users"

@@ -156,5 +156,22 @@ export default {
             component: () => import("@/Pages/panel/users/edit.vue"),
         },
 
+        // pricing
+        {
+            path: "pricing",
+            name: "panel-pricing-index",
+            component: () => import("@/Pages/panel/pricing/index.vue"),
+        },
+        {
+            path: "pricing/create",
+            name: "panel-pricing-create",
+            component: () => import("@/Pages/panel/pricing/create.vue"),
+        },
+        {
+            path: "pricing/edit/:id",
+            name: "panel-pricing-edit",
+            component: () => import("@/Pages/panel/pricing/edit.vue"),
+        },
+
     ],
 };

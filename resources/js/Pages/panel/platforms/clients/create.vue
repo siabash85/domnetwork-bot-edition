@@ -7,7 +7,7 @@
 
             <Form ref="formRef" @submit="handleCreate">
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="name"
@@ -29,7 +29,7 @@
                             <ErrorMessage name="name" />
                         </div>
                     </div>
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="link"
@@ -51,7 +51,7 @@
                             <ErrorMessage name="link" />
                         </div>
                     </div>
-                    <div class="col-span-4">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-select
                             v-model="form.status"
                             label="انتخاب  وضعیت"
