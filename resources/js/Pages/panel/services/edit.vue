@@ -1,153 +1,168 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش سرویس</h2>
-            </div>
-
-            <Form ref="formRef" @submit="handleUpdate">
+        <base-skeleton animated :loading="loader">
+            <template #template>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12 lg:col-span-4">
-                        <Field
-                            mode="passive"
-                            name="server_id"
-                            v-slot="{ field }"
-                            rules="required"
-                            label="سرور"
-                        >
-                            <v-select
-                                v-bind="field"
-                                v-model="form.server_id"
-                                label="انتخاب  سرور"
-                                :items="servers"
-                                item-title="name"
-                                item-value="id"
-                                single-line
-                                variant="solo-filled"
-                                hide-details="auto"
-                            ></v-select>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="server_id" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-4">
-                        <Field
-                            mode="passive"
-                            name="package_duration_id"
-                            v-slot="{ field }"
-                            rules="required"
-                            label="بازه زمانی"
-                        >
-                            <v-select
-                                v-bind="field"
-                                v-model="form.package_duration_id"
-                                label="انتخاب  بازه زمانی"
-                                :items="durations"
-                                item-title="name"
-                                item-value="id"
-                                single-line
-                                variant="solo-filled"
-                                hide-details="auto"
-                            ></v-select>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="package_duration_id" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-4">
-                        <Field
-                            mode="passive"
-                            name="package_id"
-                            v-slot="{ field }"
-                            rules="required"
-                            label="بازه پکیج"
-                        >
-                            <v-select
-                                v-model="form.package_id"
-                                label="انتخاب  پکیج"
-                                :items="packages"
-                                item-title="name"
-                                item-value="id"
-                                single-line
-                                variant="solo-filled"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-select>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="package_id" />
-                        </div>
-                    </div>
-
-                    <div class="col-span-12 lg:col-span-6">
-                        <v-select
-                            v-model="form.status"
-                            label="انتخاب  وضعیت"
-                            :items="statuses"
-                            item-title="state"
-                            item-value="value"
-                            single-line
-                            variant="solo-filled"
-                        ></v-select>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="price"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" قیمت"
-                        >
-                            <v-text-field
-                                type="number"
-                                v-model="form.price"
-                                label="قیمت"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="price" />
-                        </div>
-                    </div>
-                    <div class="col-span-12">
-                        <Field
-                            mode="passive"
-                            name="link"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" لینک"
-                        >
-                            <v-textarea
-                                v-model="form.link"
-                                label="لینک کانفیگ"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-textarea>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="link" />
-                        </div>
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
                     </div>
                 </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش سرویس</h2>
+                    </div>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </Form>
-        </v-sheet>
+                    <Form ref="formRef" @submit="handleUpdate">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="server_id"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label="سرور"
+                                >
+                                    <v-select
+                                        v-bind="field"
+                                        v-model="form.server_id"
+                                        label="انتخاب  سرور"
+                                        :items="servers"
+                                        item-title="name"
+                                        item-value="id"
+                                        single-line
+                                        variant="solo-filled"
+                                        hide-details="auto"
+                                    ></v-select>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="server_id" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="package_duration_id"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label="بازه زمانی"
+                                >
+                                    <v-select
+                                        v-bind="field"
+                                        v-model="form.package_duration_id"
+                                        label="انتخاب  بازه زمانی"
+                                        :items="durations"
+                                        item-title="name"
+                                        item-value="id"
+                                        single-line
+                                        variant="solo-filled"
+                                        hide-details="auto"
+                                    ></v-select>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="package_duration_id" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="package_id"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label="بازه پکیج"
+                                >
+                                    <v-select
+                                        v-model="form.package_id"
+                                        label="انتخاب  پکیج"
+                                        :items="packages"
+                                        item-title="name"
+                                        item-value="id"
+                                        single-line
+                                        variant="solo-filled"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-select>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="package_id" />
+                                </div>
+                            </div>
+
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-select
+                                    v-model="form.status"
+                                    label="انتخاب  وضعیت"
+                                    :items="statuses"
+                                    item-title="state"
+                                    item-value="value"
+                                    single-line
+                                    variant="solo-filled"
+                                ></v-select>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="price"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" قیمت"
+                                >
+                                    <v-text-field
+                                        type="number"
+                                        v-model="form.price"
+                                        label="قیمت"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="price" />
+                                </div>
+                            </div>
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="link"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" لینک"
+                                >
+                                    <v-textarea
+                                        v-model="form.link"
+                                        label="لینک کانفیگ"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-textarea>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="link" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             سرویس با موفقیت ویرایش شد.
         </v-snackbar>
@@ -155,11 +170,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -171,12 +187,7 @@ const form = ref({
     link: null,
 });
 const visible_success_message = ref(false);
-const rules = ref([
-    (value) => {
-        if (value) return true;
-        return "نام   سرویس  الزامی می باشد";
-    },
-]);
+
 const servers = ref([]);
 const durations = ref([]);
 const packages = ref([]);
@@ -227,10 +238,16 @@ const fetchData = async () => {
     form.value.status = data.data.status;
     form.value.price = data.data.price;
     form.value.link = data.data.link;
-    formRef.value.setValues({
-        ...form.value,
-    });
+    loader.value = false;
 };
+
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();

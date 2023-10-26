@@ -1,46 +1,61 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش پلتفرم</h2>
-            </div>
-
-            <Form ref="formRef" @submit="handleUpdate">
+        <base-skeleton animated :loading="loader">
+            <template #template>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12">
-                        <Field
-                            mode="passive"
-                            name="name"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" نام پلتفرم"
-                        >
-                            <v-text-field
-                                v-model="form.name"
-                                label="نام پلتفرم"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="name" />
-                        </div>
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
                     </div>
                 </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش پلتفرم</h2>
+                    </div>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </Form>
-        </v-sheet>
+                    <Form ref="formRef" @submit="handleUpdate">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="name"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" نام پلتفرم"
+                                >
+                                    <v-text-field
+                                        v-model="form.name"
+                                        label="نام پلتفرم"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="name" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             پلتفرم با موفقیت ویرایش شد.
         </v-snackbar>
@@ -48,11 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -95,11 +111,16 @@ const fetchData = async () => {
         `/api/panel/guide/platforms/${route.params.id}`
     );
     form.value.name = data.data?.name;
-
-    formRef.value.setValues({
-        ...form.value,
-    });
+    loader.value = false;
 };
+
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();

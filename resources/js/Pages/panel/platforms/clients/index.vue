@@ -1,86 +1,107 @@
 <template>
     <div>
-        <div class="flex justify-between mb-12 items-center">
-            <h2 class="text-xl">لیست برنامه ها</h2>
-            <v-btn
-                :to="{
-                    name: 'panel-platforms-clients-create',
-                    params: { id: route.params.id },
-                }"
-                color="blue-accent-2"
-            >
-                ایجاد برنامه
-            </v-btn>
-        </div>
-        <v-table fixed-header height="700px">
-            <thead>
-                <tr>
-                    <th class="text-right">نام</th>
-                    <th class="text-right">ویدیو</th>
-                    <th class="text-right">وضعیت</th>
-                    <th class="text-right">عملیات</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in clients" :key="item.name">
-                    <td>
-                        <div class="whitespace-nowrap">
-                            {{ item?.name }}
-                        </div>
-                    </td>
+        <base-skeleton animated :loading="loading">
+            <template #template>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[300px]"
+                        ></base-skeleton-item>
+                    </div>
+                </div>
+            </template>
+            <template #default>
+                <div class="flex justify-between mb-12 items-center">
+                    <h2 class="text-xl">لیست برنامه ها</h2>
+                    <v-btn
+                        :to="{
+                            name: 'panel-platforms-clients-create',
+                            params: { id: route.params.id },
+                        }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد برنامه
+                    </v-btn>
+                </div>
+                <v-table fixed-header height="700px">
+                    <thead>
+                        <tr>
+                            <th class="text-right">نام</th>
+                            <th class="text-right">ویدیو</th>
+                            <th class="text-right">وضعیت</th>
+                            <th class="text-right">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in clients" :key="item.name">
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item?.name }}
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="whitespace-nowrap">
-                            <a
-                                class="text-blue-500"
-                                target="_blank"
-                                :href="item?.video"
-                                >نمایش ویدیو</a
-                            >
-                        </div>
-                    </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    <a
+                                        class="text-blue-500"
+                                        target="_blank"
+                                        :href="`/${item?.video}`"
+                                        >نمایش ویدیو</a
+                                    >
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="whitespace-nowrap">
-                            <template v-if="item.status == 'active'">
-                                <v-chip color="green" text-color="white">
-                                    فعال
-                                </v-chip>
-                            </template>
-                            <template v-if="item.status == 'inactive'">
-                                <v-chip color="warning" text-color="white">
-                                    غیرفعال
-                                </v-chip>
-                            </template>
-                        </div>
-                    </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    <template v-if="item.status == 'active'">
+                                        <v-chip
+                                            color="green"
+                                            text-color="white"
+                                        >
+                                            فعال
+                                        </v-chip>
+                                    </template>
+                                    <template v-if="item.status == 'inactive'">
+                                        <v-chip
+                                            color="warning"
+                                            text-color="white"
+                                        >
+                                            غیرفعال
+                                        </v-chip>
+                                    </template>
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="flex items-center">
-                            <v-btn
-                                :to="{
-                                    name: 'panel-platforms-clients-edit',
-                                    params: {
-                                        platform: route.params.id,
-                                        id: item.id,
-                                    },
-                                }"
-                                prepend-icon="mdi-pencil-box-outline"
-                            >
-                                ویرایش
-                            </v-btn>
-                            <v-btn
-                                @click="handleShowDeleteMessage(item)"
-                                prepend-icon="mdi-trash-can-outline"
-                                class="mr-4"
-                            >
-                                حذف
-                            </v-btn>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </v-table>
+                            <td>
+                                <div class="flex items-center">
+                                    <v-btn
+                                        :to="{
+                                            name: 'panel-platforms-clients-edit',
+                                            params: {
+                                                platform: route.params.id,
+                                                id: item.id,
+                                            },
+                                        }"
+                                        prepend-icon="mdi-pencil-box-outline"
+                                    >
+                                        ویرایش
+                                    </v-btn>
+                                    <v-btn
+                                        @click="handleShowDeleteMessage(item)"
+                                        prepend-icon="mdi-trash-can-outline"
+                                        class="mr-4"
+                                    >
+                                        حذف
+                                    </v-btn>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </template>
+        </base-skeleton>
+
         <v-dialog
             v-model="visible_delete_confirmation"
             persistent
@@ -116,6 +137,8 @@
 import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute } from "vue-router";
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loading = ref(true);
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
 const route = useRoute();
@@ -126,6 +149,7 @@ const fetchData = async () => {
         `/api/panel/guide/platform/${route.params.id}/clients`
     );
     clients.value = data.data;
+    loading.value = false;
 };
 const handleShowDeleteMessage = (item) => {
     visible_delete_confirmation.value = true;

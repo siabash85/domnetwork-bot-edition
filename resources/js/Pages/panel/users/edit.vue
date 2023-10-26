@@ -1,211 +1,231 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش کاربر</h2>
-            </div>
-
-            <Form ref="formRef" @submit="handleUpdate">
+        <base-skeleton animated :loading="loader">
+            <template #template>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="username"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" نام کاربری"
-                        >
-                            <v-text-field
-                                v-model="form.username"
-                                label="نام کاربری"
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="username" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="first_name"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" نام "
-                        >
-                            <v-text-field
-                                v-model="form.first_name"
-                                label="نام "
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="first_name" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="uid"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" آیدی عددی تلگرام "
-                        >
-                            <v-text-field
-                                v-model="form.uid"
-                                label="آیدی عددی تلگرام "
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="uid" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="email"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" ایمیل"
-                        >
-                            <v-text-field
-                                v-model="form.email"
-                                label="ایمیل"
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="email" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="wallet"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" مقدار کیف پول (تومان)"
-                        >
-                            <v-text-field
-                                v-model="form.wallet"
-                                label="مقدار کیف پول (تومان)"
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="wallet" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-6">
-                        <v-select
-                            v-model="form.status"
-                            label="انتخاب  وضعیت"
-                            :items="statuses"
-                            item-title="state"
-                            item-value="value"
-                            single-line
-                            variant="solo-filled"
-                        ></v-select>
-                    </div>
-
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="password"
-                            v-slot="{ field }"
-                            label="رمز عبور"
-                        >
-                            <v-text-field
-                                type="password"
-                                v-model="form.password"
-                                label="رمز عبور"
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="password" />
-                        </div>
-                    </div>
-
-                    <div class="col-span-12 lg:col-span-6">
-                        <Field
-                            mode="passive"
-                            name="password_confirmation"
-                            v-slot="{ field }"
-                            label="تکرار رمز عبور"
-                        >
-                            <v-text-field
-                                type="password"
-                                v-model="form.password_confirmation"
-                                label="تکرار رمز عبور"
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="password_confirmation" />
-                        </div>
-                    </div>
-
-                    <div class="col-span-12">
-                        <Field
-                            mode="passive"
-                            name="is_superuser"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" سطح کاربری"
-                        >
-                            <v-radio-group
-                                v-bind="field"
-                                v-model="form.is_superuser"
-                            >
-                                <template v-slot:label>
-                                    <div>سطح کاربری</div>
-                                </template>
-                                <v-radio
-                                    label="کاربر ادمین"
-                                    value="1"
-                                ></v-radio>
-                                <v-radio label="کاربر عادی" value="0"></v-radio>
-                            </v-radio-group>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="is_superuser" />
-                        </div>
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
                     </div>
                 </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش کاربر</h2>
+                    </div>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </Form>
-        </v-sheet>
+                    <Form ref="formRef" @submit="handleUpdate">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="username"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" نام کاربری"
+                                >
+                                    <v-text-field
+                                        v-model="form.username"
+                                        label="نام کاربری"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="username" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="first_name"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" نام "
+                                >
+                                    <v-text-field
+                                        v-model="form.first_name"
+                                        label="نام "
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="first_name" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="uid"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" آیدی عددی تلگرام "
+                                >
+                                    <v-text-field
+                                        v-model="form.uid"
+                                        label="آیدی عددی تلگرام "
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="uid" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="email"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" ایمیل"
+                                >
+                                    <v-text-field
+                                        v-model="form.email"
+                                        label="ایمیل"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="email" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="wallet"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" مقدار کیف پول (تومان)"
+                                >
+                                    <v-text-field
+                                        v-model="form.wallet"
+                                        label="مقدار کیف پول (تومان)"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="wallet" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-select
+                                    v-model="form.status"
+                                    label="انتخاب  وضعیت"
+                                    :items="statuses"
+                                    item-title="state"
+                                    item-value="value"
+                                    single-line
+                                    variant="solo-filled"
+                                ></v-select>
+                            </div>
+
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="password"
+                                    v-slot="{ field }"
+                                    label="رمز عبور"
+                                >
+                                    <v-text-field
+                                        type="password"
+                                        v-model="form.password"
+                                        label="رمز عبور"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="password" />
+                                </div>
+                            </div>
+
+                            <div class="col-span-12 lg:col-span-6">
+                                <Field
+                                    mode="passive"
+                                    name="password_confirmation"
+                                    v-slot="{ field }"
+                                    label="تکرار رمز عبور"
+                                >
+                                    <v-text-field
+                                        type="password"
+                                        v-model="form.password_confirmation"
+                                        label="تکرار رمز عبور"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage
+                                        name="password_confirmation"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="is_superuser"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" سطح کاربری"
+                                >
+                                    <v-radio-group
+                                        v-bind="field"
+                                        v-model="form.is_superuser"
+                                    >
+                                        <template v-slot:label>
+                                            <div>سطح کاربری</div>
+                                        </template>
+                                        <v-radio
+                                            label="کاربر ادمین"
+                                            value="1"
+                                        ></v-radio>
+                                        <v-radio
+                                            label="کاربر عادی"
+                                            value="0"
+                                        ></v-radio>
+                                    </v-radio-group>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="is_superuser" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             کاربر با موفقیت ویرایش شد.
         </v-snackbar>
@@ -213,11 +233,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -277,10 +298,15 @@ const fetchData = async () => {
     form.value.email = data.data.email;
     form.value.is_superuser = data.data.is_superuser.toString();
     form.value.wallet = data.data.wallet;
-    formRef.value.setValues({
-        ...form.value,
-    });
+    loader.value = false;
 };
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();

@@ -9,4 +9,6 @@ import { onMounted, ref } from "vue";
 onMounted(() => {});
 </script>
 
-<style></style>
+<style lang="scss">
+@import "@/assets/master.scss";
+</style>

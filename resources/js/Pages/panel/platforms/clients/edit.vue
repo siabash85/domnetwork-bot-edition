@@ -1,120 +1,135 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش برنامه</h2>
-            </div>
-
-            <Form ref="formRef" @submit="handleCreate">
+        <base-skeleton animated :loading="loader">
+            <template #template>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12 lg:col-span-4">
-                        <Field
-                            mode="passive"
-                            name="name"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" عنوان"
-                        >
-                            <v-text-field
-                                v-model="form.name"
-                                label="عنوان"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="name" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-4">
-                        <Field
-                            mode="passive"
-                            name="link"
-                            v-slot="{ field }"
-                            rules="required"
-                            label=" لینک دانلود برنامه"
-                        >
-                            <v-text-field
-                                v-model="form.link"
-                                label="لینک دانلود برنامه"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-text-field>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="link" />
-                        </div>
-                    </div>
-                    <div class="col-span-12 lg:col-span-4">
-                        <v-select
-                            v-model="form.status"
-                            label="انتخاب  وضعیت"
-                            :items="statuses"
-                            item-title="state"
-                            item-value="value"
-                            single-line
-                            variant="solo-filled"
-                        ></v-select>
-                    </div>
-                    <div class="col-span-12">
-                        <Field
-                            mode="passive"
-                            name="description"
-                            v-slot="{ field }"
-                            rules="required"
-                            label="توضیحات"
-                        >
-                            <v-textarea
-                                v-model="form.description"
-                                label="توضیحات"
-                                single-line
-                                variant="solo-filled"
-                                size="large"
-                                v-bind="field"
-                                hide-details="auto"
-                            ></v-textarea>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="description" />
-                        </div>
-                    </div>
-                    <div class="col-span-12">
-                        <Field
-                            mode="passive"
-                            name="video"
-                            v-slot="{ field }"
-                            label="ویدیو آموزشی"
-                        >
-                            <v-file-input
-                                accept="video/*"
-                                label="ویدیو آموزشی"
-                                size="large"
-                                hide-details="auto"
-                                @change="handleChangeVideo"
-                            ></v-file-input>
-                        </Field>
-                        <div class="invalid-feedback d-block">
-                            <ErrorMessage name="video" />
-                        </div>
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
                     </div>
                 </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش برنامه</h2>
+                    </div>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </Form>
-        </v-sheet>
+                    <Form ref="formRef" @submit="handleCreate">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="name"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" عنوان"
+                                >
+                                    <v-text-field
+                                        v-model="form.name"
+                                        label="عنوان"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="name" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="link"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" لینک دانلود برنامه"
+                                >
+                                    <v-text-field
+                                        v-model="form.link"
+                                        label="لینک دانلود برنامه"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="link" />
+                                </div>
+                            </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <v-select
+                                    v-model="form.status"
+                                    label="انتخاب  وضعیت"
+                                    :items="statuses"
+                                    item-title="state"
+                                    item-value="value"
+                                    single-line
+                                    variant="solo-filled"
+                                ></v-select>
+                            </div>
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="description"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label="توضیحات"
+                                >
+                                    <v-textarea
+                                        v-model="form.description"
+                                        label="توضیحات"
+                                        single-line
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-textarea>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="description" />
+                                </div>
+                            </div>
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="video"
+                                    v-slot="{ field }"
+                                    label="ویدیو آموزشی"
+                                >
+                                    <v-file-input
+                                        accept="video/*"
+                                        label="ویدیو آموزشی"
+                                        size="large"
+                                        hide-details="auto"
+                                        @change="handleChangeVideo"
+                                    ></v-file-input>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="video" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             برنامه با موفقیت ویرایش شد.
         </v-snackbar>
@@ -122,11 +137,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -191,10 +207,15 @@ const fetchData = async () => {
     form.value.link = data.data.link;
     form.value.status = data.data.status;
     form.value.description = data.data.description;
-    formRef.value.setValues({
-        ...form.value,
-    });
+    loader.value = false;
 };
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();

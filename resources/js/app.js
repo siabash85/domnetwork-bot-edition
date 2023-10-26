@@ -6,7 +6,7 @@ import router from "./Router";
 import ApiService from "@/Core/services/ApiService";
 import { createPinia } from "pinia";
 
-import app from "./Layouts/App.vue";
+import App from "./Layouts/App.vue";
 import '@mdi/font/css/materialdesignicons.css'
 
 import 'vuetify/styles'
@@ -24,8 +24,18 @@ const vuetify = createVuetify({
         rtl: { fa: true },
     },
 })
+const app = createApp(App);
+
+app.config.globalProperties.$filters = {
+
+    separate(Number) {
+        // const value = Number / 10
+        const value = Number
+        return value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+    }
+};
 ApiService.init(app);
 initVeeValidate(app)
-const init = createApp(app).use(vuetify).use(createPinia()).use(router);
+const init = app.use(vuetify).use(createPinia()).use(router);
 
 init.mount("#app");

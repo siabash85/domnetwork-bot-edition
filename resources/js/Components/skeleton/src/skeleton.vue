@@ -1,0 +1,56 @@
+<template>
+    <template v-if="uiLoading">
+        <div class="hx-skeleton is-animated" v-bind="$attrs">
+            <template v-for="i in count" :key="i">
+                <slot v-if="loading" :key="i" name="template">
+                    <!-- <el-skeleton-item :class="ns.is('first')" variant="p" />
+                    <el-skeleton-item
+                        v-for="item in rows"
+                        :key="item"
+                        :class="[
+                            ns.e('paragraph'),
+                            ns.is('last', item === rows && rows > 1),
+                        ]"
+                        variant="p"
+                    /> -->
+                </slot>
+            </template>
+        </div>
+    </template>
+    <template v-else>
+        <slot v-bind="$attrs" />
+    </template>
+</template>
+
+<script lang="ts" setup>
+import { toRef } from "vue";
+import ElSkeletonItem from "./skeleton-item.vue";
+const props = defineProps({
+    animated: {
+        type: Boolean,
+        default: false,
+    },
+    count: {
+        type: Number,
+        default: 1,
+    },
+    rows: {
+        type: Number,
+        default: 3,
+    },
+    loading: {
+        type: Boolean,
+        default: true,
+    },
+    throttle: {
+        type: Number,
+    },
+});
+
+const uiLoading = toRef(props, "loading");
+
+defineExpose({
+    /** @description loading state */
+    uiLoading,
+});
+</script>

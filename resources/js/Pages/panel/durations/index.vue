@@ -1,50 +1,67 @@
 <template>
     <div>
-        <div class="flex justify-between mb-12 items-center">
-            <h2 class="text-xl">لیست بازه های زمانی</h2>
-            <v-btn
-                :to="{ name: 'panel-durations-create' }"
-                color="blue-accent-2"
-            >
-                ایجاد بازه زمانی
-            </v-btn>
-        </div>
-        <v-table fixed-header height="700px">
-            <thead>
-                <tr>
-                    <th class="text-right">نام</th>
-                    <th class="text-right">عملیات</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in durations" :key="item.name">
-                    <td>
-                        <div class="whitespace-nowrap">{{ item.name }} روز</div>
-                    </td>
+        <base-skeleton animated :loading="loading">
+            <template #template>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[300px]"
+                        ></base-skeleton-item>
+                    </div>
+                </div>
+            </template>
+            <template #default>
+                <div class="flex justify-between mb-12 items-center">
+                    <h2 class="text-xl">لیست بازه های زمانی</h2>
+                    <v-btn
+                        :to="{ name: 'panel-durations-create' }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد بازه زمانی
+                    </v-btn>
+                </div>
+                <v-table fixed-header height="700px">
+                    <thead>
+                        <tr>
+                            <th class="text-right">نام</th>
+                            <th class="text-right">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in durations" :key="item.name">
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.name }} روز
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="flex items-center">
-                            <v-btn
-                                :to="{
-                                    name: 'panel-durations-edit',
-                                    params: { id: item.id },
-                                }"
-                                prepend-icon="mdi-pencil-box-outline"
-                            >
-                                ویرایش
-                            </v-btn>
-                            <v-btn
-                                @click="handleShowDeleteMessage(item)"
-                                prepend-icon="mdi-trash-can-outline"
-                                class="mr-4"
-                            >
-                                حذف
-                            </v-btn>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </v-table>
+                            <td>
+                                <div class="flex items-center">
+                                    <v-btn
+                                        :to="{
+                                            name: 'panel-durations-edit',
+                                            params: { id: item.id },
+                                        }"
+                                        prepend-icon="mdi-pencil-box-outline"
+                                    >
+                                        ویرایش
+                                    </v-btn>
+                                    <v-btn
+                                        @click="handleShowDeleteMessage(item)"
+                                        prepend-icon="mdi-trash-can-outline"
+                                        class="mr-4"
+                                    >
+                                        حذف
+                                    </v-btn>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </template>
+        </base-skeleton>
+
         <v-dialog
             v-model="visible_delete_confirmation"
             persistent
@@ -81,12 +98,14 @@ import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loading = ref(true);
 const durations = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
     const { data } = await ApiService.get("/api/panel/package/durations");
     durations.value = data.data;
+    loading.value = false;
 };
 const handleShowDeleteMessage = (item) => {
     visible_delete_confirmation.value = true;

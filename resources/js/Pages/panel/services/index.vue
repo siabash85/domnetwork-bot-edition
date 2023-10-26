@@ -1,91 +1,115 @@
 <template>
     <div>
-        <div class="flex justify-between mb-12 items-center">
-            <h2 class="text-xl">لیست سرویس ها</h2>
-            <v-btn
-                :to="{ name: 'panel-services-create' }"
-                color="blue-accent-2"
-            >
-                ایجاد سرویس
-            </v-btn>
-        </div>
-        <v-table fixed-header height="700px">
-            <thead>
-                <tr>
-                    <th class="text-right">سرور</th>
-                    <th class="text-right">بازه زمانی</th>
-                    <th class="text-right">پکیج</th>
-                    <th class="text-right">قیمت</th>
-                    <th class="text-right">وضعیت</th>
-                    <th class="text-right">عملیات</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in services" :key="item.name">
-                    <td>
-                        <div class="whitespace-nowrap">
-                            {{ item.server?.name }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="whitespace-nowrap">
-                            {{ item.package_duration?.name }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="whitespace-nowrap">
-                            {{ item.package?.name }}
-                        </div>
-                    </td>
+        <base-skeleton animated :loading="loading">
+            <template #template>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[300px]"
+                        ></base-skeleton-item>
+                    </div>
+                </div>
+            </template>
+            <template #default>
+                <div class="flex justify-between mb-12 items-center">
+                    <h2 class="text-xl">لیست سرویس ها</h2>
+                    <v-btn
+                        :to="{ name: 'panel-services-create' }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد سرویس
+                    </v-btn>
+                </div>
+                <v-table fixed-header height="700px">
+                    <thead>
+                        <tr>
+                            <th class="text-right">سرور</th>
+                            <th class="text-right">بازه زمانی</th>
+                            <th class="text-right">پکیج</th>
+                            <th class="text-right">قیمت</th>
+                            <th class="text-right">وضعیت</th>
+                            <th class="text-right">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in services" :key="item.name">
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.server?.name }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.package_duration?.name }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.package?.name }}
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="whitespace-nowrap">
-                            {{ item.price }} تومان
-                        </div>
-                    </td>
-                    <td>
-                        <div class="whitespace-nowrap">
-                            <template v-if="item.status == 'active'">
-                                <v-chip color="green" text-color="white">
-                                    فعال
-                                </v-chip>
-                            </template>
-                            <template v-if="item.status == 'purchased'">
-                                <v-chip color="warning" text-color="white">
-                                    خریداری شده
-                                </v-chip>
-                            </template>
-                            <template v-if="item.status == 'inactive'">
-                                <v-chip color="green" text-color="white">
-                                    غیرفعال
-                                </v-chip>
-                            </template>
-                        </div>
-                    </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.price }} تومان
+                                </div>
+                            </td>
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    <template v-if="item.status == 'active'">
+                                        <v-chip
+                                            color="green"
+                                            text-color="white"
+                                        >
+                                            فعال
+                                        </v-chip>
+                                    </template>
+                                    <template v-if="item.status == 'purchased'">
+                                        <v-chip
+                                            color="warning"
+                                            text-color="white"
+                                        >
+                                            خریداری شده
+                                        </v-chip>
+                                    </template>
+                                    <template v-if="item.status == 'inactive'">
+                                        <v-chip
+                                            color="green"
+                                            text-color="white"
+                                        >
+                                            غیرفعال
+                                        </v-chip>
+                                    </template>
+                                </div>
+                            </td>
 
-                    <td>
-                        <div class="flex items-center">
-                            <v-btn
-                                :to="{
-                                    name: 'panel-services-edit',
-                                    params: { id: item.id },
-                                }"
-                                prepend-icon="mdi-pencil-box-outline"
-                            >
-                                ویرایش
-                            </v-btn>
-                            <v-btn
-                                @click="handleShowDeleteMessage(item)"
-                                prepend-icon="mdi-trash-can-outline"
-                                class="mr-4"
-                            >
-                                حذف
-                            </v-btn>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </v-table>
+                            <td>
+                                <div class="flex items-center">
+                                    <v-btn
+                                        :to="{
+                                            name: 'panel-services-edit',
+                                            params: { id: item.id },
+                                        }"
+                                        prepend-icon="mdi-pencil-box-outline"
+                                    >
+                                        ویرایش
+                                    </v-btn>
+                                    <v-btn
+                                        @click="handleShowDeleteMessage(item)"
+                                        prepend-icon="mdi-trash-can-outline"
+                                        class="mr-4"
+                                    >
+                                        حذف
+                                    </v-btn>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </template>
+        </base-skeleton>
+
         <v-dialog
             v-model="visible_delete_confirmation"
             persistent
@@ -120,6 +144,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+
+const loading = ref(true);
+
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
 
@@ -128,6 +156,7 @@ const selected_item = ref(null);
 const fetchData = async () => {
     const { data } = await ApiService.get("/api/panel/services");
     services.value = data.data;
+    loading.value = false;
 };
 const handleShowDeleteMessage = (item) => {
     visible_delete_confirmation.value = true;

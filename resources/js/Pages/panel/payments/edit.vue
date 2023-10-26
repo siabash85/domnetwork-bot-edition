@@ -1,108 +1,123 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش تراکنش</h2>
-            </div>
-
-            <Form ref="formRef" @submit="handleUpdate">
-                <div class="mb-6">
-                    <v-chip
-                        class="ma-2"
-                        text-color="white"
-                        prepend-icon="mdi-account-circle"
-                    >
-                        کاربر : {{ form.user?.username }}
-                    </v-chip>
-
-                    <v-chip
-                        class="ma-2"
-                        text-color="white"
-                        append-icon="mdi-cash"
-                    >
-                        قیمت :‌ {{ form?.amount }} تومان
-                    </v-chip>
-
-                    <v-chip
-                        class="ma-2"
-                        text-color="white"
-                        append-icon="mdi-credit-card-outline"
-                    >
-                        روش پرداخت : {{ form?.payment_method?.title }}
-                    </v-chip>
-
-                    <v-chip
-                        class="ma-2"
-                        text-color="white"
-                        append-icon="mdi-anchor"
-                    >
-                        کد پیگیری : {{ form?.reference_code }}
-                    </v-chip>
-
-                    <template v-if="form?.status == 'pending'">
-                        <v-chip
-                            class="ma-2"
-                            color="warning"
-                            text-color="white"
-                            prepend-icon="mdi-alert-circle-outline"
-                        >
-                            وضعیت : در انتظار پرداخت
-                        </v-chip>
-                    </template>
-                    <template v-if="form?.status == 'success'">
-                        <v-chip
-                            class="ma-2"
-                            color="success"
-                            text-color="white"
-                            prepend-icon="mdi-alert-circle-outline"
-                        >
-                            وضعیت : پرداخت موفق
-                        </v-chip>
-                    </template>
-                    <template v-if="form?.status == 'rejected'">
-                        <v-chip
-                            class="ma-2"
-                            color="red"
-                            text-color="white"
-                            prepend-icon="mdi-alert-circle-outline"
-                        >
-                            وضعیت : لغو شده
-                        </v-chip>
-                    </template>
-
-                    <v-chip
-                        class="ma-2"
-                        text-color="white"
-                        prepend-icon="mdi-calendar-clock-outline"
-                    >
-                        تاریخ : {{ form?.created_at }}
-                    </v-chip>
-                </div>
-
+        <base-skeleton animated :loading="loader">
+            <template #template>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12">
-                        <v-select
-                            v-model="form.status"
-                            label="انتخاب  وضعیت"
-                            :items="statuses"
-                            item-title="state"
-                            item-value="value"
-                            single-line
-                            variant="solo-filled"
-                        ></v-select>
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
                     </div>
                 </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش تراکنش</h2>
+                    </div>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </Form>
-        </v-sheet>
+                    <Form ref="formRef" @submit="handleUpdate">
+                        <div class="mb-6">
+                            <v-chip
+                                class="ma-2"
+                                text-color="white"
+                                prepend-icon="mdi-account-circle"
+                            >
+                                کاربر : {{ form.user?.username }}
+                            </v-chip>
+
+                            <v-chip
+                                class="ma-2"
+                                text-color="white"
+                                append-icon="mdi-cash"
+                            >
+                                قیمت :‌ {{ form?.amount }} تومان
+                            </v-chip>
+
+                            <v-chip
+                                class="ma-2"
+                                text-color="white"
+                                append-icon="mdi-credit-card-outline"
+                            >
+                                روش پرداخت : {{ form?.payment_method?.title }}
+                            </v-chip>
+
+                            <v-chip
+                                class="ma-2"
+                                text-color="white"
+                                append-icon="mdi-anchor"
+                            >
+                                کد پیگیری : {{ form?.reference_code }}
+                            </v-chip>
+
+                            <template v-if="form?.status == 'pending'">
+                                <v-chip
+                                    class="ma-2"
+                                    color="warning"
+                                    text-color="white"
+                                    prepend-icon="mdi-alert-circle-outline"
+                                >
+                                    وضعیت : در انتظار پرداخت
+                                </v-chip>
+                            </template>
+                            <template v-if="form?.status == 'success'">
+                                <v-chip
+                                    class="ma-2"
+                                    color="success"
+                                    text-color="white"
+                                    prepend-icon="mdi-alert-circle-outline"
+                                >
+                                    وضعیت : پرداخت موفق
+                                </v-chip>
+                            </template>
+                            <template v-if="form?.status == 'rejected'">
+                                <v-chip
+                                    class="ma-2"
+                                    color="red"
+                                    text-color="white"
+                                    prepend-icon="mdi-alert-circle-outline"
+                                >
+                                    وضعیت : لغو شده
+                                </v-chip>
+                            </template>
+
+                            <v-chip
+                                class="ma-2"
+                                text-color="white"
+                                prepend-icon="mdi-calendar-clock-outline"
+                            >
+                                تاریخ : {{ form?.created_at }}
+                            </v-chip>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                                <v-select
+                                    v-model="form.status"
+                                    label="انتخاب  وضعیت"
+                                    :items="statuses"
+                                    item-title="state"
+                                    item-value="value"
+                                    single-line
+                                    variant="solo-filled"
+                                ></v-select>
+                            </div>
+                        </div>
+
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             تراکنش با موفقیت ویرایش شد.
         </v-snackbar>
@@ -110,11 +125,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
-
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -126,12 +142,7 @@ const form = ref({
     created_at: null,
 });
 const visible_success_message = ref(false);
-const rules = ref([
-    (value) => {
-        if (value) return true;
-        return "نام   تراکنش  الزامی می باشد";
-    },
-]);
+
 const servers = ref([]);
 const durations = ref([]);
 const packages = ref([]);
@@ -165,10 +176,15 @@ const fetchData = async () => {
     );
     form.value = data.data;
 
-    formRef.value.setValues({
-        ...form.value,
-    });
+    loader.value = false;
 };
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();

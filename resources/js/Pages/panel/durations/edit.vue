@@ -1,35 +1,46 @@
 <template>
     <div>
-        <v-sheet>
-            <div class="mb-6">
-                <h2 class="text-xl">ویرایش بازه زمانی</h2>
-            </div>
-            <v-form
-                ref="formRef"
-                validate-on="submit"
-                @submit.prevent="handleUpdate"
-            >
-                <v-text-field
-                    type="number"
-                    v-model="form.name"
-                    :rules="rules"
-                    label="روز به عدد"
-                    density="compact"
-                    single-line
-                    variant="solo"
-                    hint="بازه زمانی را تعداد روز وارد کنید"
-                ></v-text-field>
+        <base-skeleton animated :loading="loader">
+            <template #template>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-12 lg:col-span-12">
+                        <base-skeleton-item
+                            variant="card"
+                            class="h-[500px]"
+                        ></base-skeleton-item>
+                    </div>
+                </div>
+            </template>
+            <template #default>
+                <v-sheet>
+                    <div class="mb-6">
+                        <h2 class="text-xl">ویرایش بازه زمانی</h2>
+                    </div>
+                    <Form ref="formRef" @submit="handleUpdate">
+                        <v-text-field
+                            type="number"
+                            v-model="form.name"
+                            :rules="rules"
+                            label="روز به عدد"
+                            density="compact"
+                            single-line
+                            variant="solo"
+                            hint="بازه زمانی را تعداد روز وارد کنید"
+                        ></v-text-field>
 
-                <v-btn
-                    :loading="loading"
-                    color="light-blue-accent-4"
-                    type="submit"
-                    block
-                    class="mt-2"
-                    >ویرایش</v-btn
-                >
-            </v-form>
-        </v-sheet>
+                        <v-btn
+                            :loading="loading"
+                            color="light-blue-accent-4"
+                            type="submit"
+                            block
+                            class="mt-2"
+                            >ویرایش</v-btn
+                        >
+                    </Form>
+                </v-sheet>
+            </template>
+        </base-skeleton>
+
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             بازه زمانی با موفقیت ویرایش شد.
         </v-snackbar>
@@ -37,10 +48,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
+import { ErrorMessage, Field, Form } from "vee-validate";
 
+import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
@@ -78,7 +92,16 @@ const fetchData = async () => {
         `/api/panel/package/durations/${route.params.id}`
     );
     form.value.name = data.data.name;
+    loader.value = false;
 };
+
+watchEffect(() => {
+    if (formRef.value) {
+        formRef.value.setValues({
+            ...form.value,
+        });
+    }
+});
 
 onMounted(() => {
     fetchData();
