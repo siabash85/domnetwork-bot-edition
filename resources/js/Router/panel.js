@@ -142,5 +142,19 @@ export default {
             component: () => import("@/Pages/panel/messages/edit.vue"),
         },
 
+
+        // users
+        {
+            path: "users",
+            name: "panel-users-index",
+            component: () => import("@/Pages/panel/users/index.vue"),
+        },
+
+        {
+            path: "users/edit/:id",
+            name: "panel-users-edit",
+            component: () => import("@/Pages/panel/users/edit.vue"),
+        },
+
     ],
 };

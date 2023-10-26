@@ -30,7 +30,8 @@ class User extends Authenticatable
         'section',
         'step',
         'mobile',
-        'wallet'
+        'wallet',
+        'status'
     ];
 
     /**

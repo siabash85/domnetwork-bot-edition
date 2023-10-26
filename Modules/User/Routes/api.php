@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Modules\User\Http\Controllers\Panel\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,3 +14,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::prefix('/panel')->group(function () {
+    Route::apiResource("users", UserController::class);
+});

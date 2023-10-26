@@ -74,6 +74,12 @@
                     value="messages"
                     :to="{ name: 'panel-messages-index' }"
                 ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-account-group"
+                    title="کاربران"
+                    value="users"
+                    :to="{ name: 'panel-users-index' }"
+                ></v-list-item>
             </v-list>
         </v-navigation-drawer>
         <v-app-bar title="">
