@@ -13,12 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pricings', function (Blueprint $table) {
-            $table->id();
-            $table->longText("content");
-            $table->string("name")->nullable();
-            $table->boolean("is_default")->default(true);
-            $table->timestamps();
+        Schema::table('subscriptions', function (Blueprint $table) {
+            $table->string("slug");
         });
     }
 
@@ -29,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pricings');
+        Schema::table('subscriptions', function (Blueprint $table) {
+            $table->dropColumn("slug");
+        });
     }
 };

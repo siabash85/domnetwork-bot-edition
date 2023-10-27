@@ -57,12 +57,14 @@ class UserController extends ApiController
         $user = User::query()->find($id);
         $data = [
             'is_superuser' => $request->is_superuser,
+            'is_notifable' => $request->is_notifable,
             'status' => $request->status,
             'username' => $request->username,
             'fist_name' => $request->fist_name,
             'email' => $request->email,
             // 'mobile' => $request->mobile,
             'wallet' => $request->wallet,
+
 
         ];
         if ($request->password) {

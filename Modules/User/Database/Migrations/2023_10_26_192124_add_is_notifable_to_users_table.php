@@ -13,12 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pricings', function (Blueprint $table) {
-            $table->id();
-            $table->longText("content");
-            $table->string("name")->nullable();
-            $table->boolean("is_default")->default(true);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean("is_notifable")->default(false);
         });
     }
 
@@ -29,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pricings');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn("is_notifable");
+        });
     }
 };

@@ -18,7 +18,7 @@
             <template #default>
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 lg:col-span-4" v-if="!loading">
-                        <v-card class="" max-width="368">
+                        <v-card class="">
                             <v-card-item title="فروش کل">
                                 <template v-slot:subtitle>
                                     <v-icon
@@ -68,7 +68,7 @@
                         </v-card>
                     </div>
                     <div class="col-span-12 lg:col-span-4">
-                        <v-card class="" max-width="368">
+                        <v-card class="">
                             <v-card-item title="کاربران">
                                 <template v-slot:subtitle>
                                     <v-icon
@@ -113,7 +113,7 @@
                         </v-card>
                     </div>
                     <div class="col-span-12 lg:col-span-4">
-                        <v-card class="" max-width="368">
+                        <v-card class="">
                             <v-card-item title="پیام های پشتیبانی">
                                 <template v-slot:subtitle>
                                     <v-icon

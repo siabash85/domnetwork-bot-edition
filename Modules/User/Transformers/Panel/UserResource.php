@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'uid' => $this->uid,
             'email' => $this->email,
             'is_superuser' => $this->is_superuser,
+            'is_notifable' => $this->is_notifable,
             'wallet' => $this->wallet,
             'status' => $this->status,
             'created_at' =>  formatGregorian($this->created_at),

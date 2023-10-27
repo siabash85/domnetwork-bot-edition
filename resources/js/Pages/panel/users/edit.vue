@@ -87,7 +87,6 @@
                                     mode="passive"
                                     name="email"
                                     v-slot="{ field }"
-                                    rules="required"
                                     label=" ایمیل"
                                 >
                                     <v-text-field
@@ -211,6 +210,36 @@
                                     <ErrorMessage name="is_superuser" />
                                 </div>
                             </div>
+
+                            <div class="col-span-12">
+                                <Field
+                                    mode="passive"
+                                    name="is_notifable"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label="ارسال اعلان"
+                                >
+                                    <v-radio-group
+                                        v-bind="field"
+                                        v-model="form.is_notifable"
+                                    >
+                                        <template v-slot:label>
+                                            <div>ارسال اعلان</div>
+                                        </template>
+                                        <v-radio
+                                            label="ارسال تمام اعلان های سیستم به این کاربر"
+                                            value="1"
+                                        ></v-radio>
+                                        <v-radio
+                                            label="عدم ارسال"
+                                            value="0"
+                                        ></v-radio>
+                                    </v-radio-group>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="is_notifable" />
+                                </div>
+                            </div>
                         </div>
 
                         <v-btn
@@ -251,6 +280,7 @@ const form = ref({
     wallet: null,
     password: null,
     password_confirmation: null,
+    is_notifable: "0",
 });
 const visible_success_message = ref(false);
 const statuses = ref([
@@ -269,9 +299,11 @@ const handleUpdate = async (event) => {
         form_data.append("email", form.value.email);
         form_data.append("uid", form.value.uid);
         form_data.append("is_superuser", form.value.is_superuser);
+        form_data.append("is_notifable", form.value.is_notifable);
         form_data.append("status", form.value.status);
         form_data.append("wallet", form.value.wallet);
         form_data.append("password", form.value.password ?? "");
+
         form_data.append(
             "password_confirmation",
             form.value.password_confirmation ?? ""
@@ -289,15 +321,15 @@ const handleUpdate = async (event) => {
 
 const fetchData = async () => {
     let { data } = await ApiService.get(`/api/panel/users/${route.params.id}`);
-    console.log("data.data", data.data);
-
     form.value.username = data.data.username;
     form.value.first_name = data.data.first_name;
     form.value.uid = data.data.uid;
     form.value.status = data.data.status;
     form.value.email = data.data.email;
     form.value.is_superuser = data.data.is_superuser.toString();
+    form.value.is_notifable = data.data.is_notifable.toString();
     form.value.wallet = data.data.wallet;
+    form.value.status = data.data.status;
     loader.value = false;
 };
 watchEffect(() => {

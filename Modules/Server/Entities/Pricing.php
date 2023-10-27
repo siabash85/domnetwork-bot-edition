@@ -9,6 +9,7 @@ class Pricing extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'content',
         'name',

@@ -20,6 +20,8 @@ use Modules\Guide\Entities\GuidePlatformClient;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
+use Modules\Server\Entities\Pricing;
+use Modules\Server\Entities\Subscription;
 use Modules\Support\Entities\SupportMessage;
 use Modules\User\Entities\WalletTransaction;
 use Telegram\Bot\FileUpload\InputFile;
@@ -91,7 +93,14 @@ class WebhookController extends Controller
         }
 
         if ($update->getMessage()->text !== "/start") {
-
+            if ($update->getMessage()->text == Keyboards::HOME) {
+                Telegram::sendMessage([
+                    'text' => "سلام {$user->username} عزیز، به ربات ما خوش آمدید. 🚀\nیکی از دکمه های زیر را انتخاب کنید !",
+                    'chat_id' => $sender->id,
+                    'reply_markup' => KeyboardHandler::home(),
+                ]);
+                return true;
+            }
 
             if ($update->getMessage()->text == Keyboards::PURCHASE_SERVICE) {
                 $servers = Server::query()->where('is_active', true)->get();
@@ -127,6 +136,7 @@ class WebhookController extends Controller
                         }
                         $keyboards[] = $row;
                     }
+                    array_push($keyboards, [['text' => Keyboards::HOME]]);
 
                     $replyMarkup = [
                         'keyboard' => $keyboards,
@@ -150,9 +160,21 @@ class WebhookController extends Controller
                     'section' => Keyboards::CHARGE,
                     'step' => 1
                 ]);
+                $keyboards = [
+                    [
+                        ['text' => Keyboards::HOME],
+                    ],
+                ];
+                $replyMarkup = [
+                    'keyboard' => $keyboards,
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                ];
+                $encodedMarkup = json_encode($replyMarkup);
                 Telegram::sendMessage([
                     'text' => "💸 لطفا مبلغی که میخواهید شارژ کنید را به لاتین حداقل 2,000 تومان ارسال کنید :",
                     "chat_id" => $sender->id,
+                    'reply_markup' => $encodedMarkup,
                 ]);
                 return true;
             }
@@ -187,7 +209,7 @@ class WebhookController extends Controller
                     }
                     $keyboards[] = $row;
                 }
-
+                array_push($keyboards, [['text' => Keyboards::HOME]]);
                 $replyMarkup = [
                     'keyboard' => $keyboards,
                     'resize_keyboard' => true,
@@ -211,6 +233,53 @@ class WebhookController extends Controller
                 ]);
                 $user->update([
                     'section' => Keyboards::SUPPORT,
+                    'step' => 1
+                ]);
+                return true;
+            }
+            if ($update->getMessage()->text == Keyboards::PRICING) {
+                $pricing_exists = Pricing::query()->where('is_default', true)->first();
+                if (!is_null($pricing_exists)) {
+
+                    $pricing_content = $pricing_exists->content;
+                } else {
+                    $pricing_content = "متن تعرفه هنوز تنظیم نشده است.";
+                }
+                Telegram::sendMessage([
+                    'text' => $pricing_content,
+                    'chat_id' => $sender->id,
+                ]);
+                $user->update([
+                    'section' => Keyboards::SUPPORT,
+                    'step' => 1
+                ]);
+                return true;
+            }
+            if ($update->getMessage()->text == Keyboards::SERVICES) {
+                $user_services = Subscription::query()->where('user_id', $user->id)->get();
+                $keyboards = [];
+                $keyboards_keyboards = $user_services->chunk(2);
+                foreach ($keyboards_keyboards as $chunk) {
+                    $row = [];
+                    foreach ($chunk as $service) {
+                        $row[] = ['text' => $service->slug];
+                    }
+                    $keyboards[] = $row;
+                }
+                array_push($keyboards, [['text' => Keyboards::HOME]]);
+                $replyMarkup = [
+                    'keyboard' => $keyboards,
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                ];
+                $encodedMarkup = json_encode($replyMarkup);
+                Telegram::sendMessage([
+                    'text' => "🗂 سرویس مورد نظر رو انتخاب کنید:",
+                    'chat_id' => $sender->id,
+                    'reply_markup' => $encodedMarkup,
+                ]);
+                $user->update([
+                    'section' => Keyboards::SERVICES,
                     'step' => 1
                 ]);
                 return true;
@@ -243,6 +312,8 @@ class WebhookController extends Controller
                         }
                         $keyboards[] = $row;
                     }
+                    array_push($keyboards, [['text' => Keyboards::HOME]]);
+
                     $replyMarkup = [
                         'keyboard' => $keyboards,
                         'resize_keyboard' => true,
@@ -273,6 +344,7 @@ class WebhookController extends Controller
                         }
                         $keyboards[] = $row;
                     }
+                    array_push($keyboards, [['text' => Keyboards::HOME]]);
                     $replyMarkup = [
                         'keyboard' => $keyboards,
                         'resize_keyboard' => true,
@@ -296,7 +368,6 @@ class WebhookController extends Controller
                 }
             } else if (in_array($update->getMessage()->text, $packages)) {
                 if ($user->step == "3" && $user->section == Keyboards::PURCHASE_SERVICE) {
-
                     $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
                     $selected_package = Package::query()->where('name', $update->getMessage()->text)->first();
                     $pre_order->update([
@@ -309,47 +380,17 @@ class WebhookController extends Controller
                         ->where('status', "active")
                         ->first();
                     if (!is_null($service)) {
-                        $order =   Order::query()->create([
-                            "user_id" => $user->id,
-                            "service_id" => $service->id,
-                            "status" =>  "pending",
-                            "payable_price" =>  $service->price,
-                            "price" =>  $service->price,
-                        ]);
-                        $location = $service->server->name;
-                        $volume = $service->package->name;
-                        $date = $service->package_duration->name;
-                        $trackingCode = $order->reference_code;
-                        $price = round($service->price);
-                        $amount = "{$price} تومان";
-                        $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
-                            "⬅️ لوکیشن : $location\n" .
-                            "⬅️ حجم : $volume\n" .
-                            "⬅️ تاریخ : $date\n" .
-                            "⬅️ کد پیگیری : $trackingCode\n\n" .
-                            "💸 مبلغ سرویس شما : $amount\n\n" .
-                            " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
 
-                        $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
-                            "pin" => "sandbox",
-                            "amount" => $order->price,
-                            "callback" => "https://pashmak-titab.store/api/client/payment/callback",
-                        ]);
-                        $dd = json_decode($res->body());
-                        $transid = $dd->transid;
-                        $inlineKeyboard = [
-                            [
-                                [
-                                    'text' => 'درگاه پرداخت',
-                                    'url' => route('payment.generate', ['order' => $order->id, 'id' => $transid])
-                                ],
-                            ],
-                        ];
-                        $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                        $message = " 📝 یک نام دلخواه برای این سرویس وارد کنید: (اختیاری)\n\n" .
+                            "📌 نام باید دارای شرایط زیر باشد:\n" .
+                            "1⃣ می تواند با $#@ و اعداد و حروف انگلیسی شروع شود. \n" .
+                            "2⃣ بین کاراکترها می توان از $#@-_/ و فاصله استفاده کرد. \n" .
+                            "3⃣ انتهای نام نمی تواند شامل $#@-_/ و فاصله باشد.\n" .
+                            "4️⃣ طول نامی که انتخاب می کنید نمی تواند بیش تر از ۱۱ کاراکتر باشد. \n";
                         Telegram::sendMessage([
                             'text' => $message,
                             "chat_id" => $sender->id,
-                            'reply_markup' => $encodedKeyboard,
+                            // 'reply_markup' => $encodedKeyboard,
                         ]);
 
                         $user->update([
@@ -364,6 +405,63 @@ class WebhookController extends Controller
                         ]);
                     }
                 }
+            } else if ($user->step == "4" && $user->section == Keyboards::PURCHASE_SERVICE) {
+                $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
+                $pre_order->update([
+                    'service_name' => $update->getMessage()->text
+                ]);
+                $service = Service::query()
+                    ->where('server_id', $pre_order->server_id)
+                    ->where('package_duration_id', $pre_order->package_duration_id)
+                    ->where('package_id', $pre_order->package_id)
+                    ->where('status', "active")
+                    ->first();
+                $order =   Order::query()->create([
+                    "user_id" => $user->id,
+                    "service_id" => $service->id,
+                    "status" =>  "pending",
+                    "payable_price" =>  $service->price,
+                    "price" =>  $service->price,
+                ]);
+                $location = $service->server->name;
+                $volume = $service->package->name;
+                $date = $service->package_duration->name;
+                $trackingCode = $order->reference_code;
+                $price = round($service->price);
+                $amount = "{$price} تومان";
+                $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
+                    "⬅️ لوکیشن : $location\n" .
+                    "⬅️ حجم : $volume\n" .
+                    "⬅️ تاریخ : $date\n" .
+                    "⬅️ کد پیگیری : $trackingCode\n\n" .
+                    "💸 مبلغ سرویس شما : $amount\n\n" .
+                    " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
+
+                $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
+                    "pin" => "sandbox",
+                    "amount" => $order->price,
+                    "callback" => "https://pashmak-titab.store/api/client/payment/callback",
+                ]);
+                $dd = json_decode($res->body());
+                $transid = $dd->transid;
+                $inlineKeyboard = [
+                    [
+                        [
+                            'text' => 'درگاه پرداخت',
+                            'url' => route('payment.generate', ['order' => $order->id, 'id' => $transid])
+                        ],
+                    ],
+                ];
+                $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                $user->update([
+                    'section' => Keyboards::PURCHASE_SERVICE,
+                    'step' => 5
+                ]);
+                Telegram::sendMessage([
+                    'text' => $message,
+                    "chat_id" => $sender->id,
+                    'reply_markup' => $encodedKeyboard,
+                ]);
             } else if ($user->step == "1" && $user->section == Keyboards::CHARGE) {
                 $amount = $update->getMessage()->text;
                 $wallet_trans = WalletTransaction::updateOrCreate(
@@ -407,6 +505,7 @@ class WebhookController extends Controller
                     }
                     $keyboards[] = $row;
                 }
+                array_push($keyboards, [['text' => Keyboards::HOME]]);
                 $replyMarkup = [
                     'keyboard' => $keyboards,
                     'resize_keyboard' => true,
@@ -427,6 +526,8 @@ class WebhookController extends Controller
                 $selected_client = GuidePlatformClient::query()->where('name', $update->getMessage()->text)->first();
                 $platform = $selected_client->guide_platform->name;
                 $markdownText = "📚 آموزش اتصال در $platform با $selected_client->name\n📌 [لینک دانلود نرم افزارهای استفاده شده در این آموزش: $selected_client->name]($selected_client->link)";
+
+
                 Telegram::sendVideo([
                     "chat_id" => $sender->id,
                     "video" => InputFile::create(public_path($selected_client->video)),
@@ -454,6 +555,37 @@ class WebhookController extends Controller
                     'section' => Keyboards::SUPPORT,
                     'step' => 2
                 ]);
+            } else if ($user->step == "1" && $user->section == Keyboards::SERVICES) {
+                $user_sub = Subscription::query()->where('user_id', $user->id)->where('slug', $update->getMessage()->text)->first();
+                if (is_null($user_sub)) {
+                    Telegram::sendMessage([
+                        'text' => "⛔️ سرور انتخاب شده نامعتبر می  باشد",
+                        'chat_id' => $sender->id,
+                    ]);
+                } else {
+                    $location = $user_sub->service->server->name;
+                    $volume = $user_sub->service->package->name;
+                    $service_link = $user_sub->service->link;
+                    $code = $user_sub->code;
+                    $expire_date = $user_sub->expire_at;
+                    $message = "💎 *کد سرویس:* `$code`\n" .
+                        "🌎 *لوکیشن:* `$location`\n" .
+                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                        "♾ *حجم کل:* `$volume` \n\n" .
+                        "📌 *لینک اشتراک* \n\n" .
+                        "`$service_link`";
+                    Telegram::sendMessage([
+                        'text' => $message,
+                        'chat_id' => $sender->id,
+                        'parse_mode' => 'MarkdownV2',
+                        'reply_markup' => KeyboardHandler::home(),
+                    ]);
+                }
+                return true;
+                // $user->update([
+                //     'section' => Keyboards::SUPPORT,
+                //     'step' => 2
+                // ]);
             }
         }
 

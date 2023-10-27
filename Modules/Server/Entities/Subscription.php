@@ -16,7 +16,8 @@ class Subscription extends Model
         'expire_at',
         'status',
         'name',
-        'code'
+        'code',
+        'slug'
     ];
     protected $casts = [
         'expire_at' => 'datetime'
@@ -32,12 +33,12 @@ class Subscription extends Model
         return $this->belongsTo(Service::class);
     }
 
-    public static function booted()
-    {
-        static::saving(function ($item) {
-            $item->code =  random_int(1000000, 10000000);
-        });
-    }
+    // public static function booted()
+    // {
+    //     static::saving(function ($item) {
+    //         $item->code =  random_int(1000000, 10000000);
+    //     });
+    // }
 
 
     // protected static function newFactory()

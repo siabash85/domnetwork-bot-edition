@@ -32,7 +32,8 @@ class User extends Authenticatable
         'mobile',
         'wallet',
         'status',
-        'is_superuser'
+        'is_superuser',
+        'is_notifable'
     ];
 
     /**

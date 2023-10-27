@@ -11,6 +11,7 @@ class  Keyboards
     const PROFILE = '👤 پروفایل';
     const SUPPORT = '📮 پشتیبانی آنلاین';
     const GUIDE = '🔗 راهنمای اتصال';
+    const HOME = "🏠 خانه";
 
     public static $keyboards = [
         self::PURCHASE_SERVICE,

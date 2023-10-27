@@ -2,14 +2,16 @@
 
 namespace Modules\Payment\Http\Controllers\Client;
 
-use App\Telegram\Keyboard\KeyboardHandler;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Modules\User\Entities\User;
 use Modules\Order\Entities\Order;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;
+use Modules\Order\Entities\PreOrder;
 use Modules\Payment\Entities\Payment;
 use Modules\Server\Entities\Subscription;
+use App\Telegram\Keyboard\KeyboardHandler;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Illuminate\Contracts\Support\Renderable;
@@ -48,11 +50,15 @@ class PaymentController extends ApiController
             if ($code == "1") {
                 $payment->update(['status' => 'success']);
                 $payment->paymentable->service()->update(['status' => "purchased"]);
+                $pre_order = PreOrder::query()->where('user_id', $payment->user_id)->first();
+                $sub_code = random_int(1000000, 10000000);
                 $subscription = Subscription::query()->create([
                     'user_id' => $payment->user_id,
                     'service_id' => $payment->paymentable->service->id,
                     'status' => "active",
-                    'name' => random_int(1000, 1000000),
+                    'name' => $pre_order->service_name,
+                    'code' => $sub_code,
+                    'slug' => $pre_order->service_name . " - " . $sub_code,
                     "expire_at" => now()->addDays($payment->paymentable->service->package_duration->name)
                 ]);
 
@@ -74,6 +80,16 @@ class PaymentController extends ApiController
                     'parse_mode' => 'MarkdownV2',
                     'reply_markup' => KeyboardHandler::home(),
                 ]);
+                $owner_users = User::query()->where('is_notifable', true)->get();
+                $notif_message = "📣 *سرویس جدیدی خریداری شد*\n\n";
+                foreach ($owner_users as $key => $owner_user) {
+                    Telegram::sendMessage([
+                        'text' => $notif_message,
+                        "chat_id" => $owner_user->uid,
+                        'parse_mode' => 'MarkdownV2',
+                        'reply_markup' => KeyboardHandler::home(),
+                    ]);
+                }
                 return redirect()->route('payment.success', $payment->id);
             } else {
                 $payment->update(['status' => 'rejected']);
