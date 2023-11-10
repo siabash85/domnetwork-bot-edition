@@ -17,7 +17,14 @@ class Subscription extends Model
         'status',
         'name',
         'code',
-        'slug'
+        'slug',
+        'limit',
+        'totalGB',
+        'expiryTime',
+        'tgId',
+        'subId',
+        'flow',
+        'uuid',
     ];
     protected $casts = [
         'expire_at' => 'datetime'

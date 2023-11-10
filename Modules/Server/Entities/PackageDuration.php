@@ -10,7 +10,8 @@ class PackageDuration extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'value'
     ];
 
     // protected static function newFactory()
