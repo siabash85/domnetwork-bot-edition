@@ -29,6 +29,7 @@ class PackageController extends ApiController
     {
         $server =  Package::query()->create([
             'name' => $request->name,
+            'value' => $request->value,
             'is_active' => $request->is_active
         ]);
         return $this->successResponse($server, "ایجاد  با موفقیت انجام شد");
@@ -56,6 +57,7 @@ class PackageController extends ApiController
         $server = Package::query()->find($id);
         $server->update([
             'name' => $request->name,
+            'value' => $request->value,
             'is_active' => $request->is_active
         ]);
         return $this->successResponse($server, "ویرایش  با موفقیت انجام شد");

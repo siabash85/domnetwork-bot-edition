@@ -15,6 +15,8 @@ use Modules\Server\Entities\Package;
 use Modules\Server\Entities\Service;
 use Modules\Payment\Entities\Payment;
 use App\Telegram\Keyboard\KeyboardHandler;
+use DOMDocument;
+use DOMXPath;
 use Modules\Guide\Entities\GuidePlatform;
 use Modules\Guide\Entities\GuidePlatformClient;
 use Telegram\Bot\Laravel\Facades\Telegram;
@@ -23,6 +25,7 @@ use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Entities\Pricing;
 use Modules\Server\Entities\Subscription;
 use Modules\Support\Entities\SupportMessage;
+use Modules\User\Entities\VoucherTransaction;
 use Modules\User\Entities\WalletTransaction;
 use Telegram\Bot\FileUpload\InputFile;
 
@@ -33,8 +36,6 @@ class WebhookController extends Controller
         $update = Telegram::commandsHandler(true);
         $sender = $update->getMessage()->from;
         $user = User::query()->where('uid', $sender->id)->first();
-
-
         if (isset($update->callback_query)) {
             $sender = $update->callback_query->message->chat;
             $user = User::query()->where('uid', $sender->id)->first();
@@ -42,53 +43,209 @@ class WebhookController extends Controller
             $callbackData = $update->callback_query->data;
             $chatId = $update->callback_query->message->chat->id;
             $messageId = $update->callback_query->message->message_id;
-            $responseText = 'You clicked the button with callback data: ' . $callbackData;
-            $wallet_trans = WalletTransaction::query()->where('user_id', $user->id)->first();
-            $wallet_amount  = $wallet_trans->amount;
-            Telegram::answerCallbackQuery([
-                'callback_query_id' => $callbackQueryId,
-                'text' => $responseText,
-            ]);
-            $payment_method = PaymentMethod::query()->where('is_default', true)->first();
-
-            $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
-                "pin" => "sandbox",
-                "amount" => $wallet_amount,
-                "callback" => "https://pashmak-titab.store/api/client/wallet/payment/callback",
-            ]);
-            $dd = json_decode($res->body());
-            $transid = $dd->transid;
-            $payment =  Payment::query()->create([
-                "paymentable_type" => User::class,
-                "paymentable_id" => $user->id,
-                "user_id" => $user->id,
-                "payment_method_id" => $payment_method->id,
-                "invoice_id" => $transid,
-                "amount" => $wallet_amount,
-                "status" => "pending",
-            ]);
-            $inlineKeyboard = [
-                [
+            if ($callbackData == "online_purchase") {
+                $wallet_trans = WalletTransaction::query()->where('user_id', $user->id)->first();
+                $wallet_amount = $wallet_trans->amount;
+                $payment_method = PaymentMethod::query()->where('is_default', true)->first();
+                $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
+                    "pin" => "sandbox",
+                    "amount" => $wallet_amount,
+                    "callback" => "https://pashmak-titab.store/api/client/wallet/payment/callback",
+                ]);
+                $dd = json_decode($res->body());
+                $transid = $dd->transid;
+                $payment = Payment::query()->create([
+                    "paymentable_type" => User::class,
+                    "paymentable_id" => $user->id,
+                    "user_id" => $user->id,
+                    "payment_method_id" => $payment_method->id,
+                    "invoice_id" => $transid,
+                    "amount" => $wallet_amount,
+                    "status" => "pending",
+                ]);
+                $inlineKeyboard = [
                     [
-                        'text' => 'پرداخت آنلاین',
-                        'url' => "https://panel.aqayepardakht.ir/startpay/sandbox/{$transid}"
+                        [
+                            'text' => 'پرداخت آنلاین',
+                            'url' => "https://panel.aqayepardakht.ir/startpay/sandbox/{$transid}"
+                        ],
                     ],
-                ],
-            ];
-            $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
-            $invoise_code = $payment->reference_code;
-            $newMessageText = "📣 *فاکتور شما با موفقیت ساخته شد*\n\n" .
-                "💎 * شماره فاکتور:* `$invoise_code`\n" .
-                "💳 * مبلغ قابل پرداخت:* `$wallet_amount` " . "تومان\n";
+                ];
+                $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                $invoise_code = $payment->reference_code;
+                $newMessageText = "📣 *فاکتور شما با موفقیت ساخته شد*\n\n" .
+                    "💎 * شماره فاکتور:* `$invoise_code`\n" .
+                    "💳 * مبلغ قابل پرداخت:* `$wallet_amount` " . "تومان\n";
+                Telegram::editMessageText([
+                    'chat_id' => $chatId,
+                    'message_id' => $messageId,
+                    'text' => $newMessageText,
+                    'parse_mode' => 'MarkdownV2',
+                    'reply_markup' => $encodedKeyboard,
+                ]);
+            } else if ($callbackData == "card") {
+                $user->update([
+                    'section' => Keyboards::CHARGE,
+                    'step' => 2
+                ]);
+                $wallet_trans = WalletTransaction::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'user_id' => $user->id,
+                        // 'amount' => $amount,
+                        "method" => "card",
+                        'status' => "pending"
+                    ]
+                );
+
+                Telegram::sendMessage([
+                    'text' => "💸 لطفا مبلغی که میخواهید شارژ کنید را به لاتین حداقل 10,000 تومان ارسال کنید :",
+                    "chat_id" => $sender->id,
+                    // 'reply_markup' => $encodedMarkup,
+                ]);
+                return true;
+            } else if ($callbackData == "voucher") {
+                $user->update([
+                    'section' => Keyboards::CHARGE,
+                    'step' => 2
+                ]);
+                $wallet_trans = WalletTransaction::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'user_id' => $user->id,
+                        "method" => "voucher",
+                        'status' => "pending"
+                    ]
+                );
+                Telegram::sendMessage([
+                    'text' => "🎁 کد ۱۰ رقمی ووچر الکترونیکی را ارسال کنید:",
+                    "chat_id" => $sender->id,
+                    // 'reply_markup' => $encodedMarkup,
+                ]);
+                return true;
+            } else if ($callbackData == "purchase_wallet") {
+
+                $order = Order::query()->where('user_id', $user->id)->where("status", "pending")->latest()->first();
+
+                $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
+                if ($order->payable_price > $user->wallet) {
+                    Telegram::sendMessage([
+                        'text' => "❌ موجودی شما برای خرید این سرویس کافی نمیباشد ",
+                        "chat_id" => $sender->id,
+                        // 'reply_markup' => $encodedMarkup,
+                    ]);
+                } else {
+
+                    $sub_code = random_int(1000000, 10000000);
+                    $rand_code = Str::random(8);
+                    $subscription = Subscription::query()->create([
+                        'user_id' => $user->id,
+                        'service_id' => $order->service->id,
+                        'status' => "active",
+                        'name' => $pre_order->service_name,
+                        'code' => $rand_code,
+                        'slug' => $pre_order->service_name . " - " . $rand_code,
+                        "expire_at" => now()->addDays($order->service->package_duration->name),
+                        'uuid' => Str::uuid(),
+                        'subId' => Str::random(16)
+                    ]);
+                    $server_address = $order->service->server->address;
+
+                    // $order->update(["status" => "success"]);
 
 
-            Telegram::editMessageText([
-                'chat_id' => $chatId,
-                'message_id' => $messageId,
-                'text' => $newMessageText,
-                'parse_mode' => 'MarkdownV2',
-                'reply_markup' => $encodedKeyboard,
-            ]);
+                    $user->decrement("wallet", $order->payable_price);
+                    $res = Http::post("$server_address/login", [
+                        "username" => $order->service->server->username,
+                        "password" => $order->service->server->password
+                    ]);;
+                    $cookieJar = $res->cookies();
+                    $cookiesArray = [];
+                    foreach ($cookieJar as $cookie) {
+                        $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+                    }
+                    $cookiesString = implode('; ', $cookiesArray);
+                    $package_duration_time = $order->service->package_duration->value > 0 ? -$order->service->package_duration->value * 24 * 60 * 60 * 1000 : 0;
+                    $settings = [
+                        "clients" => [
+                            [
+                                "id" => $subscription->uuid,
+                                "flow" => "",
+                                "email" => $subscription->code,
+                                "limitIp" => 0,
+                                "totalGB" => $order->service->package->value > 0 ? $order->service->package->value * pow(1024, 3) : 0,
+                                "expiryTime" => $package_duration_time,
+                                "enable" => true,
+                                "tgId" => "",
+                                "subId" => $subscription->subId
+                            ]
+                        ]
+                    ];
+                    $server_inbound_id = $order->service->server->inbound;
+
+
+
+                    $response = Http::withHeaders([
+                        'Cookie' => $cookiesString,
+                    ])->post("$server_address/panel/inbound/addClient", [
+                        "id" => intval($server_inbound_id),
+                        "settings" => json_encode($settings)
+                    ]);
+
+                    try {
+
+                        $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
+                        $inbound_res = json_decode($inbound->body());
+                        $inbound_obj = $inbound_res->obj;
+                        $network = json_decode($inbound_obj->streamSettings)->network;
+
+                        $inbound_port = $inbound_obj->port;
+                        $inbound_remark = $inbound_obj->remark;
+                        if ($response->successful()) {
+                            $location = $order->service->server->name;
+                            $volume = $order->service->package->name;
+                            $code = $subscription->code;
+                            $expire_date = $subscription->expire_at;
+                            $parts = parse_url($server_address);
+                            $clean_server_url = $parts['host'];
+                            $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
+                            $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
+                                "💎 *کد سرویس:* `$code`\n" .
+                                "🌎 *لوکیشن:* `$location`\n" .
+                                "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                "♾ *حجم کل:* `$volume` \n\n" .
+                                "📌 *لینک اشتراک* \n\n" .
+                                "`$service_link`";
+                            Telegram::sendMessage([
+                                'text' => $message,
+                                "chat_id" => $sender->id,
+                                'parse_mode' => 'MarkdownV2',
+                                'reply_markup' => KeyboardHandler::home(),
+                            ]);
+                            $owner_users = User::query()->where('is_notifable', true)->get();
+                            $notif_message = "📣 *سرویس جدیدی خریداری شد*\n\n";
+                            foreach ($owner_users as $key => $owner_user) {
+                                Telegram::sendMessage([
+                                    'text' => $notif_message,
+                                    "chat_id" => $owner_user->uid,
+                                    'parse_mode' => 'MarkdownV2',
+                                    'reply_markup' => KeyboardHandler::home(),
+                                ]);
+                            }
+                        }
+                    } catch (\Throwable $th) {
+                        // dd($th->getMessage());
+                    }
+                }
+
+                return true;
+            }
+
+            // Telegram::answerCallbackQuery([
+            //     'callback_query_id' => $callbackQueryId,
+            //     'text' => $responseText,
+            // ]);
+
             return true;
         }
 
@@ -160,19 +317,22 @@ class WebhookController extends Controller
                     'section' => Keyboards::CHARGE,
                     'step' => 1
                 ]);
-                $keyboards = [
-                    [
-                        ['text' => Keyboards::HOME],
-                    ],
+                $payment_methods = PaymentMethod::query()->where('status', 'active')->get();
+                $keyboards = [];
+                $keyboards_keyboards = $payment_methods->chunk(1);
+                foreach ($keyboards_keyboards as $chunk) {
+                    $row = [];
+                    foreach ($chunk as $method) {
+                        $row[] = ['text' => $method->title, 'callback_data' => $method->type];
+                    }
+                    $keyboards[] = $row;
+                }
+                $keyboardMarkup = [
+                    'inline_keyboard' => $keyboards,
                 ];
-                $replyMarkup = [
-                    'keyboard' => $keyboards,
-                    'resize_keyboard' => true,
-                    'one_time_keyboard' => false,
-                ];
-                $encodedMarkup = json_encode($replyMarkup);
+                $encodedMarkup = json_encode($keyboardMarkup);
                 Telegram::sendMessage([
-                    'text' => "💸 لطفا مبلغی که میخواهید شارژ کنید را به لاتین حداقل 2,000 تومان ارسال کنید :",
+                    'text' => "💳 روش پرداخت را انتخاب کنید:",
                     "chat_id" => $sender->id,
                     'reply_markup' => $encodedMarkup,
                 ]);
@@ -291,6 +451,7 @@ class WebhookController extends Controller
             $platforms = GuidePlatform::query()->pluck('name')->toArray();
             $platform_clients = GuidePlatformClient::query()->pluck('name')->toArray();
 
+
             if (in_array($update->getMessage()->text, $servers)) {
 
                 if ($user->step == "1" && $user->section == Keyboards::PURCHASE_SERVICE) {
@@ -373,13 +534,14 @@ class WebhookController extends Controller
                     $pre_order->update([
                         'package_id' => $selected_package->id
                     ]);
-                    $service = Service::query()
-                        ->where('server_id', $pre_order->server_id)
-                        ->where('package_duration_id', $pre_order->package_duration_id)
-                        ->where('package_id', $selected_package->id)
-                        ->where('status', "active")
-                        ->first();
-                    if (!is_null($service)) {
+                    // $service = Service::query()
+                    //     ->where('server_id', $pre_order->server_id)
+                    //     ->where('package_duration_id', $pre_order->package_duration_id)
+                    //     ->where('package_id', $selected_package->id)
+                    //     ->where('status', "active")
+                    //     ->first();
+                    $condition_config = true;
+                    if ($condition_config) {
 
                         $message = " 📝 یک نام دلخواه برای این سرویس وارد کنید: (اختیاری)\n\n" .
                             "📌 نام باید دارای شرایط زیر باشد:\n" .
@@ -416,83 +578,220 @@ class WebhookController extends Controller
                     ->where('package_id', $pre_order->package_id)
                     ->where('status', "active")
                     ->first();
-                $order =   Order::query()->create([
-                    "user_id" => $user->id,
-                    "service_id" => $service->id,
-                    "status" =>  "pending",
-                    "payable_price" =>  $service->price,
-                    "price" =>  $service->price,
-                ]);
-                $location = $service->server->name;
-                $volume = $service->package->name;
-                $date = $service->package_duration->name;
-                $trackingCode = $order->reference_code;
-                $price = round($service->price);
-                $amount = "{$price} تومان";
-                $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
-                    "⬅️ لوکیشن : $location\n" .
-                    "⬅️ حجم : $volume\n" .
-                    "⬅️ تاریخ : $date\n" .
-                    "⬅️ کد پیگیری : $trackingCode\n\n" .
-                    "💸 مبلغ سرویس شما : $amount\n\n" .
-                    " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
+                if (!is_null($service)) {
+                    $order = Order::query()->create([
+                        "user_id" => $user->id,
+                        "service_id" => $service->id,
+                        "status" => "pending",
+                        "payable_price" => $service->price,
+                        "price" => $service->price,
+                    ]);
+                    $location = $service->server->name;
+                    $volume = $service->package->name;
+                    $date = $service->package_duration->name;
+                    $trackingCode = $order->reference_code;
+                    $price = round($service->price);
+                    $amount = "{$price} تومان";
+                    $message = "ℹ️ فاکتور شما با جزئیات زیر با موفقیت ساخته شد.\n\n" .
+                        "⬅️ لوکیشن : $location\n" .
+                        "⬅️ حجم : $volume\n" .
+                        "⬅️ تاریخ : $date\n" .
+                        "⬅️ کد پیگیری : $trackingCode\n\n" .
+                        "💸 مبلغ سرویس شما : $amount\n\n" .
+                        " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
 
-                $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
-                    "pin" => "sandbox",
-                    "amount" => $order->price,
-                    "callback" => "https://pashmak-titab.store/api/client/payment/callback",
-                ]);
-                $dd = json_decode($res->body());
-                $transid = $dd->transid;
-                $inlineKeyboard = [
-                    [
+                    // $res = Http::post("https://panel.aqayepardakht.ir/api/v2/create", [
+                    //     "pin" => "sandbox",
+                    //     "amount" => $order->price,
+                    //     "callback" => "https://pashmak-titab.store/api/client/payment/callback",
+                    // ]);
+                    // $dd = json_decode($res->body());
+                    // $transid = $dd->transid;
+                    $inlineKeyboard = [
                         [
-                            'text' => 'درگاه پرداخت',
-                            'url' => route('payment.generate', ['order' => $order->id, 'id' => $transid])
+                            [
+                                'text' => '💰 کیف پول',
+                                'callback_data' => "purchase_wallet"
+                            ],
                         ],
-                    ],
-                ];
-                $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
-                $user->update([
-                    'section' => Keyboards::PURCHASE_SERVICE,
-                    'step' => 5
-                ]);
-                Telegram::sendMessage([
-                    'text' => $message,
-                    "chat_id" => $sender->id,
-                    'reply_markup' => $encodedKeyboard,
-                ]);
-            } else if ($user->step == "1" && $user->section == Keyboards::CHARGE) {
-                $amount = $update->getMessage()->text;
-                $wallet_trans = WalletTransaction::updateOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'user_id' => $user->id,
-                        'amount' => $amount,
-                        'status' => "pending"
-                    ]
-                );
-                $keyboard = [
-                    [
-                        ['text' => 'درگاه پرداخت', 'callback_data' => 'online_purchase'],
-                    ],
+                    ];
+                    $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                    $user->update([
+                        'section' => Keyboards::PURCHASE_SERVICE,
+                        'step' => 5
+                    ]);
+                    Telegram::sendMessage([
+                        'text' => $message,
+                        "chat_id" => $sender->id,
+                        'reply_markup' => $encodedKeyboard,
+                    ]);
+                } else {
+                    Telegram::sendMessage([
+                        'text' => "ظرفیت سرور موردنظر تکمیل شده و یا در دسترس نمی باشد",
+                        "chat_id" => $sender->id,
+                        // 'reply_markup' => $encodedKeyboard,
+                    ]);
+                    return true;
+                }
+            } else if ($user->step == "2" && $user->section == Keyboards::CHARGE) {
 
-                ];
-                $keyboardMarkup = [
-                    'inline_keyboard' => $keyboard,
-                ];
-                $replyMarkup = json_encode($keyboardMarkup);
+                $wallet_trans = WalletTransaction::query()->where('user_id', $user->id)->first();
+                $payment_method = PaymentMethod::query()->where('type', $wallet_trans->method)->first();
+                if ($wallet_trans->method == "card") {
+                    $amount = $update->getMessage()->text;
+                    $wallet_trans->update(["amount" => $amount]);
+                    $wallet_amount = $wallet_trans->amount;
+                    $payment = Payment::query()->create([
+                        "paymentable_type" => User::class,
+                        "paymentable_id" => $user->id,
+                        "user_id" => $user->id,
+                        "payment_method_id" => $payment_method->id,
+                        "amount" => $wallet_amount,
+                        "status" => "pending",
+                    ]);
+                    Telegram::sendMessage([
+                        'text' => "🔄 در حال ساخت فاکتور شما . . .",
+                        "chat_id" => $sender->id,
+                    ]);
+                    $card_num = "6037787898981212";
+                    $card_name = "بایدن عباسی";
+                    $invoise_code = $payment->reference_code;
+                    $newMessageText = "📣 *فاکتور شما با موفقیت ساخته شد*\n\n" .
+                        "💎 * شماره فاکتور:* `$invoise_code`\n" .
+                        "💳 * مبلغ قابل پرداخت:* `$wallet_amount` " . "تومان\n" .
+                        "🔢 * شماره کارت :* `$card_num` * $card_name *\n" .
+                        "👇🏻مبلغ مورد نظر را به شماره کارت بالا واریز کنید و سپس رسید  خود را در همین قسمت ارسال کنید ";
 
+                    Telegram::sendMessage([
+                        "chat_id" => $sender->id,
+                        'text' => $newMessageText,
+                        'parse_mode' => 'MarkdownV2',
+                    ]);
+                    return true;
+                } else if ($wallet_trans->method == "voucher") {
+                    $ev_number = $update->getMessage()->text;
+                    if (strlen($ev_number) === 10) {
+                        Telegram::sendMessage([
+                            'text' => "✅ کد فعالسازی ووچر را ارسال نمایید:",
+                            "chat_id" => $sender->id,
+                        ]);
+                        VoucherTransaction::query()->where('user_id', $user->id)->delete();
+                        VoucherTransaction::query()->create([
+                            'user_id' => $user->id,
+                            "ev_number" => $ev_number,
+                            "status" => "pending"
+                        ]);
+                        $user->update([
+                            'section' => Keyboards::CHARGE,
+                            'step' => 3
+                        ]);
+                        return true;
+                    } else {
+                        Telegram::sendMessage([
+                            'text' => "⛔️ کد ووچر الکترونیکی یک کد ۱۰ رقمی است.",
+                            "chat_id" => $sender->id,
+                        ]);
+                        return true;
+                    }
+                }
+            } else if ($user->step == "3" && $user->section == Keyboards::CHARGE) {
+                $wallet_trans = WalletTransaction::query()->where('user_id', $user->id)->first();
+                if ($wallet_trans->method == "card") {
+                    if (isset($update->getMessage()->photo) && $update->getMessage()->photo) {
+                        if (!is_null($wallet_trans) && $wallet_trans->method == "card") {
+                            Telegram::sendMessage([
+                                "chat_id" => $sender->id,
+                                'text' => "✅ فیش ارسالی شما با موفقیت به مدیریت ارسال شد پس از برسی حساب شما به صورت خودکار شارژ خواهد شد !",
+                            ]);
+                            return true;
+                        }
+                    } else {
+                        Telegram::sendMessage([
+                            "chat_id" => $sender->id,
+                            'text' => "❌ ورودی فقط باید عکس باشد !",
+                        ]);
+                        return true;
+                    }
+                } else if ($wallet_trans->method == "voucher") {
+                    $ev_code = $update->getMessage()->text;
+                    if (strlen($ev_code) === 16) {
+                        $voucher_transaction = VoucherTransaction::query()->where('user_id', $user->id)->first();
+                        $voucher_transaction->update([
+                            "ev_code" => $ev_code
+                        ]);
+                        try {
+                            $res = Http::asForm()->post("https://perfectmoney.com/acct/ev_activate.asp", [
+                                "AccountID" => "63150797",
+                                "PassPhrase" => "amir3090@A",
+                                "Payee_Account" => "U45963880",
+                                "ev_number" => $voucher_transaction->ev_number,
+                                "ev_code" => $ev_code,
+                            ]);
+                            $html = $res->body();
+                            $dom = new DOMDocument();
+                            libxml_use_internal_errors(true);
+                            $dom->loadHTML($html);
+                            libxml_clear_errors();
+                            $xpath = new DOMXPath($dom);
+                            $error_node = $xpath->query('//input[@name="ERROR"]')->item(0);
+                            $voucher_amount_node = $xpath->query('//input[@name="VOUCHER_AMOUNT"]')->item(0);
+                            $voucher_amount_currency_node = $xpath->query('//input[@name="VOUCHER_AMOUNT_CURRENCY"]')->item(0);
+                            if (!is_null($error_node)) {
+                                Telegram::sendMessage([
+                                    'text' => $error_node->getAttribute('value'),
+                                    "chat_id" => $sender->id,
+                                ]);
+                                return true;
+                            }
+                            if (!is_null($voucher_amount_node)) {
+                                $voucher_amount = $voucher_amount_node->getAttribute('value');
+                                $voucher_amount_currency = $voucher_amount_currency_node->getAttribute('value');
+                                $dollar_price = 51000;
+                                $wallet_amount = $voucher_amount * $dollar_price;
 
-                $message = "💵 *یکی از روش های پرداخت زیر را جهت شارژ حساب خود انتخاب کنید :*\n\n" .
-                    "🔢 * مبلغ:* `$amount` "  . "تومان\n";
-                Telegram::sendMessage([
-                    'text' => $message,
-                    "chat_id" => $sender->id,
-                    'parse_mode' => 'MarkdownV2',
-                    'reply_markup' => $replyMarkup,
+                                $payment_method = PaymentMethod::query()->where('type', "voucher")->first();
+                                $payment = Payment::query()->create([
+                                    "paymentable_type" => User::class,
+                                    "paymentable_id" => $user->id,
+                                    "user_id" => $user->id,
+                                    "payment_method_id" => $payment_method->id,
+                                    "amount" => $wallet_amount,
+                                    "status" => "success",
+                                ]);
+                                $user->increment("wallet", $wallet_amount);
+                                $reference_code = $payment->reference_code;
+                                $wallet_amount =  number_format($wallet_amount);
+                                $newMessageText = "✅ پرداخت موفق\n\n" .
+                                    "📮 شناسه سفارش: $reference_code\n" .
+                                    "💰مبلغ $voucher_amount دلار معادل $wallet_amount تومان به حساب شما افزوده شد \n";
 
-                ]);
+                                Telegram::sendMessage([
+                                    "chat_id" => $sender->id,
+                                    'text' => $newMessageText,
+                                    // 'parse_mode' => 'MarkdownV2',
+                                ]);
+                                return true;
+                            } else {
+                                Telegram::sendMessage([
+                                    'text' => "⛔️ کد ووچر یا کد فعالسازی نامعتبر است",
+                                    "chat_id" => $sender->id,
+                                ]);
+                                return true;
+                            }
+                        } catch (\Throwable $th) {
+                            Telegram::sendMessage([
+                                'text' => $th->getMessage(),
+                                "chat_id" => $sender->id,
+                            ]);
+                        }
+                    } else {
+                        Telegram::sendMessage([
+                            'text' => "⛔️ کد فعالسازی ووچر یک کد ۱۶ رقمی است.",
+                            "chat_id" => $sender->id,
+                        ]);
+                        return true;
+                    }
+                }
             } else if (in_array($update->getMessage()->text, $platforms)) {
                 $selected_platform = GuidePlatform::query()->where('name', $update->getMessage()->text)->first();
                 $clients = GuidePlatformClient::query()->where('guide_platform_id', $selected_platform->id)->get();

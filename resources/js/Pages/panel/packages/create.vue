@@ -10,7 +10,7 @@
                 @submit.prevent="handleCreate"
             >
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12">
+                    <div class="col-span-6">
                         <v-text-field
                             v-model="form.name"
                             :rules="rules"
@@ -20,17 +20,19 @@
                             variant="solo"
                         ></v-text-field>
                     </div>
-                    <!-- <div class="col-span-6">
+
+                    <div class="col-span-6">
                         <v-text-field
                             type="number"
-                            v-model="form.price"
-                            :rules="rules"
-                            label="قیمت"
+                            v-model="form.value"
+                            label="مقدار"
                             density="compact"
                             single-line
+                            persistent-hint
                             variant="solo"
+                            hint="مقدار 0 به معنی بی نهایت می باشد"
                         ></v-text-field>
-                    </div> -->
+                    </div>
                     <div class="col-span-12">
                         <v-radio-group v-model="form.is_active">
                             <template v-slot:label>
@@ -67,6 +69,7 @@ const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
     name: null,
+    value: 0,
     is_active: "active",
 });
 const visible_success_message = ref(false);
@@ -84,7 +87,7 @@ const handleCreate = async (event) => {
         loading.value = true;
         const form_data = new FormData();
         form_data.append("name", form.value.name);
-        // form_data.append("price", form.value.price);
+        form_data.append("value", form.value.value);
         form_data.append("is_active", form.value.is_active);
         const { data } = await ApiService.post(
             `/api/panel/packages`,

@@ -17,14 +17,55 @@
                         <h2 class="text-xl">ویرایش سرور</h2>
                     </div>
                     <Form ref="formRef" @submit="handleUpdate">
-                        <v-text-field
-                            v-model="form.name"
-                            :rules="rules"
-                            label="نام"
-                            density="compact"
-                            single-line
-                            variant="solo"
-                        ></v-text-field>
+                        <div class="grid grid-cols-12 gap-2">
+                            <div class="col-span-12">
+                                <v-text-field
+                                    v-model="form.name"
+                                    :rules="rules"
+                                    label="نام"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    v-model="form.username"
+                                    label="نام کاربری سرور"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    v-model="form.password"
+                                    label=" رمز عبور سرور"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    v-model="form.address"
+                                    label="آدرس سرور"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    v-model="form.inbound"
+                                    label="inbound id"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                        </div>
+
                         <v-radio-group v-model="form.is_active">
                             <template v-slot:label>
                                 <div>وضعیت</div>
@@ -70,6 +111,10 @@ const formRef = ref(null);
 import { ErrorMessage, Field, Form } from "vee-validate";
 const form = ref({
     name: null,
+    username: null,
+    password: null,
+    address: null,
+    inbound: null,
     is_active: false,
     is_default: false,
 });
@@ -86,6 +131,10 @@ const handleUpdate = async (event) => {
     loading.value = true;
     const form_data = new FormData();
     form_data.append("name", form.value.name);
+    form_data.append("username", form.value.username);
+    form_data.append("password", form.value.password);
+    form_data.append("address", form.value.address);
+    form_data.append("inbound", form.value.inbound);
     form_data.append("is_active", form.value.is_active);
     form_data.append("is_default", form.value.is_default);
     const { data } = await ApiService.put(
@@ -103,6 +152,10 @@ const fetchData = async () => {
         `/api/panel/servers/${route.params.id}`
     );
     form.value.name = data.data.name;
+    form.value.username = data.data.username;
+    form.value.password = data.data.password;
+    form.value.address = data.data.address;
+    form.value.inbound = data.data.inbound;
     form.value.is_active = data.data.is_active.toString();
     form.value.is_default = data.data.is_default.toString();
     loader.value = false;

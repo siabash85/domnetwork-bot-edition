@@ -17,14 +17,30 @@
                         <h2 class="text-xl">ویرایش پکیج</h2>
                     </div>
                     <Form ref="formRef" @submit="handleUpdate">
-                        <v-text-field
-                            v-model="form.name"
-                            :rules="rules"
-                            label="نام"
-                            density="compact"
-                            single-line
-                            variant="solo"
-                        ></v-text-field>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    v-model="form.name"
+                                    :rules="rules"
+                                    label="نام"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-6">
+                                <v-text-field
+                                    type="number"
+                                    v-model="form.value"
+                                    label="مقدار"
+                                    density="compact"
+                                    single-line
+                                    persistent-hint
+                                    variant="solo"
+                                    hint="مقدار 0 به معنی بی نهایت می باشد"
+                                ></v-text-field>
+                            </div>
+                        </div>
 
                         <v-radio-group v-model="form.is_active">
                             <template v-slot:label>
@@ -81,6 +97,7 @@ const handleUpdate = async (event) => {
         loading.value = true;
         const form_data = new FormData();
         form_data.append("name", form.value.name);
+        form_data.append("value", form.value.value);
         form_data.append("is_active", form.value.is_active);
         const { data } = await ApiService.put(
             `/api/panel/packages/${route.params.id}`,
@@ -98,6 +115,7 @@ const fetchData = async () => {
         `/api/panel/packages/${route.params.id}`
     );
     form.value.name = data.data.name;
+    form.value.value = data.data.value;
     form.value.is_active = data.data.is_active.toString();
 
     loader.value = false;

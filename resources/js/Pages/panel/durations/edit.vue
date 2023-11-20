@@ -17,16 +17,32 @@
                         <h2 class="text-xl">ویرایش بازه زمانی</h2>
                     </div>
                     <Form ref="formRef" @submit="handleUpdate">
-                        <v-text-field
-                            type="number"
-                            v-model="form.name"
-                            :rules="rules"
-                            label="روز به عدد"
-                            density="compact"
-                            single-line
-                            variant="solo"
-                            hint="بازه زمانی را تعداد روز وارد کنید"
-                        ></v-text-field>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-6">
+                                <v-text-field
+                                    type="number"
+                                    v-model="form.name"
+                                    :rules="rules"
+                                    label="روز به عدد"
+                                    density="compact"
+                                    single-line
+                                    variant="solo"
+                                    hint="بازه زمانی را تعداد روز وارد کنید"
+                                ></v-text-field>
+                            </div>
+                            <div class="col-span-6">
+                                <v-text-field
+                                    type="number"
+                                    v-model="form.value"
+                                    label="مقدار"
+                                    density="compact"
+                                    single-line
+                                    persistent-hint
+                                    variant="solo"
+                                    hint="مقدار 0 به معنی بی نهایت می باشد"
+                                ></v-text-field>
+                            </div>
+                        </div>
 
                         <v-btn
                             :loading="loading"
@@ -59,6 +75,7 @@ const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
     name: null,
+    value: null,
 });
 const visible_success_message = ref(false);
 const rules = ref([
@@ -75,7 +92,7 @@ const handleUpdate = async (event) => {
         loading.value = true;
         const form_data = new FormData();
         form_data.append("name", form.value.name);
-
+        form_data.append("value", form.value.value);
         const { data } = await ApiService.put(
             `/api/panel/package/durations/${route.params.id}`,
             form_data
@@ -92,6 +109,7 @@ const fetchData = async () => {
         `/api/panel/package/durations/${route.params.id}`
     );
     form.value.name = data.data.name;
+    form.value.value = data.data.value;
     loader.value = false;
 };
 

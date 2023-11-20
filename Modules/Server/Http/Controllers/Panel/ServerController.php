@@ -29,6 +29,10 @@ class ServerController extends ApiController
     {
         $server =  Server::query()->create([
             'name' => $request->name,
+            'username' => $request->username,
+            'password' => $request->password,
+            'address' => $request->address,
+            'inbound' => $request->inbound,
             'is_active' => $request->is_active,
             'is_default' => $request->is_default,
             'stock' => $request->stock,
@@ -58,6 +62,10 @@ class ServerController extends ApiController
         $server = Server::query()->find($id);
         $server->update([
             'name' => $request->name,
+            'username' => $request->username,
+            'password' => $request->password,
+            'address' => $request->address,
+            'inbound' => $request->inbound,
             'is_active' => $request->is_active,
             'is_default' => $request->is_default,
             'stock' => $request->stock,

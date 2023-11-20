@@ -13,6 +13,7 @@ class WalletTransaction extends Model
         'user_id',
         'amount',
         'status',
+        'method'
     ];
 
     public function user()

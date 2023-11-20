@@ -14,7 +14,10 @@ class Server extends Model
         'stock',
         'is_active',
         'is_default',
-
+        'username',
+        'password',
+        'address',
+        'inbound',
     ];
 
     // protected static function newFactory()

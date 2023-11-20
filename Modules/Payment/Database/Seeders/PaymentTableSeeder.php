@@ -20,14 +20,14 @@ class PaymentTableSeeder extends Seeder
                 "title" => "درگاه پرداخت",
                 "description" => "پرداخت اینترنتی",
                 "type" => "online",
-                "status" => "active",
+                "status" => "inactive",
                 "is_default" => true,
             ],
             [
                 "title" => "کارت به کارت",
                 "description" => "پرداخت با کارت بانکی",
                 "type" => "card",
-                "status" => "inactive",
+                "status" => "active",
                 "is_default" => false,
             ],
             [
@@ -41,7 +41,7 @@ class PaymentTableSeeder extends Seeder
                 "title" => "🎁 ووچر",
                 "description" => "پرداخت با  ووچر",
                 "type" => "voucher",
-                "status" => "inactive",
+                "status" => "active",
                 "is_default" => false,
             ],
 

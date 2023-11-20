@@ -29,6 +29,7 @@ class PackageDurationController extends ApiController
     {
         $server =  PackageDuration::query()->create([
             'name' => $request->name,
+            'value' => $request->value,
         ]);
         return $this->successResponse($server, "ایجاد  با موفقیت انجام شد");
     }
@@ -55,6 +56,7 @@ class PackageDurationController extends ApiController
         $server = PackageDuration::query()->find($id);
         $server->update([
             'name' => $request->name,
+            'value' => $request->value,
         ]);
         return $this->successResponse($server, "ویرایش  با موفقیت انجام شد");
     }
