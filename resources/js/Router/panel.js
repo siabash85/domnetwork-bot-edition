@@ -180,5 +180,17 @@ export default {
             component: () => import("@/Pages/panel/settings/variables.vue"),
         },
 
+        // orders
+        {
+            path: "orders",
+            name: "panel-orders-index",
+            component: () => import("@/Pages/panel/orders/index.vue"),
+        },
+        {
+            path: "orders/edit/:id",
+            name: "panel-orders-edit",
+            component: () => import("@/Pages/panel/orders/edit.vue"),
+        },
+
     ],
 };

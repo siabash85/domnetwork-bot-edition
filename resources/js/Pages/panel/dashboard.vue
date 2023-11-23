@@ -62,7 +62,7 @@
 
                             <v-card-actions>
                                 <v-btn :to="{ name: 'panel-payments-index' }"
-                                    >مشاهده سفارشات
+                                    >مشاهده تراکنش ها
                                 </v-btn>
                             </v-card-actions>
                         </v-card>

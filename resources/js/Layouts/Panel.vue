@@ -57,6 +57,12 @@
                     :to="{ name: 'panel-services-index' }"
                 ></v-list-item>
                 <v-list-item
+                    prepend-icon="mdi-basket-outline"
+                    title=" مدیریت سفارشات "
+                    value="orders"
+                    :to="{ name: 'panel-orders-index' }"
+                ></v-list-item>
+                <v-list-item
                     prepend-icon="mdi-credit-card-outline"
                     title=" مدیریت تراکنش ها"
                     value="payments"

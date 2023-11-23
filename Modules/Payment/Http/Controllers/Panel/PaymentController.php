@@ -54,6 +54,10 @@ class PaymentController extends ApiController
         $user = $payment->user;
         if ($payment->status == "pending_confirmation" && $request->status == "success") {
             $user->increment("wallet", $payment->amount);
+            Telegram::sendMessage([
+                'text' => "✅ کیف پول شما به مقدار {$payment->amount} تومان شارژ شد",
+                "chat_id" => $user->uid,
+            ]);
         }
         $payment->update([
             'status' => $request->status,

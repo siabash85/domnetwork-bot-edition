@@ -136,6 +136,11 @@ class WebhookController extends Controller
                         // 'reply_markup' => $encodedMarkup,
                     ]);
                 } else {
+                    Telegram::sendMessage([
+                        'text' => "🔄 در حال ساخت سرویس شما . . .",
+                        "chat_id" => $sender->id,
+                    ]);
+
                     $sub_code = random_int(1000000, 10000000);
                     $rand_code = Str::random(8);
                     $subscription = Subscription::query()->create([
