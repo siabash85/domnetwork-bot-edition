@@ -2,10 +2,18 @@
 
 namespace Modules\Payment\Http\Controllers\Panel;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\Common\Http\Controllers\Api\ApiController;
+use Modules\User\Entities\User;
+use Modules\Order\Entities\Order;
+use Illuminate\Support\Facades\Http;
+use Modules\Order\Entities\PreOrder;
 use Modules\Payment\Entities\Payment;
+use Modules\Server\Entities\Subscription;
+use App\Telegram\Keyboard\KeyboardHandler;
+use Telegram\Bot\Laravel\Facades\Telegram;
+use Modules\Common\Http\Controllers\Api\ApiController;
 use Modules\Server\Transformers\Panel\PaymentResource;
 
 class PaymentController extends ApiController
@@ -43,6 +51,10 @@ class PaymentController extends ApiController
     public function update(Request $request, $id)
     {
         $payment = Payment::query()->find($id);
+        $user = $payment->user;
+        if ($payment->status == "pending_confirmation" && $request->status == "success") {
+            $user->increment("wallet", $payment->amount);
+        }
         $payment->update([
             'status' => $request->status,
         ]);

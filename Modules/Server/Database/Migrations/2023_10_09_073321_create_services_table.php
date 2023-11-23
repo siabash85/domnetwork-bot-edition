@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreignId("package_duration_id")->constrained("package_durations")->cascadeOnDelete();
             $table->foreignId("package_id")->constrained("packages")->cascadeOnDelete();
             $table->decimal('price', $precision = 64, $scale = 4)->default(0);
-            $table->text("link")->nullable();
             $table->string("status");
             $table->timestamps();
         });

@@ -20,6 +20,7 @@ class Payment extends Model
         "reference_code",
         "amount",
         "status",
+        "receipt"
 
     ];
 

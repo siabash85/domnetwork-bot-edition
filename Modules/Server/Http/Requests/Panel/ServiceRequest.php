@@ -19,7 +19,7 @@ class ServiceRequest extends FormRequest
             "package_id" => ['required'],
             "status" => ['required'],
             "price" => ['required'],
-            "link" => ['required'],
+
         ];
     }
 

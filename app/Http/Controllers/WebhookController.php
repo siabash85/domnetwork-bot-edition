@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use DOMXPath;
+use DOMDocument;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Modules\User\Entities\User;
@@ -12,22 +14,21 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Modules\Order\Entities\PreOrder;
 use Modules\Server\Entities\Package;
+use Modules\Server\Entities\Pricing;
 use Modules\Server\Entities\Service;
 use Modules\Payment\Entities\Payment;
-use App\Telegram\Keyboard\KeyboardHandler;
-use DOMDocument;
-use DOMXPath;
+use Telegram\Bot\FileUpload\InputFile;
+use Illuminate\Support\Facades\Storage;
 use Modules\Guide\Entities\GuidePlatform;
-use Modules\Guide\Entities\GuidePlatformClient;
+use Modules\Server\Entities\Subscription;
+use App\Telegram\Keyboard\KeyboardHandler;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
-use Modules\Server\Entities\Pricing;
-use Modules\Server\Entities\Subscription;
 use Modules\Support\Entities\SupportMessage;
-use Modules\User\Entities\VoucherTransaction;
 use Modules\User\Entities\WalletTransaction;
-use Telegram\Bot\FileUpload\InputFile;
+use Modules\User\Entities\VoucherTransaction;
+use Modules\Guide\Entities\GuidePlatformClient;
 
 class WebhookController extends Controller
 {
@@ -135,7 +136,6 @@ class WebhookController extends Controller
                         // 'reply_markup' => $encodedMarkup,
                     ]);
                 } else {
-
                     $sub_code = random_int(1000000, 10000000);
                     $rand_code = Str::random(8);
                     $subscription = Subscription::query()->create([
@@ -150,10 +150,7 @@ class WebhookController extends Controller
                         'subId' => Str::random(16)
                     ]);
                     $server_address = $order->service->server->address;
-
-                    // $order->update(["status" => "success"]);
-
-
+                    $order->update(["status" => "success"]);
                     $user->decrement("wallet", $order->payable_price);
                     $res = Http::post("$server_address/login", [
                         "username" => $order->service->server->username,
@@ -182,16 +179,12 @@ class WebhookController extends Controller
                         ]
                     ];
                     $server_inbound_id = $order->service->server->inbound;
-
-
-
                     $response = Http::withHeaders([
                         'Cookie' => $cookiesString,
                     ])->post("$server_address/panel/inbound/addClient", [
                         "id" => intval($server_inbound_id),
                         "settings" => json_encode($settings)
                     ]);
-
                     try {
 
                         $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
@@ -646,7 +639,7 @@ class WebhookController extends Controller
                         "paymentable_id" => $user->id,
                         "user_id" => $user->id,
                         "payment_method_id" => $payment_method->id,
-                        "amount" => $wallet_amount,
+                        "amount" => $amount,
                         "status" => "pending",
                     ]);
                     Telegram::sendMessage([
@@ -661,6 +654,10 @@ class WebhookController extends Controller
                         "💳 * مبلغ قابل پرداخت:* `$wallet_amount` " . "تومان\n" .
                         "🔢 * شماره کارت :* `$card_num` * $card_name *\n" .
                         "👇🏻مبلغ مورد نظر را به شماره کارت بالا واریز کنید و سپس رسید  خود را در همین قسمت ارسال کنید ";
+                    $user->update([
+                        'section' => Keyboards::CHARGE,
+                        'step' => 3
+                    ]);
 
                     Telegram::sendMessage([
                         "chat_id" => $sender->id,
@@ -699,6 +696,14 @@ class WebhookController extends Controller
                 if ($wallet_trans->method == "card") {
                     if (isset($update->getMessage()->photo) && $update->getMessage()->photo) {
                         if (!is_null($wallet_trans) && $wallet_trans->method == "card") {
+                            $dd = Telegram::getFile(['file_id' => $update->getMessage()->photo[2]->file_id]);
+                            $filePath = $dd->getFilePath();
+                            $token = getenv("TELEGRAM_BOT_TOKEN");
+                            $contents = file_get_contents('https://api.telegram.org/file/bot' . $token . '/' . $filePath);
+                            $storagePath = 'receipts/';
+                            Storage::put("public/" . $storagePath . $filePath, $contents, 'public');
+                            $latest_payment = Payment::query()->where('user_id', $user->id)->latest()->first();
+                            $latest_payment->update(['receipt' => asset('storage/' . $storagePath . $filePath), 'status' => "pending_confirmation"]);
                             Telegram::sendMessage([
                                 "chat_id" => $sender->id,
                                 'text' => "✅ فیش ارسالی شما با موفقیت به مدیریت ارسال شد پس از برسی حساب شما به صورت خودکار شارژ خواهد شد !",
@@ -824,17 +829,22 @@ class WebhookController extends Controller
             } else if (in_array($update->getMessage()->text, $platform_clients)) {
                 $selected_client = GuidePlatformClient::query()->where('name', $update->getMessage()->text)->first();
                 $platform = $selected_client->guide_platform->name;
-                $markdownText = "📚 آموزش اتصال در $platform با $selected_client->name\n📌 [لینک دانلود نرم افزارهای استفاده شده در این آموزش: $selected_client->name]($selected_client->link)";
+                $video_path = asset($selected_client->video);
+                $markdownText = "لینک آموزش  برنامه استفاده شده : [$selected_client->name]($video_path)\n\n" .
+                    "📚 آموزش اتصال در $platform با $selected_client->name\n📌 [لینک دانلود نرم افزارهای استفاده شده در این آموزش: $selected_client->name]($selected_client->link)";
+                // Telegram::sendVideo([
+                //     "chat_id" => $sender->id,
+                //     "video" => InputFile::create(public_path($selected_client->video)),
+                //     'parse_mode' => 'MarkdownV2',
+                //     'caption' => $markdownText,
+                //     'width' => 1280,
+                //     'height' => 720,
 
-
-                Telegram::sendVideo([
-                    "chat_id" => $sender->id,
-                    "video" => InputFile::create(public_path($selected_client->video)),
+                // ]);
+                Telegram::sendMessage([
+                    'text' => $markdownText,
+                    'chat_id' => $sender->id,
                     'parse_mode' => 'MarkdownV2',
-                    'caption' => $markdownText,
-                    'width' => 1280,
-                    'height' => 720,
-
                 ]);
                 $user->update([
                     'section' => Keyboards::GUIDE,

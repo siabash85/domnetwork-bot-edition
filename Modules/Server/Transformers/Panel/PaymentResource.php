@@ -21,6 +21,7 @@ class PaymentResource extends JsonResource
             'reference_code' => $this->reference_code,
             'amount' => round($this->amount),
             'status' => $this->status,
+            'receipt' => $this->receipt,
             'created_at' =>  formatGregorian($this->created_at),
         ];
     }

@@ -126,28 +126,6 @@
                                     <ErrorMessage name="price" />
                                 </div>
                             </div>
-                            <div class="col-span-12">
-                                <Field
-                                    mode="passive"
-                                    name="link"
-                                    v-slot="{ field }"
-                                    rules="required"
-                                    label=" لینک"
-                                >
-                                    <v-textarea
-                                        v-model="form.link"
-                                        label="لینک کانفیگ"
-                                        single-line
-                                        variant="solo-filled"
-                                        size="large"
-                                        v-bind="field"
-                                        hide-details="auto"
-                                    ></v-textarea>
-                                </Field>
-                                <div class="invalid-feedback d-block">
-                                    <ErrorMessage name="link" />
-                                </div>
-                            </div>
                         </div>
 
                         <v-btn
@@ -184,7 +162,6 @@ const form = ref({
     package_id: null,
     status: "active",
     price: null,
-    link: null,
 });
 const visible_success_message = ref(false);
 
@@ -207,7 +184,7 @@ const handleUpdate = async (event) => {
         form_data.append("package_id", form.value.package_id);
         form_data.append("status", form.value.status);
         form_data.append("price", form.value.price);
-        form_data.append("link", form.value.link);
+
         const { data } = await ApiService.put(
             `/api/panel/services/${route.params.id}`,
             form_data
@@ -237,7 +214,7 @@ const fetchData = async () => {
     form.value.package_id = data.data.package?.id;
     form.value.status = data.data.status;
     form.value.price = data.data.price;
-    form.value.link = data.data.link;
+
     loader.value = false;
 };
 

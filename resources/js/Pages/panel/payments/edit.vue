@@ -105,6 +105,21 @@
                             </div>
                         </div>
 
+                        <div class="col-span-12">
+                            <div class="mb-6">
+                                <h2 class="text-xl">رسید پرداخت</h2>
+                            </div>
+
+                            <div>
+                                <img
+                                    @click="OpenReceipt"
+                                    class="w-[200px] h-[200px] cursor-pointer"
+                                    :src="form?.receipt"
+                                    alt=""
+                                />
+                            </div>
+                        </div>
+
                         <v-btn
                             :loading="loading"
                             color="light-blue-accent-4"
@@ -121,6 +136,35 @@
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
             تراکنش با موفقیت ویرایش شد.
         </v-snackbar>
+
+        <v-dialog
+            v-model="visible_receipt"
+            transition="dialog-bottom-transition"
+            width="auto"
+        >
+            <template v-slot:default="{ isActive }">
+                <v-card>
+                    <v-toolbar
+                        color="primary"
+                        title="تایید رسید پرداخت"
+                    ></v-toolbar>
+                    <v-card-text>
+                        <div>
+                            <img
+                                class="w-[400px] h-[400px]"
+                                :src="form?.receipt"
+                                alt=""
+                            />
+                        </div>
+                    </v-card-text>
+                    <v-card-actions class="justify-end">
+                        <v-btn variant="text" @click="isActive.value = false"
+                            >تایید</v-btn
+                        >
+                    </v-card-actions>
+                </v-card>
+            </template>
+        </v-dialog>
     </div>
 </template>
 
@@ -141,6 +185,7 @@ const form = ref({
     amount: null,
     created_at: null,
 });
+const visible_receipt = ref(false);
 const visible_success_message = ref(false);
 
 const servers = ref([]);
@@ -150,6 +195,7 @@ const statuses = ref([
     { state: "در انتظار پرداخت", value: "pending" },
     { state: "پرداخت شده", value: "success" },
     { state: "لغو شده", value: "rejected" },
+    { state: "در انتظار تایید رسید پرداخت", value: "pending_confirmation" },
 ]);
 const router = useRouter();
 const route = useRoute();
@@ -168,6 +214,9 @@ const handleUpdate = async (event) => {
             router.push({ name: "panel-payments-index" });
         }
     }
+};
+const OpenReceipt = () => {
+    visible_receipt.value = true;
 };
 
 const fetchData = async () => {

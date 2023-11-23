@@ -83,6 +83,19 @@
                                             لغو شده
                                         </v-chip>
                                     </template>
+                                    <template
+                                        v-if="
+                                            item.status ==
+                                            'pending_confirmation'
+                                        "
+                                    >
+                                        <v-chip
+                                            color="warning"
+                                            text-color="white"
+                                        >
+                                            در انتظار تایید رسید پرداخت
+                                        </v-chip>
+                                    </template>
                                 </div>
                             </td>
                             <td>

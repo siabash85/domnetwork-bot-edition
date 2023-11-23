@@ -16,8 +16,6 @@ class Service extends Model
         "package_id",
         "status",
         "price",
-        "link",
-
     ];
 
 

@@ -35,7 +35,6 @@ class ServiceController extends ApiController
             'package_id' => $request->package_id,
             'status' => $request->status,
             'price' => $request->price,
-            'link' => $request->link,
         ]);
         return $this->successResponse($services, "ایجاد  با موفقیت انجام شد");
     }
@@ -67,7 +66,6 @@ class ServiceController extends ApiController
             'package_id' => $request->package_id,
             'status' => $request->status,
             'price' => $request->price,
-            'link' => $request->link,
         ]);
         return $this->successResponse($services, "ویرایش  با موفقیت انجام شد");
     }
