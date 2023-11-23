@@ -69,6 +69,12 @@
                     :to="{ name: 'panel-payments-index' }"
                 ></v-list-item>
                 <v-list-item
+                    prepend-icon="mdi-account-star"
+                    title=" مدیریت اشتراک ها "
+                    value="subscriptions"
+                    :to="{ name: 'panel-subscriptions-index' }"
+                ></v-list-item>
+                <v-list-item
                     prepend-icon="mdi-connection"
                     title="راهنمای اتصال"
                     value="platforms"

@@ -192,5 +192,17 @@ export default {
             component: () => import("@/Pages/panel/orders/edit.vue"),
         },
 
+        // subscriptions
+        {
+            path: "subscriptions",
+            name: "panel-subscriptions-index",
+            component: () => import("@/Pages/panel/subscriptions/index.vue"),
+        },
+        {
+            path: "subscriptions/edit/:id",
+            name: "panel-subscriptions-edit",
+            component: () => import("@/Pages/panel/subscriptions/edit.vue"),
+        },
+
     ],
 };

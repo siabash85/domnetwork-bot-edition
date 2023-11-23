@@ -196,7 +196,6 @@ class WebhookController extends Controller
                         $inbound_res = json_decode($inbound->body());
                         $inbound_obj = $inbound_res->obj;
                         $network = json_decode($inbound_obj->streamSettings)->network;
-
                         $inbound_port = $inbound_obj->port;
                         $inbound_remark = $inbound_obj->remark;
                         if ($response->successful()) {
@@ -759,7 +758,7 @@ class WebhookController extends Controller
                             if (!is_null($voucher_amount_node)) {
                                 $voucher_amount = $voucher_amount_node->getAttribute('value');
                                 $voucher_amount_currency = $voucher_amount_currency_node->getAttribute('value');
-                                $dollar_price = 51000;
+                                $dollar_price = intval(settingRepo()->get("usd_amount"));
                                 $wallet_amount = $voucher_amount * $dollar_price;
 
                                 $payment_method = PaymentMethod::query()->where('type', "voucher")->first();

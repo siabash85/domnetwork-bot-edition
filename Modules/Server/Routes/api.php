@@ -7,6 +7,7 @@ use Modules\Server\Http\Controllers\Panel\PackageDurationController;
 use Modules\Server\Http\Controllers\Panel\PricingController;
 use Modules\Server\Http\Controllers\Panel\ServerController;
 use Modules\Server\Http\Controllers\Panel\ServiceController;
+use Modules\Server\Http\Controllers\Panel\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +26,5 @@ Route::prefix('/panel')->group(function () {
     Route::apiResource("packages", PackageController::class);
     Route::apiResource("services", ServiceController::class);
     Route::apiResource("pricing", PricingController::class);
+    Route::apiResource("subscriptions", SubscriptionController::class);
 });

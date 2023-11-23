@@ -161,6 +161,26 @@
                                     <ErrorMessage name="voucher_link" />
                                 </div>
                             </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <Field
+                                    mode="passive"
+                                    name="usd_amount"
+                                    v-slot="{ field }"
+                                    label="قیمت دلار"
+                                >
+                                    <v-text-field
+                                        v-model="form.usd_amount"
+                                        label="قیمت دلار"
+                                        variant="solo-filled"
+                                        size="large"
+                                        v-bind="field"
+                                        hide-details="auto"
+                                    ></v-text-field>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="usd_amount" />
+                                </div>
+                            </div>
                         </div>
 
                         <v-btn
@@ -199,6 +219,7 @@ const form = ref({
     voucher_account_id: null,
     voucher_payee_account: null,
     voucher_pass: null,
+    usd_amount: null,
 });
 const visible_success_message = ref(false);
 const router = useRouter();
@@ -207,6 +228,7 @@ const handleUpdate = async (event) => {
     if (valid) {
         loading.value = true;
         const form_data = new FormData();
+        form_data.append("usd_amount", form.value.usd_amount ?? "");
         form_data.append("card_number", form.value.card_number ?? "");
         form_data.append("card_name", form.value.card_name ?? "");
         form_data.append("voucher_link", form.value.voucher_link ?? "");

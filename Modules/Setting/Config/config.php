@@ -9,5 +9,6 @@ return [
         'voucher_account_id',
         'voucher_payee_account',
         'voucher_pass',
+        'usd_amount'
     ],
 ];
