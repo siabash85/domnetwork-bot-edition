@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
             ], [
                 'value' => $obj->usd->value
             ]);
-        })->everyTwoMinutes();
+        })->everySixHours();
     }
 
     /**

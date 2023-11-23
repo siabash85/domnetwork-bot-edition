@@ -32,7 +32,7 @@ class SubscriptionDetailResource  extends JsonResource
             'created_at' =>  formatGregorian($this->created_at),
             'updated_at' =>  formatGregorian($this->updated_at),
             'expire_at' =>  formatGregorian($this->expire_at),
-            // 'config' => GenerateConfigService::generate($this->id)
+            'config' => GenerateConfigService::generate($this->id)
         ];
     }
 }
