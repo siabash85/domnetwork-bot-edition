@@ -10,6 +10,7 @@ use Modules\Server\Entities\Package;
 use Illuminate\Support\Facades\Route;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Http\Controllers\WebhookController;
+use Modules\Setting\Transformers\SettingResource;
 
 /*
 |--------------------------------------------------------------------------

@@ -172,6 +172,13 @@ export default {
             name: "panel-pricing-edit",
             component: () => import("@/Pages/panel/pricing/edit.vue"),
         },
+        // setting
+
+        {
+            path: "setting/variables",
+            name: "panel-settings-index",
+            component: () => import("@/Pages/panel/settings/variables.vue"),
+        },
 
     ],
 };

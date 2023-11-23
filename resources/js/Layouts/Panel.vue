@@ -86,6 +86,12 @@
                     value="users"
                     :to="{ name: 'panel-users-index' }"
                 ></v-list-item>
+                <v-list-item
+                    prepend-icon="mdi-cog-outline"
+                    title="تنظیمات"
+                    value="settings"
+                    :to="{ name: 'panel-settings-index' }"
+                ></v-list-item>
             </v-list>
         </v-navigation-drawer>
         <v-app-bar title="">

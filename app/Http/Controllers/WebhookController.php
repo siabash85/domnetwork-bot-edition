@@ -646,8 +646,8 @@ class WebhookController extends Controller
                         'text' => "🔄 در حال ساخت فاکتور شما . . .",
                         "chat_id" => $sender->id,
                     ]);
-                    $card_num = "6037787898981212";
-                    $card_name = "بایدن عباسی";
+                    $card_num = settingRepo()->get("card_number");
+                    $card_name = json_decode(settingRepo()->get("card_name"), true);
                     $invoise_code = $payment->reference_code;
                     $newMessageText = "📣 *فاکتور شما با موفقیت ساخته شد*\n\n" .
                         "💎 * شماره فاکتور:* `$invoise_code`\n" .
@@ -725,10 +725,13 @@ class WebhookController extends Controller
                             "ev_code" => $ev_code
                         ]);
                         try {
+                            $voucher_account_id = settingRepo()->get("voucher_account_id");
+                            $voucher_account_pass = settingRepo()->get("voucher_pass");
+                            $voucher_account_payee = settingRepo()->get("voucher_payee_account");
                             $res = Http::asForm()->post("https://perfectmoney.com/acct/ev_activate.asp", [
-                                "AccountID" => "63150797",
-                                "PassPhrase" => "amir3090@A",
-                                "Payee_Account" => "U45963880",
+                                "AccountID" => $voucher_account_id,
+                                "PassPhrase" => $voucher_account_pass,
+                                "Payee_Account" => $voucher_account_payee,
                                 "ev_number" => $voucher_transaction->ev_number,
                                 "ev_code" => $ev_code,
                             ]);
@@ -741,13 +744,13 @@ class WebhookController extends Controller
                             $error_node = $xpath->query('//input[@name="ERROR"]')->item(0);
                             $voucher_amount_node = $xpath->query('//input[@name="VOUCHER_AMOUNT"]')->item(0);
                             $voucher_amount_currency_node = $xpath->query('//input[@name="VOUCHER_AMOUNT_CURRENCY"]')->item(0);
-                            if (!is_null($error_node)) {
-                                Telegram::sendMessage([
-                                    'text' => $error_node->getAttribute('value'),
-                                    "chat_id" => $sender->id,
-                                ]);
-                                return true;
-                            }
+                            // if (!is_null($error_node)) {
+                            //     Telegram::sendMessage([
+                            //         'text' => $error_node->getAttribute('value'),
+                            //         "chat_id" => $sender->id,
+                            //     ]);
+                            //     return true;
+                            // }
                             if (!is_null($voucher_amount_node)) {
                                 $voucher_amount = $voucher_amount_node->getAttribute('value');
                                 $voucher_amount_currency = $voucher_amount_currency_node->getAttribute('value');

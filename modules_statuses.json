@@ -6,5 +6,6 @@
     "Order": true,
     "Payment": true,
     "Guide": true,
-    "Support": true
+    "Support": true,
+    "Setting": true
 }
