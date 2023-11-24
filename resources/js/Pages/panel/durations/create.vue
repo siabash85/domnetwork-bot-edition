@@ -10,7 +10,7 @@
                 @submit.prevent="handleCreate"
             >
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-text-field
                             type="number"
                             v-model="form.name"
@@ -22,7 +22,7 @@
                             hint="بازه زمانی را تعداد روز وارد کنید"
                         ></v-text-field>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-text-field
                             type="number"
                             v-model="form.value"
@@ -32,6 +32,18 @@
                             persistent-hint
                             variant="solo"
                             hint="مقدار 0 به معنی بی نهایت می باشد"
+                        ></v-text-field>
+                    </div>
+                    <div class="col-span-12 lg:col-span-4">
+                        <v-text-field
+                            type="number"
+                            v-model="form.price"
+                            label="مبلغ تمدید سرویس به ازای هر گیگابایت"
+                            density="compact"
+                            single-line
+                            persistent-hint
+                            variant="solo"
+                            hint=" مقدار وارد شده به تومان می باشد."
                         ></v-text-field>
                     </div>
                 </div>
@@ -62,6 +74,7 @@ const formRef = ref(null);
 const form = ref({
     name: null,
     value: 0,
+    price: null,
 });
 const visible_success_message = ref(false);
 const rules = ref([
@@ -79,6 +92,7 @@ const handleCreate = async (event) => {
         const form_data = new FormData();
         form_data.append("name", form.value.name);
         form_data.append("value", form.value.value);
+        form_data.append("price", form.value.price);
         const { data } = await ApiService.post(
             `/api/panel/package/durations`,
             form_data

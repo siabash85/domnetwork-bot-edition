@@ -12,6 +12,7 @@ class  Keyboards
     const SUPPORT = '📮 پشتیبانی آنلاین';
     const GUIDE = '🔗 راهنمای اتصال';
     const HOME = "🏠 خانه";
+    const EXTENSION_SERVICE = "🔄 تمدید";
 
     public static $keyboards = [
         self::PURCHASE_SERVICE,
@@ -21,6 +22,7 @@ class  Keyboards
         self::PROFILE,
         self::SUPPORT,
         self::GUIDE,
+        self::EXTENSION_SERVICE
     ];
 
     // public static $main_keys = [

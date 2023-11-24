@@ -11,7 +11,8 @@ class PackageDuration extends Model
 
     protected $fillable = [
         'name',
-        'value'
+        'value',
+        'price'
     ];
 
     // protected static function newFactory()

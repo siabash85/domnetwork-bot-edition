@@ -43,4 +43,26 @@ class GenerateConfigService
             // return $th->getMessage();
         }
     }
+    public static function getClientTraffics($subscription)
+    {
+        $subscription = Subscription::query()->find($subscription);
+        $server_address = $subscription->service->server->address;
+        $res = Http::post("$server_address/login", [
+            "username" => $subscription->service->server->username,
+            "password" => $subscription->service->server->password
+        ]);;
+        $cookieJar = $res->cookies();
+        $cookiesArray = [];
+        foreach ($cookieJar as $cookie) {
+            $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+        }
+        $cookiesString = implode('; ', $cookiesArray);
+        $sub_code = $subscription->code;
+        $response = Http::withHeaders([
+            'Cookie' => $cookiesString,
+        ])->get("$server_address/xui/API/inbounds/getClientTraffics/{$sub_code}");
+        $inbound_res = json_decode($response->body());
+        $inbound_obj = $inbound_res->obj;
+        return $inbound_obj;
+    }
 }

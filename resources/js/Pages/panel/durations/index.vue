@@ -25,6 +25,9 @@
                     <thead>
                         <tr>
                             <th class="text-right">نام</th>
+                            <th class="text-right whitespace-nowrap">
+                                مبلغ تمدید سرویس به ازای هر گیگابایت
+                            </th>
                             <th class="text-right">عملیات</th>
                         </tr>
                     </thead>
@@ -35,7 +38,11 @@
                                     {{ item.name }} روز
                                 </div>
                             </td>
-
+                            <td>
+                                <div class="whitespace-nowrap">
+                                    {{ item.price }} تومان
+                                </div>
+                            </td>
                             <td>
                                 <div class="flex items-center">
                                     <v-btn

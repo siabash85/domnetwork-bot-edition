@@ -6,6 +6,7 @@ use DOMXPath;
 use DOMDocument;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Modules\User\Entities\User;
 use Modules\Order\Entities\Order;
 use Modules\Server\Entities\Server;
@@ -27,8 +28,10 @@ use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
 use Modules\Support\Entities\SupportMessage;
 use Modules\User\Entities\WalletTransaction;
+use Modules\Server\Entities\ExtensionService;
 use Modules\User\Entities\VoucherTransaction;
 use Modules\Guide\Entities\GuidePlatformClient;
+use Modules\Server\Services\GenerateConfigService;
 
 class WebhookController extends Controller
 {
@@ -236,7 +239,100 @@ class WebhookController extends Controller
                 }
 
                 return true;
+            } else if ($callbackData == "extension_service") {
+                $extension_service = ExtensionService::query()->where('user_id', $user->id)->first();
+                $extension_price = $extension_service->package_duration->price *  intval($extension_service->volume);
+                $extension_sub = $extension_service->subscription;
+                if ($extension_price > $user->wallet) {
+                    Telegram::sendMessage([
+                        'text' => "❌ موجودی شما برای خرید این سرویس کافی نمیباشد ",
+                        "chat_id" => $sender->id,
+                        // 'reply_markup' => $encodedMarkup,
+                    ]);
+                } else {
+                    Telegram::sendMessage([
+                        'text' => "🔄 در حال تمدید سرویس  . . .",
+                        "chat_id" => $sender->id,
+                    ]);
+                    try {
+                        $server_address = $extension_sub->service->server->address;
+                        $extension_service->update(["status" => "success"]);
+                        $user->decrement("wallet", $extension_price);
+                        $res = Http::post("$server_address/login", [
+                            "username" => $extension_sub->service->server->username,
+                            "password" => $extension_sub->service->server->password
+                        ]);;
+                        $cookieJar = $res->cookies();
+                        $cookiesArray = [];
+                        foreach ($cookieJar as $cookie) {
+                            $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+                        }
+                        $cookiesString = implode('; ', $cookiesArray);
+                        $inbound_obj = GenerateConfigService::getClientTraffics($extension_sub->id);
+                        $volume_consumed = $inbound_obj->up + $inbound_obj->down;
+                        $total = $inbound_obj->total;
+                        $remaining_volume = $total - $volume_consumed;
+                        $extension_service_total = $extension_service->volume * pow(1024, 3);
+                        $today = Carbon::now();
+                        $givenDate = Carbon::parse($extension_sub->expire_at);
+                        $diffInDays = $today->diffInDays($givenDate);
+                        if ($givenDate->isPast()) {
+                            $diffInDays = 0;
+                            $new_volume = $extension_service_total;
+                        } else {
+                            $new_volume = $remaining_volume + $extension_service_total;
+                        }
+                        $added_deadline = $extension_service->package_duration->value;
+                        $package_duration_time = ($diffInDays + $added_deadline) * 24 * 60 * 60 * 1000;
+                        $settings = [
+                            "clients" => [
+                                [
+                                    "id" => $extension_sub->uuid,
+                                    "flow" => "",
+                                    "email" => $extension_sub->code,
+                                    "limitIp" => 0,
+                                    "totalGB" => $new_volume,
+                                    "expiryTime" => -$package_duration_time,
+                                    "enable" => true,
+                                    "tgId" => "",
+                                    "subId" => $extension_sub->subId
+                                ]
+                            ]
+                        ];
+                        $server_inbound_id = $extension_sub->service->server->inbound;
+                        $response = Http::withHeaders([
+                            'Cookie' => $cookiesString,
+                        ])->post("$server_address/panel/inbound/updateClient/$extension_sub->uuid", [
+                            "id" => intval($server_inbound_id),
+                            "settings" => json_encode($settings)
+                        ]);
+                        $code = $extension_sub->code;
+                        if ($givenDate->isPast()) {
+                            Subscription::query()->where('id', $extension_sub->id)->update(
+                                ['expire_at' => now()->addDays($added_deadline)]
+                            );
+                        } else {
+                            Subscription::query()->where('id', $extension_sub->id)->update(
+                                ['expire_at' => Carbon::parse($extension_sub->expire_at)->addDays($added_deadline)]
+                            );
+                        }
+
+                        $message = "✅ سرویس با کد {$code} تمدید شد.";
+                        Telegram::sendMessage([
+                            'text' => $message,
+                            "chat_id" => $sender->id,
+                            'reply_markup' => KeyboardHandler::home(),
+                        ]);
+                    } catch (\Throwable $th) {
+                        // dd($th->getMessage());
+                    }
+                }
+
+                return true;
             }
+
+
+
 
             // Telegram::answerCallbackQuery([
             //     'callback_query_id' => $callbackQueryId,
@@ -490,7 +586,7 @@ class WebhookController extends Controller
                     ]);
                 } else {
                 }
-            } else if (in_array($update->getMessage()->text, $durations)) {
+            } else if (in_array($update->getMessage()->text, $durations) && $user->section == Keyboards::PURCHASE_SERVICE) {
                 if ($user->step == "2" && $user->section == Keyboards::PURCHASE_SERVICE) {
                     $packages = Package::query()->get();
                     $keyboards = [];
@@ -879,32 +975,168 @@ class WebhookController extends Controller
                         'chat_id' => $sender->id,
                     ]);
                 } else {
-                    $location = $user_sub->service->server->name;
-                    $volume = $user_sub->service->package->name;
-                    $service_link = $user_sub->service->link;
-                    $code = $user_sub->code;
-                    $expire_date = $user_sub->expire_at;
-                    $message = "💎 *کد سرویس:* `$code`\n" .
-                        "🌎 *لوکیشن:* `$location`\n" .
-                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
-                        "♾ *حجم کل:* `$volume` \n\n" .
-                        "📌 *لینک اشتراک* \n\n" .
-                        "`$service_link`";
-                    Telegram::sendMessage([
-                        'text' => $message,
-                        'chat_id' => $sender->id,
-                        'parse_mode' => 'MarkdownV2',
-                        'reply_markup' => KeyboardHandler::home(),
-                    ]);
+                    try {
+                        Telegram::sendMessage([
+                            'text' => "🔄 در حال پردازش سرویس شما . . .",
+                            "chat_id" => $sender->id,
+                        ]);
+                        ExtensionService::query()->updateOrCreate([
+                            'user_id' => $user->id
+                        ], [
+                            'status' => "pending",
+                            'subscription_id' => $user_sub->id
+                        ]);
+                        $location = $user_sub->service->server->name;
+                        $volume = $user_sub->service->package->name;
+                        $service_link = GenerateConfigService::generate($user_sub->id);
+                        $code = $user_sub->code;
+                        $inbound_obj = GenerateConfigService::getClientTraffics($user_sub->id);
+                        $volume_consumed = round(($inbound_obj->up + $inbound_obj->down) / 1024 / 1024 / 1024);
+                        $total = round($inbound_obj->total / 1024 / 1024 / 1024);
+                        $remaining_volume = $total - $volume_consumed;
+                        $remaining_volume = str_replace('.', '\.', $remaining_volume);
+                        $volume_consumed = str_replace('.', '\.', $volume_consumed);
+                        $total = str_replace('.', '\.', $total);
+                        $expire_date =  formatGregorian($user_sub->expire_at);
+                        $message = "💎 *کد سرویس:* `$code`\n" .
+                            "🌎 *لوکیشن:* `$location`\n" .
+                            "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                            "♾ *حجم کل:* `$total` گیگابایت \n" .
+                            "📊 حجم مصرف شده: {$volume_consumed} گیگابایت\n" .
+                            "🧮 حجم باقی مانده: {$remaining_volume} گیگابایت\n\n" .
+                            "📌 *لینک اشتراک* \n\n" .
+                            "`$service_link`";
+                        Telegram::sendMessage([
+                            'text' => $message,
+                            'chat_id' => $sender->id,
+                            'parse_mode' => 'MarkdownV2',
+                            'reply_markup' => KeyboardHandler::service(),
+                        ]);
+                        $user->update([
+                            'section' => Keyboards::SERVICES,
+                            'step' => 2
+                        ]);
+                        return true;
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                        return true;
+                    }
                 }
                 return true;
-                // $user->update([
-                //     'section' => Keyboards::SUPPORT,
-                //     'step' => 2
+            } else if ($user->step == "2" && $user->section == Keyboards::SERVICES && $update->getMessage()->text == Keyboards::EXTENSION_SERVICE) {
+                $durations = PackageDuration::query()->get();
+                $keyboards = [];
+                $keyboards_keyboards = $durations->chunk(2);
+                foreach ($keyboards_keyboards as $chunk) {
+                    $row = [];
+                    foreach ($chunk as $duration) {
+                        $row[] = ['text' => $duration->name];
+                    }
+                    $keyboards[] = $row;
+                }
+                array_push($keyboards, [['text' => Keyboards::HOME]]);
+
+                $replyMarkup = [
+                    'keyboard' => $keyboards,
+                    'resize_keyboard' => true,
+                    'one_time_keyboard' => false,
+                ];
+                $encodedMarkup = json_encode($replyMarkup);
+                $user->update([
+                    'section' => Keyboards::SERVICES,
+                    'step' => 3
+                ]);
+                Telegram::sendMessage([
+                    'text' => "⏳ مدت زمان تمدید سرویس را انتخاب کنید:",
+                    "chat_id" => $sender->id,
+                    'reply_markup' => $encodedMarkup,
+                ]);
+                // Telegram::sendMessage([
+                //     'text' => "⛔️ سرور انتخاب شده نامعتبر می  باشد",
+                //     'chat_id' => $sender->id,
                 // ]);
+            } elseif ($user->step == "3" && $user->section == Keyboards::SERVICES) {
+                $selected_duration  = PackageDuration::query()->where('name', $update->getMessage()->text)->first();
+                ExtensionService::query()->where('user_id', $user->id)->first()->update([
+                    'package_duration_id' => $selected_duration->id
+                ]);
+                $user->update([
+                    'section' => Keyboards::SERVICES,
+                    'step' => 4
+                ]);
+                Telegram::sendMessage([
+                    'text' => "♾ حجم تمدید سرویس را وارد کنید: (حداقل:  گیگابایت)",
+                    "chat_id" => $sender->id,
+                    // 'reply_markup' => $encodedMarkup,
+                ]);
+            } elseif ($user->step == "4" && $user->section == Keyboards::SERVICES) {
+                Telegram::sendMessage([
+                    'text' => "🔄 در حال پردازش سرویس شما . . .",
+                    "chat_id" => $sender->id,
+                ]);
+
+                try {
+                    $extension_service = ExtensionService::query()->where('user_id', $user->id)->first();
+                    $extension_service->update([
+                        'volume' => intval($update->getMessage()->text)
+                    ]);
+                    $sub = $extension_service->subscription;
+                    $added_deadline = $extension_service->package_duration->value;
+                    $added_volume = $extension_service->volume;
+                    $extension_price = number_format($extension_service->package_duration->price *  intval($added_volume));
+                    $user_wallet = number_format($user->wallet);
+                    $today = Carbon::now();
+                    $givenDate = Carbon::parse($sub->expire_at);
+                    $diffInDays = $today->diffInDays($givenDate);
+                    // Telegram::sendMessage([
+                    //     'text' => $diffInDays,
+                    //     "chat_id" => $sender->id,
+                    // ]);
+                    // return true;
+
+                    $inbound_obj = GenerateConfigService::getClientTraffics($sub->id);
+                    $volume_consumed = round(($inbound_obj->up + $inbound_obj->down) / 1024 / 1024 / 1024);
+                    $total = round($inbound_obj->total / 1024 / 1024 / 1024);
+                    $remaining_volume = $total - $volume_consumed;
+                    if ($givenDate->isPast()) {
+                        $diffInDays = 0;
+                        $new_volume = $added_volume;
+                    } else {
+                        $new_volume = $remaining_volume + $added_volume;
+                    }
+                    $new_time = $added_deadline + $diffInDays;
+                    $message = "🌿 کد سرویس: {$sub->code} \n" .
+                        "📆 مهلت اضافه شده: {$added_deadline} روز \n" .
+                        "⏳ زمان باقی مانده: {$diffInDays} روز \n" .
+                        "🌝 زمان جدید: {$new_time} روز \n" .
+                        "➕ حجم اضافه شده: {$added_volume} گیگابایت \n" .
+                        "🧮 حجم باقی مانده: {$remaining_volume} گیگابایت \n" .
+                        "♾ حجم جدید: {$new_volume} گیگابایت \n" .
+                        "💵 قیمت تمدید: {$extension_price} تومان \n" .
+                        "💰 موجودی حساب شما: {$user_wallet} تومان \n" .
+                        " 👇🏻 در صورت تایید اطلاعات بالا میتوانید از طریق دکمه های زیر پرداخت خود را انجام بدید.";
+                    $inlineKeyboard = [
+                        [
+                            [
+                                'text' => '💰 کیف پول',
+                                'callback_data' => "extension_service"
+                            ],
+                        ],
+                    ];
+                    $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+
+                    Telegram::sendMessage([
+                        'text' => $message,
+                        "chat_id" => $sender->id,
+                        'reply_markup' => $encodedKeyboard,
+                    ]);
+                    return true;
+                } catch (\Throwable $th) {
+                    return true;
+                }
             }
         }
 
-        return "ok";
+        return true;
     }
 }
