@@ -208,14 +208,17 @@ class WebhookController extends Controller
                             $expire_date = $subscription->expire_at;
                             $parts = parse_url($server_address);
                             $clean_server_url = $parts['host'];
+                            $sub_link = GenerateConfigService::generateSubscription($subscription->id);
                             $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
                             $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
                                 "💎 *کد سرویس:* `$code`\n" .
                                 "🌎 *لوکیشن:* `$location`\n" .
                                 "⏳ *تاریخ انقضا:* `$expire_date`\n" .
                                 "♾ *حجم کل:* `$volume` \n\n" .
+                                "📌 *لینک v2ray* \n\n" .
+                                "`$service_link` \n\n" .
                                 "📌 *لینک اشتراک* \n\n" .
-                                "`$service_link`";
+                                "`$sub_link` \n\n";
                             Telegram::sendMessage([
                                 'text' => $message,
                                 "chat_id" => $sender->id,
@@ -989,6 +992,7 @@ class WebhookController extends Controller
                         $location = $user_sub->service->server->name;
                         $volume = $user_sub->service->package->name;
                         $service_link = GenerateConfigService::generate($user_sub->id);
+                        $sub_link = GenerateConfigService::generateSubscription($user_sub->id);
                         $code = $user_sub->code;
                         $inbound_obj = GenerateConfigService::getClientTraffics($user_sub->id);
                         $volume_consumed = round(($inbound_obj->up + $inbound_obj->down) / 1024 / 1024 / 1024);
@@ -1004,8 +1008,10 @@ class WebhookController extends Controller
                             "♾ *حجم کل:* `$total` گیگابایت \n" .
                             "📊 حجم مصرف شده: {$volume_consumed} گیگابایت\n" .
                             "🧮 حجم باقی مانده: {$remaining_volume} گیگابایت\n\n" .
+                            "📌 *لینک v2ray* \n\n" .
+                            "`$service_link` \n\n" .
                             "📌 *لینک اشتراک* \n\n" .
-                            "`$service_link`";
+                            "`$sub_link` \n\n";
                         Telegram::sendMessage([
                             'text' => $message,
                             'chat_id' => $sender->id,
