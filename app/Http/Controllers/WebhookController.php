@@ -957,19 +957,50 @@ class WebhookController extends Controller
                     'step' => 3
                 ]);
             } else if ($user->step == "1" && $user->section == Keyboards::SUPPORT) {
-                SupportMessage::query()->create([
-                    'user_id' => $user->id,
-                    'message' => $update->getMessage()->text,
-                    'status' => "pending"
-                ]);
-                Telegram::sendMessage([
-                    'text' => "✅ پیام شما با موفقیت به ادمین های ربات ارسال شد !",
-                    'chat_id' => $sender->id,
-                ]);
-                $user->update([
-                    'section' => Keyboards::SUPPORT,
-                    'step' => 2
-                ]);
+                try {
+                    $message = SupportMessage::query()->create([
+                        'user_id' => $user->id,
+                        'message' => $update->getMessage()->text,
+                        'status' => "pending"
+                    ]);
+
+                    Telegram::sendMessage([
+                        'text' => "✅ پیام شما با موفقیت به ادمین های ربات ارسال شد !",
+                        'chat_id' => $sender->id,
+                    ]);
+
+                    $owner_users = User::query()->where('is_notifable', true)->get();
+                    // Telegram::sendMessage([
+                    //     'text' => json_encode($owner_users),
+                    //     'chat_id' => $sender->id,
+                    // ]);
+                    // return true;
+                    $notif_message = "پیام جدیدی توسط کاربر {$user->username} ایجاد شد";
+                    $inlineKeyboard = [
+                        [
+                            [
+                                'text' => 'پاسخ به پیام',
+                                'url' => "https://pashmak-titab.store/panel/support/messages/edit/$message->id"
+                            ],
+                        ],
+                    ];
+                    $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                    foreach ($owner_users as $key => $owner_user) {
+                        Telegram::sendMessage([
+                            'text' => $notif_message,
+                            "chat_id" => $owner_user->uid,
+                            'reply_markup' => $encodedKeyboard,
+                        ]);
+                    }
+
+                    $user->update([
+                        'section' => Keyboards::SUPPORT,
+                        'step' => 2
+                    ]);
+                    return true;
+                } catch (\Throwable $th) {
+                    return true;
+                }
             } else if ($user->step == "1" && $user->section == Keyboards::SERVICES) {
                 $user_sub = Subscription::query()->where('user_id', $user->id)->where('slug', $update->getMessage()->text)->first();
                 if (is_null($user_sub)) {
