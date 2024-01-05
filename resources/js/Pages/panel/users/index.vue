@@ -115,6 +115,27 @@
 
                             <td>
                                 <div class="flex items-center">
+                                    <template v-if="item?.is_partner">
+                                        <v-btn
+                                            :to="{
+                                                name: 'panel-users-report',
+                                                params: { id: item.id },
+                                            }"
+                                            prepend-icon="mdi-chart-box-outline"
+                                            class="mr-4"
+                                        >
+                                            گزارش
+                                        </v-btn>
+                                    </template>
+                                    <template v-else>
+                                        <v-btn
+                                            prepend-icon="mdi-chart-box-outline"
+                                            class="mr-4"
+                                        >
+                                            گزارش
+                                        </v-btn>
+                                    </template>
+
                                     <v-btn
                                         :to="{
                                             name: 'panel-users-edit',
@@ -168,12 +189,13 @@
 import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
-
+import { useAuthStore, type User } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const store = useAuthStore();
+const { user } = storeToRefs(store);
 const loading = ref(true);
-
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
-
 const users = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
@@ -181,11 +203,6 @@ const fetchData = async () => {
     users.value = data.data;
     loading.value = false;
 };
-const handleShowDeleteMessage = (item) => {
-    visible_delete_confirmation.value = true;
-    selected_item.value = item;
-};
-
 const handleDelete = async () => {
     const { data } = await ApiService.delete(
         `/api/panel/users/${selected_item.value.id}`

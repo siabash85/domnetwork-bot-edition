@@ -23,7 +23,7 @@ class DashboardController extends ApiController
     {
         $user = auth()->user();
         $payments = Payment::query()->where('status', 'success')->get();
-        $orders = Order::query()->whereHas("user", function ($q) use ($user) {
+        $orders = Order::query()->where('status', 'success')->whereHas("user", function ($q) use ($user) {
             $q->where("partner_id", $user->id);
         })->get();
         $payments_total = $payments->sum('amount');

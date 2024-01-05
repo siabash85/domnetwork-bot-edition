@@ -155,6 +155,12 @@ export default {
             name: "panel-users-edit",
             component: () => import("@/Pages/panel/users/edit.vue"),
         },
+        {
+            path: "users/report/:id",
+            name: "panel-users-report",
+            component: () => import("@/Pages/panel/users/report.vue"),
+        },
+
 
         {
             path: "users/create",
