@@ -226,7 +226,14 @@ class WebhookController extends Controller
                                 'reply_markup' => KeyboardHandler::home(),
                             ]);
                             $owner_users = User::query()->where('is_notifable', true)->get();
-                            $notif_message = "📣 *سرویس جدیدی خریداری شد*\n\n";
+                            $order_user = $user->username . " - " . $user->uid;
+                            $notif_message = "⚠️ * سرویس جدیدی با مشخصات زیر خریداری شد*\n\n" .
+                                "♾ * کاربر:* `$order_user` \n\n" .
+                                "💎 *کد سرویس:* `$code`\n" .
+                                "🌎 *لوکیشن:* `$location`\n" .
+                                "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                "♾ *حجم کل:* `$volume` \n\n";
+
                             foreach ($owner_users as $key => $owner_user) {
                                 Telegram::sendMessage([
                                     'text' => $notif_message,
