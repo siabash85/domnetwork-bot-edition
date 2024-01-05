@@ -14,10 +14,10 @@
             <template #default>
                 <v-sheet>
                     <div class="mb-6">
-                        <h2 class="text-xl">ویرایش کاربر</h2>
+                        <h2 class="text-xl">ایجاد کاربر</h2>
                     </div>
 
-                    <Form ref="formRef" @submit="handleUpdate">
+                    <Form ref="formRef" @submit="handleCreate">
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12 lg:col-span-6">
                                 <Field
@@ -110,9 +110,9 @@
                                     label=" مقدار کیف پول (تومان)"
                                 >
                                     <v-text-field
+                                        type="number"
                                         v-model="form.wallet"
                                         label="مقدار کیف پول (تومان)"
-                                        variant="solo-filled"
                                         size="large"
                                         v-bind="field"
                                         hide-details="auto"
@@ -180,7 +180,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-span-12">
+                            <div class="col-span-12" v-if="!user?.is_partner">
                                 <Field
                                     mode="passive"
                                     name="is_superuser"
@@ -210,7 +210,37 @@
                                 </div>
                             </div>
 
-                            <div class="col-span-12">
+                            <div class="col-span-12" v-if="!user?.is_partner">
+                                <Field
+                                    mode="passive"
+                                    name="is_partner"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" نوع کاربری"
+                                >
+                                    <v-radio-group
+                                        v-bind="field"
+                                        v-model="form.is_partner"
+                                    >
+                                        <template v-slot:label>
+                                            <div>نوع کاربری</div>
+                                        </template>
+                                        <v-radio
+                                            label="کاربر عادی"
+                                            value="0"
+                                        ></v-radio>
+                                        <v-radio
+                                            label="کاربر همکار"
+                                            value="1"
+                                        ></v-radio>
+                                    </v-radio-group>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="is_partner" />
+                                </div>
+                            </div>
+
+                            <div class="col-span-12" v-if="!user?.is_partner">
                                 <Field
                                     mode="passive"
                                     name="is_notifable"
@@ -247,7 +277,7 @@
                             type="submit"
                             block
                             class="mt-2"
-                            >ویرایش</v-btn
+                            >ایجاد</v-btn
                         >
                     </Form>
                 </v-sheet>
@@ -255,7 +285,7 @@
         </base-skeleton>
 
         <v-snackbar absolute v-model="visible_success_message" :timeout="20000">
-            کاربر با موفقیت ویرایش شد.
+            کاربر با موفقیت ایجاد شد.
         </v-snackbar>
     </div>
 </template>
@@ -266,20 +296,25 @@ import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
 import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+import { useAuthStore, type User } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const store = useAuthStore();
+const { user } = storeToRefs(store);
 const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
 const form = ref({
-    username: null,
-    first_name: null,
+    username: "",
+    first_name: "",
     uid: null,
     status: "active",
     email: null,
-    is_superuser: false,
-    wallet: null,
+    is_superuser: "0",
+    wallet: "0",
     password: null,
     password_confirmation: null,
     is_notifable: "0",
+    is_partner: "0",
 });
 const visible_success_message = ref(false);
 const statuses = ref([
@@ -288,7 +323,7 @@ const statuses = ref([
 ]);
 const router = useRouter();
 const route = useRoute();
-const handleUpdate = async (event) => {
+const handleCreate = async (event) => {
     const { valid } = await formRef.value.validate();
     if (valid) {
         loading.value = true;
@@ -299,6 +334,7 @@ const handleUpdate = async (event) => {
         form_data.append("uid", form.value.uid);
         form_data.append("is_superuser", form.value.is_superuser);
         form_data.append("is_notifable", form.value.is_notifable);
+        form_data.append("is_partner", form.value.is_partner);
         form_data.append("status", form.value.status);
         form_data.append("wallet", form.value.wallet);
         form_data.append("password", form.value.password ?? "");
@@ -307,10 +343,7 @@ const handleUpdate = async (event) => {
             "password_confirmation",
             form.value.password_confirmation ?? ""
         );
-        const { data } = await ApiService.put(
-            `/api/panel/users/${route.params.id}`,
-            form_data
-        );
+        const { data } = await ApiService.post(`/api/panel/users`, form_data);
         if (data.status == 200) {
             visible_success_message.value = true;
             router.push({ name: "panel-users-index" });
@@ -319,16 +352,16 @@ const handleUpdate = async (event) => {
 };
 
 const fetchData = async () => {
-    let { data } = await ApiService.get(`/api/panel/users/${route.params.id}`);
-    form.value.username = data.data.username;
-    form.value.first_name = data.data.first_name;
-    form.value.uid = data.data.uid;
-    form.value.status = data.data.status;
-    form.value.email = data.data.email;
-    form.value.is_superuser = data.data.is_superuser.toString();
-    form.value.is_notifable = data.data.is_notifable.toString();
-    form.value.wallet = data.data.wallet;
-    form.value.status = data.data.status;
+    // let { data } = await ApiService.get(`/api/panel/users/${route.params.id}`);
+    // form.value.username = data.data.username;
+    // form.value.first_name = data.data.first_name;
+    // form.value.uid = data.data.uid;
+    // form.value.status = data.data.status;
+    // form.value.email = data.data.email;
+    // form.value.is_superuser = data.data.is_superuser.toString();
+    // form.value.is_notifable = data.data.is_notifable.toString();
+    // form.value.wallet = data.data.wallet;
+    // form.value.status = data.data.status;
     loader.value = false;
 };
 watchEffect(() => {

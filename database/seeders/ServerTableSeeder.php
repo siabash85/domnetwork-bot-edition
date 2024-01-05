@@ -14,12 +14,12 @@ class ServerTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $servers = [
-            ['name' => "🇺🇸 ایالات متحده آمریکا", "stock" => "9999", "is_active" => true, "is_default" => true],
-            ['name' => "🇩🇪 آلمان", "stock" => "9999", "is_active" => true, "is_default" => false],
-            ['name' => "🇫🇮 فنلاند", "stock" => "9999", "is_active" => true, "is_default" => false],
-        ];
+        // $servers = [
+        //     ['name' => "🇺🇸 ایالات متحده آمریکا", "stock" => "9999", "is_active" => true, "is_default" => true],
+        //     ['name' => "🇩🇪 آلمان", "stock" => "9999", "is_active" => true, "is_default" => false],
+        //     ['name' => "🇫🇮 فنلاند", "stock" => "9999", "is_active" => true, "is_default" => false],
+        // ];
 
-        Server::insert($servers);
+        // Server::insert($servers);
     }
 }

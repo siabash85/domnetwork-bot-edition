@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Modules\User\Transformers\Panel\UserResource;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +18,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    return new UserResource($request->user());
 });
 Route::prefix('/auth')->group(function () {
     Route::post("login", [AuthenticatedSessionController::class, 'store']);

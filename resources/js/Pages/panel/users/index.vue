@@ -14,6 +14,12 @@
             <template #default>
                 <div class="flex justify-between mb-12 items-center">
                     <h2 class="text-xl">لیست کاربران</h2>
+                    <v-btn
+                        :to="{ name: 'panel-users-create' }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد کاربر
+                    </v-btn>
                 </div>
                 <v-table fixed-header>
                     <thead>

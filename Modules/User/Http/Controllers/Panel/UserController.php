@@ -20,7 +20,25 @@ class UserController extends ApiController
      */
     public function index()
     {
-        $users = User::query()->get();
+        $user = auth()->user();
+
+        if ($user->is_partner) {
+            $users = $user->users;
+        } else {
+            $users = User::query()->get();
+        }
+        $users = UserResource::collection($users);
+        return $this->successResponse($users, "");
+    }
+
+    public function select()
+    {
+        $user = auth()->user();
+        if ($user->is_partner) {
+            $users = $user->users;
+        } else {
+            $users = User::query()->get();
+        }
         $users = UserResource::collection($users);
         return $this->successResponse($users, "");
     }
@@ -32,6 +50,24 @@ class UserController extends ApiController
      */
     public function store(UserRequest $request)
     {
+        $user = auth()->user();
+        $data = [
+            'is_superuser' => $request->is_superuser,
+            'is_notifable' => $request->is_notifable,
+            'is_partner' => $request->is_partner,
+            'partner_id' => $user->id,
+            'status' => $request->status,
+            'username' => $request->username,
+            'first_name' => $request->first_name,
+            'email' => $request->email,
+            // 'mobile' => $request->mobile,
+            'wallet' => $request->wallet,
+        ];
+        if ($request->password) {
+            $data['password'] = Hash::make($request->password);
+        }
+        $user = User::query()->create($data);
+        return $this->successResponse($user, "ایجاد  با موفقیت انجام شد");
     }
 
     /**
@@ -60,7 +96,7 @@ class UserController extends ApiController
             'is_notifable' => $request->is_notifable,
             'status' => $request->status,
             'username' => $request->username,
-            'fist_name' => $request->fist_name,
+            'first_name' => $request->first_name,
             'email' => $request->email,
             // 'mobile' => $request->mobile,
             'wallet' => $request->wallet,

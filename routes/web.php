@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use App\Http\Controllers\WebhookController;
 use Modules\Setting\Transformers\SettingResource;
+use Spatie\MediaLibrary\Conversions\ImageGenerators\Webp;
 
 /*
 |--------------------------------------------------------------------------

@@ -13,12 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('wallet_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
-            $table->bigInteger("amount")->nullable();
-            $table->string("status")->nullable();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId("partner_id")->nullable()->constrained("users")->nullOnDelete();
         });
     }
 
@@ -29,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('wallet_transactions');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn("partner_id");
+        });
     }
 };

@@ -14,12 +14,12 @@
             <template #default>
                 <div class="flex justify-between mb-12 items-center">
                     <h2 class="text-xl">لیست اشتراک ها</h2>
-                    <!-- <v-btn
-                :to="{ name: 'panel-subscriptions-create' }"
-                color="blue-accent-2"
-            >
-                ایجاد تراکنش
-            </v-btn> -->
+                    <v-btn
+                        :to="{ name: 'panel-subscriptions-create' }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد اشتراک
+                    </v-btn>
                 </div>
                 <v-table fixed-header>
                     <thead>

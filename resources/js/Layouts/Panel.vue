@@ -24,6 +24,7 @@
 
             <v-list density="compact" nav>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     link
                     prepend-icon="mdi-home-city"
                     title="داشبورد"
@@ -32,6 +33,7 @@
                 </v-list-item>
 
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-server-outline"
                     title="سرورها"
                     value="servers"
@@ -39,18 +41,21 @@
                 ></v-list-item>
 
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-calendar-clock"
                     title="بازه های زمانی"
                     value="durations"
                     :to="{ name: 'panel-durations-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-package-variant-closed"
                     title="پکیج ها"
                     value="packages"
                     :to="{ name: 'panel-packages-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-access-point"
                     title=" مدیریت سرویس ها"
                     value="services"
@@ -63,6 +68,7 @@
                     :to="{ name: 'panel-orders-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-credit-card-outline"
                     title=" مدیریت تراکنش ها"
                     value="payments"
@@ -75,18 +81,21 @@
                     :to="{ name: 'panel-subscriptions-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-connection"
                     title="راهنمای اتصال"
                     value="platforms"
                     :to="{ name: 'panel-platforms-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-lifebuoy"
                     title="پیام های پشتیبانی"
                     value="messages"
                     :to="{ name: 'panel-messages-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-cash-multiple"
                     title="تعرفه ها"
                     value="pricing"
@@ -99,6 +108,7 @@
                     :to="{ name: 'panel-users-index' }"
                 ></v-list-item>
                 <v-list-item
+                    v-if="!user?.is_partner"
                     prepend-icon="mdi-cog-outline"
                     title="تنظیمات"
                     value="settings"

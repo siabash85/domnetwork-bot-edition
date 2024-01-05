@@ -163,7 +163,7 @@ class WebhookController extends Controller
                     $res = Http::post("$server_address/login", [
                         "username" => $order->service->server->username,
                         "password" => $order->service->server->password
-                    ]);;
+                    ]);
                     $cookieJar = $res->cookies();
                     $cookiesArray = [];
                     foreach ($cookieJar as $cookie) {
@@ -811,6 +811,33 @@ class WebhookController extends Controller
                                 "chat_id" => $sender->id,
                                 'text' => "✅ فیش ارسالی شما با موفقیت به مدیریت ارسال شد پس از برسی حساب شما به صورت خودکار شارژ خواهد شد !",
                             ]);
+                            $owner_users = User::query()->where('is_notifable', true)->get();
+                            $formated_payment_price = number_format(round($latest_payment->amount));
+                            $payment_reference_code = $latest_payment->reference_code;
+                            $payment_date = formatGregorian($latest_payment->created_at);
+                            $payment_user = $latest_payment->user->username . " " . $latest_payment->user->uid;
+                            $message = "💵  مبلغ: {$formated_payment_price} تومان \n" .
+                                "🌿  کد پیگیری: {$payment_reference_code}  \n" .
+                                "📆   تاریخ: {$payment_date}  \n" .
+                                "📌   کاربر: {$payment_user}  \n" .
+                                " 👇🏻درخواست تایید رسید کارت به کارت با مشخصات  بالا  در  انتظار تایید رسید پرداخت می باشد. لطفا جهت بررسی آن اقدام کنید";
+                            $inlineKeyboard = [
+                                [
+                                    [
+                                        'text' => 'مشاهده تراکنش',
+                                        //"https://pashmak-titab.store/panel/payments/edit/$latest_payment->id"
+                                        'url' => "https://pashmak-titab.store/panel/payments/edit/$latest_payment->id"
+                                    ],
+                                ],
+                            ];
+                            $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
+                            foreach ($owner_users as $key => $owner_user) {
+                                Telegram::sendMessage([
+                                    'text' => $message,
+                                    "chat_id" => $owner_user->uid,
+                                    'reply_markup' => $encodedKeyboard,
+                                ]);
+                            }
                             return true;
                         }
                     } else {

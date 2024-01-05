@@ -33,7 +33,9 @@ class User extends Authenticatable
         'wallet',
         'status',
         'is_superuser',
-        'is_notifable'
+        'is_notifable',
+        'is_partner',
+        'partner_id'
     ];
 
     /**
@@ -63,5 +65,13 @@ class User extends Authenticatable
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
+    }
+    public function users()
+    {
+        return $this->hasMany(User::class, 'partner_id', 'id');
+    }
+    public function partner()
+    {
+        return $this->belongsTo(User::class, 'partner_id', 'id');
     }
 }
