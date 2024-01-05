@@ -21,134 +21,156 @@
                         ایجاد اشتراک
                     </v-btn>
                 </div>
-                <v-table fixed-header>
-                    <thead>
-                        <tr>
-                            <th class="text-right whitespace-nowrap">کاربر</th>
-                            <th class="text-right whitespace-nowrap">
-                                نام سرویس
-                            </th>
-                            <th class="text-right whitespace-nowrap">
-                                کد سرویس
-                            </th>
-                            <th class="text-right whitespace-nowrap">
-                                شناسه سرویس
-                            </th>
 
-                            <th class="text-right whitespace-nowrap">سرور</th>
-                            <th class="text-right whitespace-nowrap">
-                                زمان سرویس
-                            </th>
-                            <th class="text-right whitespace-nowrap">پکیج</th>
+                <v-card flat title="">
+                    <template v-slot:text>
+                        <v-text-field
+                            v-model="search"
+                            label="جستجو"
+                            prepend-inner-icon="mdi-magnify"
+                            single-line
+                            variant="outlined"
+                            hide-details
+                        ></v-text-field>
+                    </template>
 
-                            <th class="text-right whitespace-nowrap">وضعیت</th>
-                            <th class="text-right whitespace-nowrap">
-                                تاریخ ایجاد
-                            </th>
-                            <th class="text-right whitespace-nowrap">
-                                تاریخ پایان
-                            </th>
-                            <th class="text-right whitespace-nowrap">عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in subscriptions" :key="item.name">
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.user?.username }} -
-                                    {{ item.user?.uid }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.name }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.code }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.slug }}
-                                </div>
-                            </td>
+                    <v-data-table
+                        no-data-text="نتیجه ای یافت نشد"
+                        page-text=""
+                        items-per-page-text=""
+                        :search="search"
+                        :items-per-page="10"
+                        :items="subscriptions"
+                        :headers="headers"
+                        :items-per-page-options="[
+                            { value: 5, title: '5' },
+                            { value: 10, title: '10' },
+                            { value: 25, title: '25' },
+                            { value: 50, title: '50' },
+                            { value: 100, title: '100' },
+                        ]"
+                    >
+                        <template v-slot:header.username>
+                            <div class="whitespace-nowrap">کاربر</div>
+                        </template>
+                        <template v-slot:header.name>
+                            <div class="whitespace-nowrap">نام سرویس</div>
+                        </template>
 
-                            <!-- <td>
-                                <div class="whitespace-nowrap">
-                                    {{ $filters.separate(item?.price) }}
-                                    تومان
-                                </div>
-                            </td> -->
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.service?.server?.name }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.service?.package_duration?.value }}
-                                    روز
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.service?.package?.name }}
-                                </div>
-                            </td>
+                        <template v-slot:header.code>
+                            <div class="whitespace-nowrap">کد سرویس</div>
+                        </template>
+                        <template v-slot:header.slug>
+                            <div class="whitespace-nowrap">شناسه سرویس</div>
+                        </template>
+                        <template v-slot:header.service>
+                            <div class="whitespace-nowrap">سرور</div>
+                        </template>
+                        <template v-slot:header.service.package_duration>
+                            <div class="whitespace-nowrap">زمان سرویس</div>
+                        </template>
+                        <template v-slot:header.service.package>
+                            <div class="whitespace-nowrap">پکیج</div>
+                        </template>
+                        <template v-slot:header.status>
+                            <div class="whitespace-nowrap">وضعیت</div>
+                        </template>
+                        <template v-slot:header.created_at>
+                            <div class="whitespace-nowrap">تاریخ ایجاد</div>
+                        </template>
+                        <template v-slot:header.expire_at>
+                            <div class="whitespace-nowrap">تاریخ پایان</div>
+                        </template>
+                        <template v-slot:header.actions>
+                            <div class="whitespace-nowrap">عملیات</div>
+                        </template>
 
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    <template v-if="item.status == 'active'">
-                                        <v-chip
-                                            color="green"
-                                            text-color="white"
-                                        >
-                                            فعال
-                                        </v-chip>
-                                    </template>
-                                    <template v-if="item.status == 'inactive'">
-                                        <v-chip color="red" text-color="white">
-                                            غیرفعال
-                                        </v-chip>
-                                    </template>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.created_at }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item.expire_at }}
-                                </div>
-                            </td>
+                        <template v-slot:item.username="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.user?.username }} -
+                                {{ item.user?.uid }}
+                            </div>
+                        </template>
+                        <template v-slot:item.name="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.name }}
+                            </div>
+                        </template>
+                        <template v-slot:item.code="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.code }}
+                            </div>
+                        </template>
+                        <template v-slot:item.slug="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.slug }}
+                            </div>
+                        </template>
+                        <template v-slot:item.service="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.service?.server?.name }}
+                            </div>
+                        </template>
+                        <template
+                            v-slot:item.service.package_duration="{ item }"
+                        >
+                            <div class="whitespace-nowrap">
+                                {{ item.service?.package_duration?.value }}
+                                روز
+                            </div>
+                        </template>
+                        <template v-slot:item.service.package="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.service?.package?.name }}
+                            </div>
+                        </template>
+                        <template v-slot:item.status="{ item }">
+                            <div class="whitespace-nowrap">
+                                <template v-if="item.status == 'active'">
+                                    <v-chip color="green" text-color="white">
+                                        فعال
+                                    </v-chip>
+                                </template>
+                                <template v-if="item.status == 'inactive'">
+                                    <v-chip color="red" text-color="white">
+                                        غیرفعال
+                                    </v-chip>
+                                </template>
+                            </div>
+                        </template>
+                        <template v-slot:item.created_at="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.created_at }}
+                            </div>
+                        </template>
+                        <template v-slot:item.expire_at="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item.expire_at }}
+                            </div>
+                        </template>
 
-                            <td>
-                                <div class="flex items-center">
-                                    <v-btn
-                                        @click="handleShowExtensionDialog(item)"
-                                        prepend-icon="mdi-timer-plus-outline"
-                                    >
-                                        تمدید
-                                    </v-btn>
-                                    <v-btn
-                                        :to="{
-                                            name: 'panel-subscriptions-edit',
-                                            params: { id: item.id },
-                                        }"
-                                        prepend-icon="mdi-pencil-box-outline"
-                                        class="mr-2"
-                                    >
-                                        مشاهده
-                                    </v-btn>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
+                        <template v-slot:item.actions="{ item }">
+                            <div class="flex items-center">
+                                <v-btn
+                                    @click="handleShowExtensionDialog(item)"
+                                    prepend-icon="mdi-timer-plus-outline"
+                                >
+                                    تمدید
+                                </v-btn>
+                                <v-btn
+                                    :to="{
+                                        name: 'panel-subscriptions-edit',
+                                        params: { id: item.id },
+                                    }"
+                                    prepend-icon="mdi-pencil-box-outline"
+                                    class="mr-2"
+                                >
+                                    مشاهده
+                                </v-btn>
+                            </div>
+                        </template>
+                    </v-data-table>
+                </v-card>
             </template>
         </base-skeleton>
 
@@ -257,7 +279,20 @@ import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
 import { ErrorMessage, Field, Form } from "vee-validate";
 const loading = ref(true);
 const loader = ref(false);
-
+const search = ref("");
+const headers = ref([
+    { key: "username", title: "نام کاربری", sortable: true },
+    { key: "name", title: "نام سرویس", sortable: true },
+    { key: "code", title: "کد سرویس", sortable: true },
+    { key: "slug", title: "شناسه سرویس", sortable: true },
+    { key: "service", title: "سرور", sortable: true },
+    { key: "service.package_duration", title: "زمان سرویس", sortable: true },
+    { key: "service.package", title: "پکیج", sortable: true },
+    { key: "status", title: "وضعیت", sortable: true },
+    { key: "created_at", title: "تاریخ ایجاد", sortable: true },
+    { key: "expire_at", title: "تاریخ پایان", sortable: true },
+    { key: "actions", title: "عملیات", sortable: true },
+]);
 const form = ref({
     package_duration_id: null,
     volume: "",
