@@ -681,6 +681,7 @@ class WebhookController extends Controller
                         "status" => "pending",
                         "payable_price" => $service->price,
                         "price" => $service->price,
+                        "type" => "purchase"
                     ]);
                     $location = $service->server->name;
                     $volume = $service->package->name;

@@ -16,6 +16,6 @@ use Modules\Order\Http\Controllers\Panel\OrderController;
 */
 
 
-Route::prefix('/panel')->group(function () {
+Route::prefix('/panel')->middleware('auth:api')->group(function () {
     Route::apiResource("orders", OrderController::class);
 });

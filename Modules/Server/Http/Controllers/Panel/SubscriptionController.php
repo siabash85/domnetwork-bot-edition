@@ -7,14 +7,15 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Entities\User;
+use Modules\Order\Entities\Order;
 use Illuminate\Support\Facades\Http;
 use Modules\Server\Entities\Service;
 use Modules\Server\Entities\Subscription;
 use App\Telegram\Keyboard\KeyboardHandler;
 use Telegram\Bot\Laravel\Facades\Telegram;
+use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Services\GenerateConfigService;
 use Modules\Common\Http\Controllers\Api\ApiController;
-use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Transformers\Panel\SubscriptionResource;
 use Modules\Server\Transformers\Panel\SubscriptionDetailResource;
 
@@ -207,6 +208,14 @@ class SubscriptionController extends ApiController
                         ['expire_at' => Carbon::parse($sub->expire_at)->addDays($added_deadline)]
                     );
                 }
+                $order = Order::query()->create([
+                    "user_id" => $user->id,
+                    "service_id" => $sub->service->id,
+                    "status" => "success",
+                    "payable_price" => $sub->service->price,
+                    "price" => $sub->service->price,
+                    "type" => "extension"
+                ]);
                 // if (is_null($user->uid)) {
                 //     $message = "✅ سرویس با کد {$code} تمدید شد.";
                 //     Telegram::sendMessage([
@@ -215,10 +224,11 @@ class SubscriptionController extends ApiController
                 //         'reply_markup' => KeyboardHandler::home(),
                 //     ]);
                 // }
+
                 return $this->successResponse($sub, "");
             } catch (\Throwable $th) {
                 // dd($th->getMessage());
-                return $this->errorResponse($sub, "");
+                return $this->errorResponse($th->getMessage(), "");
             }
         }
     }

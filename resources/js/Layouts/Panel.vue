@@ -15,14 +15,14 @@
                         subtitle="کاربر ادمین"
                     ></v-list-item>
                 </template>
-                <templatev-else>
+                <template v-else>
                     <v-list-item
                         lines="two"
                         prepend-avatar="/panel/media/avatars/blank.png"
                         :title="user?.username"
                         subtitle="کاربر همکار"
                     ></v-list-item>
-                </templatev-else>
+                </template>
             </template>
             <template v-slot:append>
                 <div class="pa-2">

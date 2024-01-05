@@ -22,6 +22,7 @@ class OrderResource extends JsonResource
             'price' => round($this->price),
             'payable_price' => $this->payable_price,
             'status' => $this->status,
+            'type' => $this->type,
             'reference_code' => $this->reference_code,
             'created_at' =>  formatGregorian($this->created_at),
         ];
