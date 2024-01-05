@@ -79,7 +79,7 @@
                             <ErrorMessage name="package_id" />
                         </div>
                     </div>
-                    <div class="col-span-12 lg:col-span-4">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="user_id"
@@ -103,7 +103,7 @@
                             <ErrorMessage name="user_id" />
                         </div>
                     </div>
-                    <div class="col-span-12 lg:col-span-4">
+                    <div class="col-span-12 lg:col-span-6">
                         <Field
                             mode="passive"
                             name="name"
@@ -125,7 +125,7 @@
                             <ErrorMessage name="name" />
                         </div>
                     </div>
-                    <div class="col-span-12 lg:col-span-4">
+                    <!-- <div class="col-span-12 lg:col-span-4">
                         <Field
                             mode="passive"
                             name="expire_date"
@@ -143,7 +143,7 @@
                         <div class="invalid-feedback d-block">
                             <ErrorMessage name="expire_date" />
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <v-btn
@@ -161,6 +161,16 @@
         </v-snackbar>
         <v-snackbar absolute v-model="visible_snackbar" :timeout="2000">
             اشتراک با موفقیت کپی شد.
+        </v-snackbar>
+        <v-snackbar
+            location="top"
+            class="mt-5"
+            color="red"
+            absolute
+            v-model="wallet_message"
+            :timeout="3000"
+        >
+            موجودی کاربر برای ایجاد این اشتراک کافی نمی باشد.
         </v-snackbar>
         <v-dialog v-model="visible_config_dialog" persistent>
             <v-card>
@@ -222,6 +232,7 @@ const { text, copy, copied, isSupported } = useClipboard({ page_path });
 const loading = ref(false);
 const formRef = ref(null);
 const visible_config_dialog = ref(false);
+const wallet_message = ref(false);
 const form = ref({
     server_id: null,
     package_duration_id: null,
@@ -251,7 +262,7 @@ const handleCreate = async (event) => {
         form_data.append("package_id", form.value.package_id);
         form_data.append("user_id", form.value.user_id);
         form_data.append("name", form.value.name);
-        form_data.append("expire_date", form.value.expire_date);
+        // form_data.append("expire_date", form.value.expire_date);
         const { data } = await ApiService.post(
             `/api/panel/subscriptions`,
             form_data
@@ -262,6 +273,9 @@ const handleCreate = async (event) => {
             sub_link.value = data.data.sub;
             config_link.value = data.data.link;
             visible_config_dialog.value = true;
+        } else {
+            loading.value = false;
+            wallet_message.value = true;
         }
     }
 };

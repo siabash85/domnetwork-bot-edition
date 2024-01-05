@@ -27,4 +27,5 @@ Route::prefix('/panel')->middleware('auth:api')->group(function () {
     Route::apiResource("services", ServiceController::class);
     Route::apiResource("pricing", PricingController::class);
     Route::apiResource("subscriptions", SubscriptionController::class);
+    Route::post("subscription/extension", [SubscriptionController::class, "extension"]);
 });

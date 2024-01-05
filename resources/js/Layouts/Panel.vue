@@ -7,12 +7,22 @@
             location="right"
         >
             <template v-slot:prepend>
-                <v-list-item
-                    lines="two"
-                    prepend-avatar="/panel/media/avatars/blank.png"
-                    :title="user?.username"
-                    subtitle="کاربر ادمین"
-                ></v-list-item>
+                <template v-if="!user?.is_partner">
+                    <v-list-item
+                        lines="two"
+                        prepend-avatar="/panel/media/avatars/blank.png"
+                        :title="user?.username"
+                        subtitle="کاربر ادمین"
+                    ></v-list-item>
+                </template>
+                <templatev-else>
+                    <v-list-item
+                        lines="two"
+                        prepend-avatar="/panel/media/avatars/blank.png"
+                        :title="user?.username"
+                        subtitle="کاربر همکار"
+                    ></v-list-item>
+                </templatev-else>
             </template>
             <template v-slot:append>
                 <div class="pa-2">
@@ -24,7 +34,6 @@
 
             <v-list density="compact" nav>
                 <v-list-item
-                    v-if="!user?.is_partner"
                     link
                     prepend-icon="mdi-home-city"
                     title="داشبورد"
