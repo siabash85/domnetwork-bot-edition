@@ -110,14 +110,21 @@
                                 <h2 class="text-xl">رسید پرداخت</h2>
                             </div>
 
-                            <div>
-                                <img
-                                    @click="OpenReceipt"
-                                    class="w-[200px] h-[200px] cursor-pointer"
-                                    :src="form?.receipt"
-                                    alt=""
-                                />
-                            </div>
+                            <template v-if="form?.receipt">
+                                <div>
+                                    <img
+                                        @click="OpenReceipt"
+                                        class="w-[200px] h-[200px] cursor-pointer object-cover"
+                                        :src="form?.receipt"
+                                        alt=""
+                                    />
+                                </div>
+                            </template>
+                            <template v-else>
+                                <h3 class="my-3">
+                                    رسید پرداخت ارسال نشده است.
+                                </h3>
+                            </template>
                         </div>
 
                         <v-btn
@@ -151,7 +158,7 @@
                     <v-card-text>
                         <div>
                             <img
-                                class="w-[400px] h-[400px]"
+                                class="w-[600px] h-[600px] object-contain"
                                 :src="form?.receipt"
                                 alt=""
                             />

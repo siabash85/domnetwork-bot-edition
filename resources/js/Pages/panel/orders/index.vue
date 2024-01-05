@@ -28,12 +28,16 @@
                             <th class="text-right whitespace-nowrap">مبلغ</th>
                             <th class="text-right whitespace-nowrap">سرور</th>
                             <th class="text-right whitespace-nowrap">
+                                نوع سفارش
+                            </th>
+                            <th class="text-right whitespace-nowrap">
                                 زمان سرویس
                             </th>
                             <th class="text-right whitespace-nowrap">پکیج</th>
                             <th class="text-right whitespace-nowrap">
                                 کد پیگیری
                             </th>
+
                             <th class="text-right whitespace-nowrap">وضعیت</th>
                             <th class="text-right whitespace-nowrap">تاریخ</th>
                             <!-- <th class="text-right whitespace-nowrap">عملیات</th> -->
@@ -57,6 +61,18 @@
                                 <div class="whitespace-nowrap">
                                     {{ item.service?.server?.name }}
                                 </div>
+                            </td>
+                            <td>
+                                <template v-if="item.type == 'purchase'">
+                                    <v-chip color="warning" text-color="white">
+                                        خرید اشتراک
+                                    </v-chip>
+                                </template>
+                                <template v-if="item.type == 'extension'">
+                                    <v-chip color="green" text-color="white">
+                                        تمدید اشتراک
+                                    </v-chip>
+                                </template>
                             </td>
                             <td>
                                 <div class="whitespace-nowrap">

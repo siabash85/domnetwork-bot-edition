@@ -20,11 +20,12 @@ use Modules\Server\Http\Controllers\Panel\SubscriptionController;
 |
 */
 
-Route::prefix('/panel')->group(function () {
+Route::prefix('/panel')->middleware('auth:api')->group(function () {
     Route::apiResource("servers", ServerController::class);
     Route::apiResource("package/durations", PackageDurationController::class);
     Route::apiResource("packages", PackageController::class);
     Route::apiResource("services", ServiceController::class);
     Route::apiResource("pricing", PricingController::class);
     Route::apiResource("subscriptions", SubscriptionController::class);
+    Route::post("subscription/extension", [SubscriptionController::class, "extension"]);
 });

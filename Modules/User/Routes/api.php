@@ -15,6 +15,8 @@ use Modules\User\Http\Controllers\Panel\UserController;
 |
 */
 
-Route::prefix('/panel')->group(function () {
+Route::prefix('/panel')->middleware('auth:api')->group(function () {
     Route::apiResource("users", UserController::class);
+    Route::get("user/select/search", [UserController::class, "select"]);
+    Route::get("user/report/{id}", [UserController::class, "report"]);
 });

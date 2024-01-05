@@ -15,13 +15,15 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { initVeeValidate } from "@/Core/Plugins/vee-validate";
 
+
 const vuetify = createVuetify({
     components,
     directives,
     locale: {
         locale: 'fa',
         fallback: 'fa',
-        rtl: { fa: true },
+
+        rtl: { fa: true, customLocale: true, },
     },
 })
 const app = createApp(App);

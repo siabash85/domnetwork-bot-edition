@@ -14,101 +14,155 @@
             <template #default>
                 <div class="flex justify-between mb-12 items-center">
                     <h2 class="text-xl">لیست کاربران</h2>
+                    <v-btn
+                        :to="{ name: 'panel-users-create' }"
+                        color="blue-accent-2"
+                    >
+                        ایجاد کاربر
+                    </v-btn>
                 </div>
-                <v-table fixed-header>
-                    <thead>
-                        <tr>
-                            <th class="text-right whitespace-nowrap">
-                                نام کاربری
-                            </th>
-                            <th class="text-right whitespace-nowrap">نام</th>
-                            <th class="text-right whitespace-nowrap">ایمیل</th>
-                            <th class="text-right whitespace-nowrap">
-                                سطح کاربری
-                            </th>
-                            <th class="text-right whitespace-nowrap">
-                                آیدی تلگرام
-                            </th>
-                            <th class="text-right whitespace-nowrap">
-                                کیف پول
-                            </th>
-                            <th class="text-right whitespace-nowrap">وضعیت</th>
-                            <th class="text-right whitespace-nowrap">
-                                زمان ایجاد
-                            </th>
-                            <th class="text-right whitespace-nowrap">عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in users" :key="item.id">
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.username }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.first_name }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.email }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    <template v-if="item.is_superuser">
-                                        <v-chip
-                                            color="primary"
-                                            text-color="white"
-                                        >
-                                            ادمین
-                                        </v-chip>
-                                    </template>
-                                    <template v-else>
-                                        <v-chip text-color="white">
-                                            کاربر عادی
-                                        </v-chip>
-                                    </template>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.uid }}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.wallet }}
-                                </div>
-                            </td>
 
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    <template v-if="item.status == 'active'">
-                                        <v-chip
-                                            color="green"
-                                            text-color="white"
-                                        >
-                                            فعال
-                                        </v-chip>
-                                    </template>
-                                    <template v-if="item.status == 'ban'">
-                                        <v-chip color="red" text-color="white">
-                                            مسدود شده
-                                        </v-chip>
-                                    </template>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="whitespace-nowrap">
-                                    {{ item?.created_at }}
-                                </div>
-                            </td>
+                <v-card flat title="">
+                    <template v-slot:text>
+                        <v-text-field
+                            v-model="search"
+                            label="جستجو"
+                            prepend-inner-icon="mdi-magnify"
+                            single-line
+                            variant="outlined"
+                            hide-details
+                        ></v-text-field>
+                    </template>
 
-                            <td>
+                    <v-data-table
+                        no-data-text="نتیجه ای یافت نشد"
+                        page-text=""
+                        items-per-page-text=""
+                        :search="search"
+                        :items-per-page="10"
+                        :items="users"
+                        :headers="headers"
+                        :select-all="false"
+                        :all-selected="false"
+                        items-per-page-all-text=""
+                        :items-per-page-options="[
+                            { value: 5, title: '5' },
+                            { value: 10, title: '10' },
+                            { value: 25, title: '25' },
+                            { value: 50, title: '50' },
+                            { value: 100, title: '100' },
+                        ]"
+                    >
+                        <template v-slot:header.username>
+                            <div class="whitespace-nowrap">نام کاربری</div>
+                        </template>
+                        <template v-slot:header.first_name>
+                            <div class="whitespace-nowrap">نام</div>
+                        </template>
+
+                        <template v-slot:header.email>
+                            <div class="whitespace-nowrap">ایمیل</div>
+                        </template>
+                        <template v-slot:header.is_superuser>
+                            <div class="whitespace-nowrap">سطح کاربری</div>
+                        </template>
+                        <template v-slot:header.uid>
+                            <div class="whitespace-nowrap">آیدی تلگرام</div>
+                        </template>
+                        <template v-slot:header.wallet>
+                            <div class="whitespace-nowrap">کیف پول</div>
+                        </template>
+                        <template v-slot:header.status>
+                            <div class="whitespace-nowrap">وضعیت</div>
+                        </template>
+                        <template v-slot:header.created_at>
+                            <div class="whitespace-nowrap">زمان ایجاد</div>
+                        </template>
+                        <template v-slot:header.actions>
+                            <div class="whitespace-nowrap">عملیات</div>
+                        </template>
+
+                        <template v-slot:item.username="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item?.username }}
+                            </div>
+                        </template>
+                        <template v-slot:item.first_name="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item?.first_name }}
+                            </div>
+                        </template>
+                        <template v-slot:item.is_superuser="{ item }">
+                            <div class="whitespace-nowrap">
+                                <template v-if="item.is_superuser">
+                                    <v-chip color="primary" text-color="white">
+                                        ادمین
+                                    </v-chip>
+                                </template>
+                                <template v-else>
+                                    <v-chip text-color="white">
+                                        کاربر عادی
+                                    </v-chip>
+                                </template>
+                            </div>
+                        </template>
+                        <template v-slot:item.uid="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item?.uid }}
+                            </div>
+                        </template>
+                        <template v-slot:item.wallet="{ item }">
+                            <div class="whitespace-nowrap">
+                                <v-chip color="green" text-color="white">
+                                    {{ $filters.separate(item?.wallet) }} تومان
+                                </v-chip>
+                            </div>
+                        </template>
+                        <template v-slot:item.status="{ item }">
+                            <div class="whitespace-nowrap">
+                                <template v-if="item.status == 'active'">
+                                    <v-chip color="green" text-color="white">
+                                        فعال
+                                    </v-chip>
+                                </template>
+                                <template v-if="item.status == 'ban'">
+                                    <v-chip color="red" text-color="white">
+                                        مسدود شده
+                                    </v-chip>
+                                </template>
+                            </div>
+                        </template>
+                        <template v-slot:item.created_at="{ item }">
+                            <div class="whitespace-nowrap">
+                                {{ item?.created_at }}
+                            </div>
+                        </template>
+                        <template v-slot:item.actions="{ item }">
+                            <div class="whitespace-nowrap">
                                 <div class="flex items-center">
+                                    <div v-if="!user?.is_partner">
+                                        <template v-if="item?.is_partner">
+                                            <v-btn
+                                                :to="{
+                                                    name: 'panel-users-report',
+                                                    params: { id: item.id },
+                                                }"
+                                                prepend-icon="mdi-chart-box-outline"
+                                                class="mr-4"
+                                            >
+                                                گزارش
+                                            </v-btn>
+                                        </template>
+                                        <template v-else>
+                                            <v-btn
+                                                prepend-icon="mdi-chart-box-outline"
+                                                class="mr-4"
+                                            >
+                                                گزارش
+                                            </v-btn>
+                                        </template>
+                                    </div>
+
                                     <v-btn
                                         :to="{
                                             name: 'panel-users-edit',
@@ -120,10 +174,10 @@
                                         مشاهده
                                     </v-btn>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
+                            </div>
+                        </template>
+                    </v-data-table>
+                </v-card>
             </template>
         </base-skeleton>
 
@@ -162,24 +216,32 @@
 import { onMounted, ref } from "vue";
 import ApiService from "@/Core/services/ApiService";
 import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
-
+import { useAuthStore, type User } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const store = useAuthStore();
+const { user } = storeToRefs(store);
 const loading = ref(true);
-
+const search = ref("");
 const visible_delete_confirmation = ref(false);
 const visible_delete_message = ref(false);
-
 const users = ref([]);
 const selected_item = ref(null);
+const headers = ref([
+    { key: "username", title: "نام کاربری", sortable: true },
+    { key: "first_name", title: "نام", sortable: true },
+    { key: "email", title: "ایمیل", sortable: true },
+    { key: "is_superuser", title: "سطح کاربری", sortable: true },
+    { key: "uid", title: "آیدی تلگرام", sortable: true },
+    { key: "wallet", title: "کیف پول", sortable: true },
+    { key: "status", title: "وضعیت", sortable: true },
+    { key: "created_at", title: "زمان ایجاد", sortable: true },
+    { key: "actions", title: "عملیات", sortable: true },
+]);
 const fetchData = async () => {
     const { data } = await ApiService.get("/api/panel/users");
     users.value = data.data;
     loading.value = false;
 };
-const handleShowDeleteMessage = (item) => {
-    visible_delete_confirmation.value = true;
-    selected_item.value = item;
-};
-
 const handleDelete = async () => {
     const { data } = await ApiService.delete(
         `/api/panel/users/${selected_item.value.id}`

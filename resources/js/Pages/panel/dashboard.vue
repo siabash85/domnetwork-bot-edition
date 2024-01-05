@@ -17,57 +17,130 @@
             </template>
             <template #default>
                 <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-12 lg:col-span-4" v-if="!loading">
-                        <v-card class="">
-                            <v-card-item title="فروش کل">
-                                <template v-slot:subtitle>
-                                    <v-icon
-                                        icon="mdi-alert"
-                                        size="18"
-                                        color="error"
-                                        class="me-1 pb-1"
-                                    ></v-icon>
-                                    میزان فروش کل سفارشات موفق
-                                </template>
-                            </v-card-item>
-
-                            <v-card-text class="py-0">
-                                <v-row align="center" no-gutters>
-                                    <v-col cols="6" class="text-right">
+                    <div
+                        class="col-span-12"
+                        :class="[
+                            !user?.is_partner
+                                ? 'lg:col-span-4'
+                                : 'lg:col-span-6',
+                        ]"
+                    >
+                        <template v-if="!user?.is_partner">
+                            <v-card class="">
+                                <v-card-item title="فروش کل">
+                                    <template v-slot:subtitle>
                                         <v-icon
-                                            color="green"
-                                            icon="mdi-cash"
-                                            size="88"
+                                            icon="mdi-alert"
+                                            size="18"
+                                            color="error"
+                                            class="me-1 pb-1"
                                         ></v-icon>
-                                    </v-col>
-                                    <v-col class="text-xl text-left" cols="6">
-                                        {{
-                                            $filters.separate(
-                                                statics?.payments_total
-                                            )
-                                        }}
-                                        تومان
-                                    </v-col>
-                                </v-row>
-                            </v-card-text>
+                                        میزان فروش کل سفارشات موفق
+                                    </template>
+                                </v-card-item>
 
-                            <div class="d-flex py-3 justify-space-between">
-                                <v-list-item density="compact">
-                                    <v-list-item-subtitle>
-                                        تعداد کل سفارشات :
-                                        {{ statics?.payments_count }}
-                                    </v-list-item-subtitle>
-                                </v-list-item>
-                            </div>
+                                <v-card-text class="py-0">
+                                    <v-row align="center" no-gutters>
+                                        <v-col cols="6" class="text-right">
+                                            <v-icon
+                                                color="green"
+                                                icon="mdi-cash"
+                                                size="88"
+                                            ></v-icon>
+                                        </v-col>
+                                        <v-col
+                                            class="text-xl text-left"
+                                            cols="6"
+                                        >
+                                            {{
+                                                $filters.separate(
+                                                    statics?.payments_total
+                                                )
+                                            }}
+                                            تومان
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
 
-                            <v-card-actions>
-                                <v-btn :to="{ name: 'panel-payments-index' }"
-                                    >مشاهده تراکنش ها
-                                </v-btn>
-                            </v-card-actions>
-                        </v-card>
+                                <div class="d-flex py-3 justify-space-between">
+                                    <v-list-item density="compact">
+                                        <v-list-item-subtitle>
+                                            تعداد کل سفارشات :
+                                            {{ statics?.payments_count }}
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </div>
+
+                                <v-card-actions>
+                                    <v-btn
+                                        :to="{ name: 'panel-payments-index' }"
+                                        >مشاهده تراکنش ها
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </template>
+                        <template v-else>
+                            <v-card class="">
+                                <v-card-item title="گزارش سفارشات">
+                                    <template v-slot:subtitle>
+                                        <v-icon
+                                            icon="mdi-alert"
+                                            size="18"
+                                            color="error"
+                                            class="me-1 pb-1"
+                                        ></v-icon>
+                                        گزارش سفارشات
+                                    </template>
+                                </v-card-item>
+
+                                <v-card-text class="py-0">
+                                    <v-row align="center" no-gutters>
+                                        <v-col cols="6" class="text-right">
+                                            <v-icon
+                                                color="green"
+                                                icon="mdi-cash"
+                                                size="88"
+                                            ></v-icon>
+                                        </v-col>
+                                        <v-col
+                                            class="text-xl text-left"
+                                            cols="6"
+                                        >
+                                            {{
+                                                $filters.separate(
+                                                    statics?.orders_total
+                                                )
+                                            }}
+                                            تومان
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+
+                                <div class="d-flex py-3 justify-space-between">
+                                    <v-list-item density="compact">
+                                        <v-list-item-subtitle>
+                                            تعداد کل سفارشات :
+                                            {{ statics?.orders_count }}
+                                        </v-list-item-subtitle>
+                                    </v-list-item>
+                                </div>
+
+                                <v-card-actions>
+                                    <v-btn :to="{ name: 'panel-orders-index' }"
+                                        >مشاهده سفارشات
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </template>
                     </div>
-                    <div class="col-span-12 lg:col-span-4">
+                    <div
+                        class="col-span-12"
+                        :class="[
+                            !user?.is_partner
+                                ? 'lg:col-span-4'
+                                : 'lg:col-span-6',
+                        ]"
+                    >
                         <v-card class="">
                             <v-card-item title="کاربران">
                                 <template v-slot:subtitle>
@@ -112,7 +185,10 @@
                             </v-card-actions>
                         </v-card>
                     </div>
-                    <div class="col-span-12 lg:col-span-4">
+                    <div
+                        class="col-span-12 lg:col-span-4"
+                        v-if="!user?.is_partner"
+                    >
                         <v-card class="">
                             <v-card-item title="پیام های پشتیبانی">
                                 <template v-slot:subtitle>
@@ -172,6 +248,10 @@
 import { onMounted, ref } from "vue";
 import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
 import ApiService from "@/Core/services/ApiService";
+import { useAuthStore, type User } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const store = useAuthStore();
+const { user } = storeToRefs(store);
 const statics = ref({});
 const loading = ref(true);
 const fetchData = async () => {

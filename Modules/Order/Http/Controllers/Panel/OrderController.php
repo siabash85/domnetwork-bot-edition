@@ -4,11 +4,12 @@ namespace Modules\Order\Http\Controllers\Panel;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\User\Entities\User;
+use Modules\Order\Entities\Order;
 use Modules\Payment\Entities\Payment;
 use Telegram\Bot\Laravel\Facades\Telegram;
-use Modules\Common\Http\Controllers\Api\ApiController;
-use Modules\Order\Entities\Order;
 use Modules\Order\Transformers\Panel\OrderResource;
+use Modules\Common\Http\Controllers\Api\ApiController;
 
 class OrderController extends ApiController
 {
@@ -19,7 +20,14 @@ class OrderController extends ApiController
      */
     public function index()
     {
-        $orders = Order::query()->get();
+        $user = auth()->user();
+        if ($user->is_partner) {
+            $orders = Order::query()->whereHas("user", function ($q) use ($user) {
+                $q->where("partner_id", $user->id);
+            })->get();
+        } else {
+            $orders = Order::query()->get();
+        }
         $orders = OrderResource::collection($orders);
         return $this->successResponse($orders, "");
     }

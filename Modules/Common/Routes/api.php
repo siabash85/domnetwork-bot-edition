@@ -15,6 +15,6 @@ use Modules\Common\Http\Controllers\Panel\DashboardController;
 |
 */
 
-Route::prefix('/panel')->group(function () {
+Route::prefix('/panel')->middleware('auth:api')->group(function () {
     Route::get("dashboard", [DashboardController::class, 'index']);
 });

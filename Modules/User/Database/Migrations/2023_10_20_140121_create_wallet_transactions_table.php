@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
-            $table->bigInteger("amount");
+            $table->bigInteger("amount")->nullable();
             $table->string("status")->nullable();
             $table->timestamps();
         });

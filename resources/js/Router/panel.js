@@ -155,6 +155,18 @@ export default {
             name: "panel-users-edit",
             component: () => import("@/Pages/panel/users/edit.vue"),
         },
+        {
+            path: "users/report/:id",
+            name: "panel-users-report",
+            component: () => import("@/Pages/panel/users/report.vue"),
+        },
+
+
+        {
+            path: "users/create",
+            name: "panel-users-create",
+            component: () => import("@/Pages/panel/users/create.vue"),
+        },
 
         // pricing
         {
@@ -197,6 +209,11 @@ export default {
             path: "subscriptions",
             name: "panel-subscriptions-index",
             component: () => import("@/Pages/panel/subscriptions/index.vue"),
+        },
+        {
+            path: "subscriptions/create",
+            name: "panel-subscriptions-create",
+            component: () => import("@/Pages/panel/subscriptions/create.vue"),
         },
         {
             path: "subscriptions/edit/:id",

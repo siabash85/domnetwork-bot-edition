@@ -85,7 +85,7 @@ export const useAuthStore = defineStore("auth", () => {
             ApiService.setHeader();
             ApiService.get("/api/user")
                 .then(({ data }) => {
-                    setUser(data);
+                    setUser(data.data);
                 })
                 .catch(({ response }) => {
                     setError(response.data.errors);

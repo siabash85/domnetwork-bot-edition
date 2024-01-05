@@ -66,7 +66,6 @@
                                     mode="passive"
                                     name="uid"
                                     v-slot="{ field }"
-                                    rules="required"
                                     label=" آیدی عددی تلگرام "
                                 >
                                     <v-text-field
