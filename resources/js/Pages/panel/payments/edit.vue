@@ -158,7 +158,7 @@
                     <v-card-text>
                         <div>
                             <img
-                                class="w-[400px] h-[400px]"
+                                class="w-[600px] h-[600px] object-contain"
                                 :src="form?.receipt"
                                 alt=""
                             />

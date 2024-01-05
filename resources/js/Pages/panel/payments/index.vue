@@ -175,7 +175,9 @@
                         </template>
                         <template v-slot:item.amount="{ item }">
                             <div class="whitespace-nowrap">
-                                {{ item.amount }} تومان
+                                <v-chip color="green" text-color="white">
+                                    {{ $filters.separate(item?.amount) }} تومان
+                                </v-chip>
                             </div>
                         </template>
                         <template v-slot:item.payment_method="{ item }">
