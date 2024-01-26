@@ -108,6 +108,15 @@ class SubscriptionController extends ApiController
                 "id" => intval($server_inbound_id),
                 "settings" => json_encode($settings)
             ]);
+            $order = Order::query()->create([
+                "user_id" => $user->id,
+                "service_id" => $service->id,
+                "status" => "success",
+                "payable_price" => $service->price,
+                "price" => $service->price,
+                "type" => "purchase"
+            ]);
+            $user->decrement("wallet", $service->price);
             try {
 
                 $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
@@ -143,7 +152,7 @@ class SubscriptionController extends ApiController
         $sub = Subscription::query()->where('id', $request->subscription_id)->first();
         $sub_package_duration = PackageDuration::query()->where('id', $request->package_duration_id)->first();
         $user = $sub->user;
-        $extension_price = $sub_package_duration->price *  intval($request->volume);;
+        $extension_price = $sub_package_duration->price *  intval($request->volume);
         if ($extension_price > $user->wallet) {
             return $this->successResponse($extension_price, "❌ موجودی شما برای خرید این سرویس کافی نمیباشد ", 204);
         } else {
