@@ -103,8 +103,8 @@ class GenerateConfigService
 
     public static function generateConfigQrCode($link)
     {
-        $qrCode = QrCode::format('png')->generate($link);
-        $path = 'public/images/qrcodes/' . uniqid() . '.png';
+        $qrCode = QrCode::format('jpg')->generate($link);
+        $path = 'public/images/qrcodes/' . uniqid() . '.jpg';
         Storage::put($path, $qrCode);
         $qrcode = Storage::url($path);
         return $qrcode;
