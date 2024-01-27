@@ -3,7 +3,9 @@
 namespace Modules\Server\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Modules\Server\Entities\Subscription;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 
@@ -97,5 +99,14 @@ class GenerateConfigService
         $inbound_res = json_decode($response->body());
         $inbound_obj = $inbound_res->obj;
         return $inbound_obj;
+    }
+
+    public static function generateConfigQrCode($link)
+    {
+        $qrCode = QrCode::format('png')->generate($link);
+        $path = 'public/images/qrcodes/' . uniqid() . '.png';
+        Storage::put($path, $qrCode);
+        $qrcode = Storage::url($path);
+        return $qrcode;
     }
 }

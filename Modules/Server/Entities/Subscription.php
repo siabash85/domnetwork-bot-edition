@@ -25,6 +25,7 @@ class Subscription extends Model
         'subId',
         'flow',
         'uuid',
+        'qrcode'
     ];
     protected $casts = [
         'expire_at' => 'datetime'

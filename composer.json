@@ -15,6 +15,7 @@
         "morilog/jalali": "3.*",
         "nwidart/laravel-modules": "^10.0",
         "shetabit/payment": "^5.4",
+        "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-medialibrary": "^10.15"
     },
     "require-dev": {

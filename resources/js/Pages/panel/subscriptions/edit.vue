@@ -136,7 +136,15 @@
 
                         <div class="col-span-12">
                             <div class="mb-6">
-                                <h2 class="text-xl">لینک اشتراک</h2>
+                                <h2 class="text-xl">لینک مستقیم v2ray</h2>
+                            </div>
+
+                            <div>
+                                <img
+                                    :src="form?.v2ray_qrcode"
+                                    alt=""
+                                    class="w-full lg:w-[200px] h-[250px] lg:h-[200px]"
+                                />
                             </div>
 
                             <div>
@@ -147,6 +155,31 @@
                                     prepend-icon="mdi-content-copy"
                                 >
                                     {{ form?.config }}
+                                </v-chip>
+                            </div>
+                        </div>
+
+                        <div class="col-span-12 mt-6">
+                            <div class="mb-6">
+                                <h2 class="text-xl">لینک اشتراک</h2>
+                            </div>
+
+                            <div>
+                                <img
+                                    :src="form?.sub_qrcode"
+                                    alt=""
+                                    class="w-full lg:w-[200px] h-[250px] lg:h-[200px]"
+                                />
+                            </div>
+
+                            <div>
+                                <v-chip
+                                    @click="copyToClipboard"
+                                    class="ma-2"
+                                    color="indigo"
+                                    prepend-icon="mdi-content-copy"
+                                >
+                                    {{ form?.sub_config }}
                                 </v-chip>
                             </div>
                         </div>

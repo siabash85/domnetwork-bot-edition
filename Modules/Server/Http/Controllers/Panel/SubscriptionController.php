@@ -10,9 +10,11 @@ use Modules\User\Entities\User;
 use Modules\Order\Entities\Order;
 use Illuminate\Support\Facades\Http;
 use Modules\Server\Entities\Service;
+use Illuminate\Support\Facades\Storage;
 use Modules\Server\Entities\Subscription;
 use App\Telegram\Keyboard\KeyboardHandler;
 use Telegram\Bot\Laravel\Facades\Telegram;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Modules\Server\Entities\PackageDuration;
 use Modules\Server\Services\GenerateConfigService;
 use Modules\Common\Http\Controllers\Api\ApiController;
@@ -125,9 +127,19 @@ class SubscriptionController extends ApiController
                     $clean_server_url = $parts['host'];
                     $sub_link = GenerateConfigService::generateSubscription($subscription->id);
                     $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
+                    $sub_qrCode = QrCode::format('png')->generate($sub_link);
+                    $sub_path = 'public/images/qrcodes/' . uniqid() . '.png';
+                    Storage::put($sub_path, $sub_qrCode);
+                    $sub_qrcode = Storage::url($sub_path);
+                    $v2ray_qrCode = QrCode::format('png')->generate($service_link);
+                    $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.png';
+                    Storage::put($v2ray_path, $v2ray_qrCode);
+                    $v2ray_qrcode = Storage::url($v2ray_path);
                     $reponse_data = [
                         'link' => $service_link,
                         'sub' => $sub_link,
+                        'sub_qrcode' => $sub_qrcode,
+                        'v2ray_qrcode' => $v2ray_qrcode,
                     ];
                     return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
                 }

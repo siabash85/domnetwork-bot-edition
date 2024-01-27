@@ -15,6 +15,8 @@ class SubscriptionDetailResource  extends JsonResource
      */
     public function toArray($request)
     {
+        $sub_config = GenerateConfigService::generateSubscription($this->id);
+        $v2ray_config = GenerateConfigService::generate($this->id);
         return [
             'id' => $this->id,
             'service' => new ServiceResource($this->service),
@@ -32,7 +34,10 @@ class SubscriptionDetailResource  extends JsonResource
             'created_at' =>  formatGregorian($this->created_at),
             'updated_at' =>  formatGregorian($this->updated_at),
             'expire_at' =>  formatGregorian($this->expire_at),
-            'config' => GenerateConfigService::generate($this->id)
+            'config' => $v2ray_config,
+            'sub_config' => $sub_config,
+            'sub_qrcode' =>  GenerateConfigService::generateConfigQrCode($sub_config),
+            'v2ray_qrcode' =>  GenerateConfigService::generateConfigQrCode($v2ray_config),
         ];
     }
 }

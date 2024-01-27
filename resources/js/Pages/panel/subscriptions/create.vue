@@ -177,6 +177,32 @@
                 <v-card-title class=""> </v-card-title>
                 <v-card-text>
                     <div class="grid grid-cols-12 gap-2">
+                        <div class="col-span-12 lg:col-span-6 mb-8">
+                            <div class="mb-2">
+                                <h2 class="text-xl">اسکن اشتراک</h2>
+                            </div>
+
+                            <div>
+                                <img
+                                    :src="sub_qrcode"
+                                    alt=""
+                                    class="w-full lg:w-[200px] h-[250px] lg:h-[200px]"
+                                />
+                            </div>
+                        </div>
+                        <div class="col-span-12 lg:col-span-6 mb-8">
+                            <div class="mb-2">
+                                <h2 class="text-xl">اسکن لینک مستقیم v2ray</h2>
+                            </div>
+
+                            <div>
+                                <img
+                                    :src="v2ray_qrcode"
+                                    alt=""
+                                    class="w-full lg:w-[200px] h-[250px] lg:h-[200px]"
+                                />
+                            </div>
+                        </div>
                         <div class="col-span-12">
                             <div class="mb-2">
                                 <h2 class="text-xl">لینک اشتراک</h2>
@@ -242,6 +268,8 @@ const form = ref({
     expire_date: null,
 });
 const sub_link = ref("");
+const sub_qrcode = ref("");
+const v2ray_qrcode = ref("");
 const config_link = ref("");
 const visible_success_message = ref(false);
 
@@ -272,6 +300,9 @@ const handleCreate = async (event) => {
 
             sub_link.value = data.data.sub;
             config_link.value = data.data.link;
+            sub_qrcode.value = data.data.sub_qrcode;
+            v2ray_qrcode.value = data.data.v2ray_qrcode;
+
             visible_config_dialog.value = true;
         } else {
             loading.value = false;
