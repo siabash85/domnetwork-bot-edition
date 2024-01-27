@@ -127,13 +127,13 @@ class SubscriptionController extends ApiController
                     $clean_server_url = $parts['host'];
                     $sub_link = GenerateConfigService::generateSubscription($subscription->id);
                     $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
-                    $sub_qrCode = QrCode::format('png')->generate($sub_link);
-                    $sub_path = 'public/images/qrcodes/' . uniqid() . '.png';
+                    $sub_qrCode = QrCode::format('svg')->generate($sub_link);
+                    $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
                     Storage::put($sub_path, $sub_qrCode);
                     $sub_qrcode = Storage::url($sub_path);
-                    $v2ray_qrCode = QrCode::format('png')->generate($service_link);
+                    $v2ray_qrCode = QrCode::format('svg')->generate($service_link);
 
-                    $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.png';
+                    $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.svg';
                     Storage::put($v2ray_path, $v2ray_qrCode);
                     $v2ray_qrcode = Storage::url($v2ray_path);
                     $reponse_data = [
