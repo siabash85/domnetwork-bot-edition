@@ -132,6 +132,7 @@ class SubscriptionController extends ApiController
                     Storage::put($sub_path, $sub_qrCode);
                     $sub_qrcode = Storage::url($sub_path);
                     $v2ray_qrCode = QrCode::format('png')->generate($service_link);
+
                     $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.png';
                     Storage::put($v2ray_path, $v2ray_qrCode);
                     $v2ray_qrcode = Storage::url($v2ray_path);
