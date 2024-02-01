@@ -32,15 +32,19 @@ class SendExpireServiceNotif extends Command
         $expired_subscriptions = Subscription::query()->where('status', 'active')->whereDate('expire_at', '<=', now())->get();
 
         foreach ($expired_subscriptions as $key => $epired_subscription) {
-            $code = $epired_subscription->code;
-            $chat_id = $epired_subscription->user->uid;
-            Telegram::sendMessage([
-                'text' => "⛔️ سرویس {$code} به علت عدم تمدید حذف شد.",
-                "chat_id" => $chat_id,
-            ]);
-            $epired_subscription->update([
-                "status" => "inactive"
-            ]);
+            try {
+                $code = $epired_subscription->code;
+                $chat_id = $epired_subscription->user->uid;
+                Telegram::sendMessage([
+                    'text' => "⛔️ سرویس {$code} به علت عدم تمدید حذف شد.",
+                    "chat_id" => $chat_id,
+                ]);
+                $epired_subscription->update([
+                    "status" => "inactive"
+                ]);
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
         }
 
 
@@ -48,15 +52,19 @@ class SendExpireServiceNotif extends Command
 
 
         foreach ($subscriptions as $key => $epired_subscription) {
-            $code = $epired_subscription->code;
-            $chat_id = $epired_subscription->user->uid;
-            $message =  "⚠️   کمتر از 3 روز تا انقضای سرویس {$code} باقی مانده است. \n\n" .
-                "📌 برای جلوگیری از قطع سرویس، در اسرع وقت نسبت به تمدید سرویس اقدام کنید. \n\n" .
-                "⁉️ در صورت منقضی شدن سرویس، حجم باقی مانده سرویس سوخته و سرویس پس از ۳ روز از عدم اقدام به طور کامل حذف خواهد شد.";
-            Telegram::sendMessage([
-                'text' => $message,
-                "chat_id" => $chat_id,
-            ]);
+            try {
+                $code = $epired_subscription->code;
+                $chat_id = $epired_subscription->user->uid;
+                $message =  "⚠️   کمتر از 3 روز تا انقضای سرویس {$code} باقی مانده است. \n\n" .
+                    "📌 برای جلوگیری از قطع سرویس، در اسرع وقت نسبت به تمدید سرویس اقدام کنید. \n\n" .
+                    "⁉️ در صورت منقضی شدن سرویس، حجم باقی مانده سرویس سوخته و سرویس پس از ۳ روز از عدم اقدام به طور کامل حذف خواهد شد.";
+                Telegram::sendMessage([
+                    'text' => $message,
+                    "chat_id" => $chat_id,
+                ]);
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
         }
     }
 }
