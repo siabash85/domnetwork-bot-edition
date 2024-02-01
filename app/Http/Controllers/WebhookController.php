@@ -219,11 +219,21 @@ class WebhookController extends Controller
                                 "`$service_link` \n\n" .
                                 "📌 *لینک اشتراک* \n\n" .
                                 "`$sub_link` \n\n";
-                            Telegram::sendMessage([
-                                'text' => $message,
+                            // Telegram::sendMessage([
+                            //     'text' => $message,
+                            //     "chat_id" => $sender->id,
+                            //     'parse_mode' => 'MarkdownV2',
+                            //     'reply_markup' => KeyboardHandler::home(),
+                            // ]);
+
+                            Telegram::sendPhoto([
                                 "chat_id" => $sender->id,
-                                'parse_mode' => 'MarkdownV2',
+                                'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
+                                'caption' => $message,
                                 'reply_markup' => KeyboardHandler::home(),
+                                'parse_mode' => 'MarkdownV2',
+                                'width' => 300,
+                                'height' => 300,
                             ]);
                             $owner_users = User::query()->where('is_notifable', true)->get();
                             $order_user = $user->username . " - " . $user->uid;
@@ -245,6 +255,10 @@ class WebhookController extends Controller
                         }
                     } catch (\Throwable $th) {
                         // dd($th->getMessage());
+                        Telegram::sendMessage([
+                            'text' => $th->getMessage(),
+                            "chat_id" => $sender->id,
+                        ]);
                     }
                 }
 
