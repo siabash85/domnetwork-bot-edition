@@ -28,6 +28,7 @@ use Spatie\MediaLibrary\Conversions\ImageGenerators\Webp;
 
 
 Route::fallback(function () {
+
     // $qrCode = QrCode::format('png')->generate('Hello, World!');
     // $path = 'public/images/qrcodes/' . uniqid() . '.png';
     // Storage::put($path, $qrCode);
