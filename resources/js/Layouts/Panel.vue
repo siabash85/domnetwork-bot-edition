@@ -42,6 +42,14 @@
                 </v-list-item>
 
                 <v-list-item
+                    link
+                    prepend-icon="mdi-bell-ring"
+                    title="اعلان ها"
+                    :to="{ name: 'panel-notification-messages-index' }"
+                >
+                </v-list-item>
+
+                <v-list-item
                     v-if="!user?.is_partner"
                     prepend-icon="mdi-server-outline"
                     title="سرورها"
@@ -157,6 +165,8 @@ const signOut = () => {
     });
 };
 onMounted(() => {
+    console.log("user", user);
+
     if (mobile.value) {
         drawer.value = false;
     }
