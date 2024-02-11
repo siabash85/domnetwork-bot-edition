@@ -7,5 +7,6 @@
     "Payment": true,
     "Guide": true,
     "Support": true,
-    "Setting": true
+    "Setting": true,
+    "Notification": true
 }

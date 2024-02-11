@@ -221,5 +221,23 @@ export default {
             component: () => import("@/Pages/panel/subscriptions/edit.vue"),
         },
 
+        // user messages
+
+        {
+            path: "notification/messages",
+            name: "panel-notification-messages-index",
+            component: () => import("@/Pages/panel/notification/messages/index.vue"),
+        },
+        {
+            path: "notification/messages/create",
+            name: "panel-notification-messages-create",
+            component: () => import("@/Pages/panel/notification/messages/create.vue"),
+        },
+        {
+            path: "notification/messages/:id",
+            name: "panel-notification-messages-show",
+            component: () => import("@/Pages/panel/notification/messages/show.vue"),
+        },
+
     ],
 };
