@@ -225,6 +225,7 @@ class WebhookController extends Controller
                                 'parse_mode' => 'MarkdownV2',
                                 'reply_markup' => KeyboardHandler::home(),
                             ]);
+
                             // Telegram::sendPhoto([
                             //     "chat_id" => $sender->id,
                             //     'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
