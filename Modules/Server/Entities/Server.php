@@ -20,6 +20,11 @@ class Server extends Model
         'inbound',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_default' => 'boolean',
+    ];
+
     // protected static function newFactory()
     // {
     //     return \Modules\Server\Database\factories\ServerFactory::new();

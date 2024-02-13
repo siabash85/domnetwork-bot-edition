@@ -15,6 +15,10 @@ class Package extends Model
         'price',
         'is_active'
     ];
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
 
     // protected static function newFactory()
     // {
