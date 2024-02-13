@@ -40,7 +40,7 @@ class UserMessageController extends ApiController
 
         $selected_users =  explode(",", $request->users);
 
-        if (empty($selected_users) || is_null($selected_users)) {
+        if (!$request->users) {
             $users = User::query()->get();
         } else {
             $users = User::query()->whereIn('id', $selected_users)->get();
@@ -56,7 +56,7 @@ class UserMessageController extends ApiController
                     'reply_markup' => KeyboardHandler::home(),
                 ]);
             } catch (\Throwable $th) {
-                //throw $th;
+                return $th;
             }
         };
 
