@@ -46,7 +46,6 @@ class UserMessageController extends ApiController
             $users = User::query()->whereIn('id', $selected_users)->get();
         }
 
-
         foreach ($users as $key => $user) {
             try {
                 Telegram::sendMessage([
