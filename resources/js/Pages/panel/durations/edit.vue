@@ -26,7 +26,6 @@
                                     label="روز به عدد"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                     hint="بازه زمانی را تعداد روز وارد کنید"
                                 ></v-text-field>
                             </div>
@@ -38,7 +37,6 @@
                                     density="compact"
                                     single-line
                                     persistent-hint
-                                    variant="solo"
                                     hint="مقدار 0 به معنی بی نهایت می باشد"
                                 ></v-text-field>
                             </div>
@@ -50,7 +48,6 @@
                                     density="compact"
                                     single-line
                                     persistent-hint
-                                    variant="solo"
                                     hint=" مقدار وارد شده به تومان می باشد."
                                 ></v-text-field>
                             </div>

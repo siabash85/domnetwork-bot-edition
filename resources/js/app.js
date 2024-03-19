@@ -25,6 +25,9 @@ const vuetify = createVuetify({
 
         rtl: { fa: true, customLocale: true, },
     },
+    theme: {
+        defaultTheme: 'dark'
+    }
 })
 const app = createApp(App);
 

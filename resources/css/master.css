@@ -109,3 +109,6 @@ select {
 .v-text-field .v-input__details {
     padding-inline: 0px !important;
 }
+.v-sheet {
+    padding: 1rem !important;
+}

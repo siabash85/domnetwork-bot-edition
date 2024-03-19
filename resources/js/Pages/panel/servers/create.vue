@@ -10,32 +10,29 @@
                 @submit.prevent="handleCreate"
             >
                 <div class="grid grid-cols-12 gap-2">
-                    <div class="col-span-12">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-text-field
                             v-model="form.name"
                             :rules="rules"
                             label="نام"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
                     </div>
-                    <div class="col-span-12 lg:col-span-6">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-text-field
                             v-model="form.username"
                             label="نام کاربری سرور"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
                     </div>
-                    <div class="col-span-12 lg:col-span-6">
+                    <div class="col-span-12 lg:col-span-4">
                         <v-text-field
                             v-model="form.password"
                             label=" رمز عبور سرور"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
                     </div>
                     <div class="col-span-12 lg:col-span-4">
@@ -44,7 +41,6 @@
                             label="آدرس سرور"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
                     </div>
                     <div class="col-span-12 lg:col-span-4">
@@ -53,8 +49,18 @@
                             label="inbound id"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
+                    </div>
+                    <div class="col-span-12 lg:col-span-4">
+                        <v-select
+                            v-model="form.type"
+                            label="نوع سرور"
+                            :items="server_types"
+                            item-title="state"
+                            item-value="value"
+                            single-line
+                            density="compact"
+                        ></v-select>
                     </div>
                 </div>
 
@@ -102,10 +108,16 @@ const form = ref({
     password: null,
     address: null,
     inbound: null,
-
     is_active: "1",
     is_default: "0",
+    type: "sanaei",
 });
+
+const server_types = ref([
+    { state: "سنایی", value: "sanaei" },
+    { state: "مرزبان", value: "marzban" },
+]);
+
 const visible_success_message = ref(false);
 const rules = ref([
     (value) => {
@@ -125,7 +137,7 @@ const handleCreate = async (event) => {
         form_data.append("password", form.value.password);
         form_data.append("address", form.value.address);
         form_data.append("inbound", form.value.inbound);
-
+        form_data.append("type", form.value.type);
         form_data.append("is_active", form.value.is_active);
         form_data.append("is_default", form.value.is_default);
         const { data } = await ApiService.post(`/api/panel/servers`, form_data);

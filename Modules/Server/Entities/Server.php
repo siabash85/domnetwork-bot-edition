@@ -18,6 +18,7 @@ class Server extends Model
         'password',
         'address',
         'inbound',
+        "type"
     ];
 
     protected $casts = [

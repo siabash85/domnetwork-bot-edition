@@ -123,6 +123,7 @@ class UserController extends ApiController
             'username' => $request->username,
             'first_name' => $request->first_name,
             'email' => $request->email,
+            'is_partner' => $request->is_partner,
             // 'mobile' => $request->mobile,
             'wallet' => $request->wallet,
 

@@ -140,6 +140,7 @@
                                     name="password"
                                     v-slot="{ field }"
                                     label="رمز عبور"
+                                    rules="required"
                                 >
                                     <v-text-field
                                         type="password"
@@ -162,6 +163,7 @@
                                     name="password_confirmation"
                                     v-slot="{ field }"
                                     label="تکرار رمز عبور"
+                                    rules="required"
                                 >
                                     <v-text-field
                                         type="password"

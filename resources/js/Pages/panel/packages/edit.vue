@@ -25,7 +25,6 @@
                                     label="نام"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
                             </div>
                             <div class="col-span-12 lg:col-span-6">
@@ -36,7 +35,6 @@
                                     density="compact"
                                     single-line
                                     persistent-hint
-                                    variant="solo"
                                     hint="مقدار 0 به معنی بی نهایت می باشد"
                                 ></v-text-field>
                             </div>
