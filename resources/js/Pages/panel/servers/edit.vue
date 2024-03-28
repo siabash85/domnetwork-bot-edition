@@ -18,51 +18,57 @@
                     </div>
                     <Form ref="formRef" @submit="handleUpdate">
                         <div class="grid grid-cols-12 gap-2">
-                            <div class="col-span-12">
+                            <div class="col-span-12 lg:col-span-4">
                                 <v-text-field
                                     v-model="form.name"
                                     :rules="rules"
                                     label="نام"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
                             </div>
-                            <div class="col-span-12 lg:col-span-6">
+                            <div class="col-span-12 lg:col-span-4">
                                 <v-text-field
                                     v-model="form.username"
                                     label="نام کاربری سرور"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
                             </div>
-                            <div class="col-span-12 lg:col-span-6">
+                            <div class="col-span-12 lg:col-span-4">
                                 <v-text-field
                                     v-model="form.password"
                                     label=" رمز عبور سرور"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
                             </div>
-                            <div class="col-span-12 lg:col-span-6">
+                            <div class="col-span-12 lg:col-span-4">
                                 <v-text-field
                                     v-model="form.address"
                                     label="آدرس سرور"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
                             </div>
-                            <div class="col-span-12 lg:col-span-6">
+                            <div class="col-span-12 lg:col-span-4">
                                 <v-text-field
                                     v-model="form.inbound"
                                     label="inbound id"
                                     density="compact"
                                     single-line
-                                    variant="solo"
                                 ></v-text-field>
+                            </div>
+                            <div class="col-span-12 lg:col-span-4">
+                                <v-select
+                                    v-model="form.type"
+                                    label="نوع سرور"
+                                    :items="server_types"
+                                    item-title="state"
+                                    item-value="value"
+                                    single-line
+                                    density="compact"
+                                ></v-select>
                             </div>
                         </div>
 
@@ -117,7 +123,14 @@ const form = ref({
     inbound: null,
     is_active: false,
     is_default: false,
+    type: "sanaei",
 });
+
+const server_types = ref([
+    { state: "سنایی", value: "sanaei" },
+    { state: "مرزبان", value: "marzban" },
+]);
+
 const visible_success_message = ref(false);
 const rules = ref([
     (value) => {
@@ -137,6 +150,8 @@ const handleUpdate = async (event) => {
     form_data.append("inbound", form.value.inbound);
     form_data.append("is_active", form.value.is_active);
     form_data.append("is_default", form.value.is_default);
+    form_data.append("type", form.value.type);
+
     const { data } = await ApiService.put(
         `/api/panel/servers/${route.params.id}`,
         form_data
@@ -156,9 +171,10 @@ const fetchData = async () => {
     form.value.password = data.data.password;
     form.value.address = data.data.address;
     form.value.inbound = data.data.inbound;
-    form.value.is_active = data.data.is_active.toString();
-    form.value.is_default = data.data.is_default.toString();
+    form.value.is_active = data.data.is_active ? "1" : "0";
+    form.value.is_default = data.data.is_default ? "1" : "0";
     loader.value = false;
+    form.value.type = data.data.type;
 };
 watchEffect(() => {
     if (formRef.value) {

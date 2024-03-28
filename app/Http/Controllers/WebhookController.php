@@ -533,7 +533,7 @@ class WebhookController extends Controller
                 return true;
             }
             if ($update->getMessage()->text == Keyboards::SERVICES) {
-                $user_services = Subscription::query()->where('user_id', $user->id)->get();
+                $user_services = Subscription::query()->where('user_id', $user->id)->where("status", "active")->get();
                 $keyboards = [];
                 $keyboards_keyboards = $user_services->chunk(2);
                 foreach ($keyboards_keyboards as $chunk) {
@@ -829,10 +829,14 @@ class WebhookController extends Controller
                             Storage::put("public/" . $storagePath . $filePath, $contents, 'public');
                             $latest_payment = Payment::query()->where('user_id', $user->id)->latest()->first();
                             $latest_payment->update(['receipt' => asset('storage/' . $storagePath . $filePath), 'status' => "pending_confirmation"]);
-                            Telegram::sendMessage([
-                                "chat_id" => $sender->id,
-                                'text' => "✅ فیش ارسالی شما با موفقیت به مدیریت ارسال شد پس از برسی حساب شما به صورت خودکار شارژ خواهد شد !",
-                            ]);
+                            try {
+                                Telegram::sendMessage([
+                                    "chat_id" => $sender->id,
+                                    'text' => "✅ فیش ارسالی شما با موفقیت به مدیریت ارسال شد پس از برسی حساب شما به صورت خودکار شارژ خواهد شد !",
+                                ]);
+                            } catch (\Throwable $th) {
+                                //throw $th;
+                            }
                             $owner_users = User::query()->where('is_notifable', true)->get();
                             $formated_payment_price = number_format(round($latest_payment->amount));
                             $payment_reference_code = $latest_payment->reference_code;
@@ -854,19 +858,27 @@ class WebhookController extends Controller
                             ];
                             $encodedKeyboard = json_encode(['inline_keyboard' => $inlineKeyboard]);
                             foreach ($owner_users as $key => $owner_user) {
-                                Telegram::sendMessage([
-                                    'text' => $message,
-                                    "chat_id" => $owner_user->uid,
-                                    'reply_markup' => $encodedKeyboard,
-                                ]);
+                                try {
+                                    Telegram::sendMessage([
+                                        'text' => $message,
+                                        "chat_id" => $owner_user->uid,
+                                        'reply_markup' => $encodedKeyboard,
+                                    ]);
+                                } catch (\Throwable $th) {
+                                    //throw $th;
+                                }
                             }
                             return true;
                         }
                     } else {
-                        Telegram::sendMessage([
-                            "chat_id" => $sender->id,
-                            'text' => "❌ ورودی فقط باید عکس باشد !",
-                        ]);
+                        try {
+                            Telegram::sendMessage([
+                                "chat_id" => $sender->id,
+                                'text' => "❌ ورودی فقط باید عکس باشد !",
+                            ]);
+                        } catch (\Throwable $th) {
+                            //throw $th;
+                        }
                         return true;
                     }
                 } else if ($wallet_trans->method == "voucher") {
@@ -1092,12 +1104,22 @@ class WebhookController extends Controller
                             "`$service_link` \n\n" .
                             "📌 *لینک اشتراک* \n\n" .
                             "`$sub_link` \n\n";
-                        Telegram::sendMessage([
-                            'text' => $message,
-                            'chat_id' => $sender->id,
-                            'parse_mode' => 'MarkdownV2',
+
+                        Telegram::sendPhoto([
+                            "chat_id" => $sender->id,
+                            'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
+                            'caption' => $message,
                             'reply_markup' => KeyboardHandler::service(),
+                            'parse_mode' => 'MarkdownV2',
+                            'width' => 300,
+                            'height' => 300,
                         ]);
+                        // Telegram::sendMessage([
+                        //     'text' => $message,
+                        //     'chat_id' => $sender->id,
+                        //     'parse_mode' => 'MarkdownV2',
+                        //     'reply_markup' => KeyboardHandler::service(),
+                        // ]);
                         $user->update([
                             'section' => Keyboards::SERVICES,
                             'step' => 2

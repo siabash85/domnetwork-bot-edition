@@ -210,6 +210,36 @@
                                 </div>
                             </div>
 
+                            <div class="col-span-12" v-if="!user?.is_partner">
+                                <Field
+                                    mode="passive"
+                                    name="is_partner"
+                                    v-slot="{ field }"
+                                    rules="required"
+                                    label=" نوع کاربری"
+                                >
+                                    <v-radio-group
+                                        v-bind="field"
+                                        v-model="form.is_partner"
+                                    >
+                                        <template v-slot:label>
+                                            <div>نوع کاربری</div>
+                                        </template>
+                                        <v-radio
+                                            label="کاربر عادی"
+                                            value="0"
+                                        ></v-radio>
+                                        <v-radio
+                                            label="کاربر همکار"
+                                            value="1"
+                                        ></v-radio>
+                                    </v-radio-group>
+                                </Field>
+                                <div class="invalid-feedback d-block">
+                                    <ErrorMessage name="is_partner" />
+                                </div>
+                            </div>
+
                             <div class="col-span-12">
                                 <Field
                                     mode="passive"
@@ -266,6 +296,10 @@ import ApiService from "@/Core/services/ApiService";
 import { useRoute, useRouter } from "vue-router";
 import { ErrorMessage, Field, Form } from "vee-validate";
 import { BaseSkeleton, BaseSkeletonItem } from "@/Components/skeleton";
+import { useAuthStore, type User } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const store = useAuthStore();
+const { user } = storeToRefs(store);
 const loader = ref(true);
 const loading = ref(false);
 const formRef = ref(null);
@@ -295,10 +329,12 @@ const handleUpdate = async (event) => {
         const form_data = new FormData();
         form_data.append("username", form.value.username);
         form_data.append("first_name", form.value.first_name);
-        form_data.append("email", form.value.email);
+        form_data.append("email", form.value.email ?? "");
         form_data.append("uid", form.value.uid);
         form_data.append("is_superuser", form.value.is_superuser);
         form_data.append("is_notifable", form.value.is_notifable);
+        form_data.append("is_partner", form.value.is_partner);
+
         form_data.append("status", form.value.status);
         form_data.append("wallet", form.value.wallet);
         form_data.append("password", form.value.password ?? "");
@@ -325,8 +361,9 @@ const fetchData = async () => {
     form.value.uid = data.data.uid;
     form.value.status = data.data.status;
     form.value.email = data.data.email;
-    form.value.is_superuser = data.data.is_superuser.toString();
-    form.value.is_notifable = data.data.is_notifable.toString();
+    form.value.is_superuser = data.data.is_superuser ? "1" : "0";
+    form.value.is_notifable = data.data.is_notifable ? "1" : "0";
+    form.value.is_partner = data.data.is_partner ? "1" : "0";
     form.value.wallet = data.data.wallet;
     form.value.status = data.data.status;
     loader.value = false;

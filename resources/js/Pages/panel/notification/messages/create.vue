@@ -41,7 +41,6 @@
                             label="عنوان"
                             density="compact"
                             single-line
-                            variant="solo"
                         ></v-text-field>
                     </div>
 
@@ -49,7 +48,6 @@
                         <v-textarea
                             v-model="form.content"
                             label="متن پیام"
-                            variant="solo"
                             size="large"
                             single-line
                             hide-details="auto"

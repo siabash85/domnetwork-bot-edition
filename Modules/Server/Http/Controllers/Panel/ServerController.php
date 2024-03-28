@@ -36,6 +36,7 @@ class ServerController extends ApiController
             'is_active' => $request->is_active,
             'is_default' => $request->is_default,
             'stock' => $request->stock,
+            'type' => $request->type,
         ]);
         return $this->successResponse($server, "ایجاد سرور با موفقیت انجام شد");
     }
@@ -69,6 +70,7 @@ class ServerController extends ApiController
             'is_active' => $request->is_active,
             'is_default' => $request->is_default,
             'stock' => $request->stock,
+            'type' => $request->type,
         ]);
         return $this->successResponse($server, "ویرایش سرور با موفقیت انجام شد");
     }

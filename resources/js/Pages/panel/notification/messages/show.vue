@@ -20,7 +20,6 @@
                             label="عنوان"
                             density="compact"
                             single-line
-                            variant="solo"
                             readonly
                         ></v-text-field>
                     </div>
@@ -30,7 +29,6 @@
                             readonly
                             v-model="form.content"
                             label="متن پیام"
-                            variant="solo"
                             size="large"
                             single-line
                             hide-details="auto"

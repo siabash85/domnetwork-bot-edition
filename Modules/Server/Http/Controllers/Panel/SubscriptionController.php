@@ -21,6 +21,7 @@ use Modules\Common\Http\Controllers\Api\ApiController;
 use Modules\Server\Transformers\Panel\SubscriptionResource;
 use Modules\Server\Transformers\Panel\SubscriptionDetailResource;
 
+
 class SubscriptionController extends ApiController
 {
     /**
@@ -76,77 +77,153 @@ class SubscriptionController extends ApiController
             ]);
 
             $server_address = $service->server->address;
-            $res = Http::post("$server_address/login", [
-                "username" => $service->server->username,
-                "password" => $service->server->password
-            ]);
-            $cookieJar = $res->cookies();
-            $cookiesArray = [];
-            foreach ($cookieJar as $cookie) {
-                $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
-            }
-            $cookiesString = implode('; ', $cookiesArray);
-            $package_duration_time = $service->package_duration->value > 0 ? -$service->package_duration->value * 24 * 60 * 60 * 1000 : 0;
-            $settings = [
-                "clients" => [
-                    [
-                        "id" => $subscription->uuid,
-                        "flow" => "",
-                        "email" => $subscription->code,
-                        "limitIp" => 0,
-                        "totalGB" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
-                        // "expire_at" => createDatetimeFromFormat($request->expire_date, 'Y/m/d'),
-                        "expire_at" => now()->addDays($service->package_duration->name),
-                        "enable" => true,
-                        "tgId" => "",
-                        "subId" => $subscription->subId
-                    ]
-                ]
-            ];
-            $server_inbound_id = $service->server->inbound;
-            $response = Http::withHeaders([
-                'Cookie' => $cookiesString,
-            ])->post("$server_address/panel/inbound/addClient", [
-                "id" => intval($server_inbound_id),
-                "settings" => json_encode($settings)
-            ]);
-            try {
+            $server_type = $service->server->type;
 
-                $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
-                $inbound_res = json_decode($inbound->body());
-                $inbound_obj = $inbound_res->obj;
-                $network = json_decode($inbound_obj->streamSettings)->network;
-                $inbound_port = $inbound_obj->port;
-                $inbound_remark = $inbound_obj->remark;
-                if ($response->successful()) {
-                    $location = $service->server->name;
-                    $volume = $service->package->name;
-                    $code = $subscription->code;
-                    $expire_date = $subscription->expire_at;
-                    $parts = parse_url($server_address);
-                    $clean_server_url = $parts['host'];
-                    $sub_link = GenerateConfigService::generateSubscription($subscription->id);
-                    $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
-                    $sub_qrCode = QrCode::format('svg')->generate($sub_link);
-                    $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
-                    Storage::put($sub_path, $sub_qrCode);
-                    $sub_qrcode = Storage::url($sub_path);
-                    $v2ray_qrCode = QrCode::format('svg')->generate($service_link);
+            if ($server_type == "marzban") {
 
-                    $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.svg';
-                    Storage::put($v2ray_path, $v2ray_qrCode);
-                    $v2ray_qrcode = Storage::url($v2ray_path);
-                    $reponse_data = [
-                        'link' => $service_link,
-                        'sub' => $sub_link,
-                        'sub_qrcode' => $sub_qrcode,
-                        'v2ray_qrcode' => $v2ray_qrcode,
-                    ];
-                    return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
+                $res = Http::asForm()->post("$server_address/api/admin/token", [
+                    "username" => $service->server->username,
+                    "password" => $service->server->password,
+                    "grant_type" => "password"
+                ]);
+
+                $auth_res = json_decode($res->body());
+                $auth_access_token = $auth_res->access_token;
+                $settings = [
+                    "username" => $request->name,
+                    "note" => "",
+                    "data_limit_reset_strategy" => "no_reset",
+                    "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
+                    "expire" => now()->addDays($service->package_duration->name)->timestamp,
+                    "status" => "active",
+                    "proxies" => array(
+                        "vless" => array(
+                            "flow" => ""
+                        ),
+                        "trojan" => array(),
+                        "shadowsocks" => array(
+                            "method" => "chacha20-ietf-poly1305"
+                        ),
+                        "vmess" => array()
+                    ),
+                    "inbounds" => array(
+                        "vmess" => array(
+                            "VMess TCP",
+                            "VMess Websocket"
+                        ),
+                        "vless" => array(
+                            "VLESS TCP REALITY",
+                            "VLESS GRPC REALITY"
+                        ),
+                        "trojan" => array(
+                            "Trojan Websocket TLS"
+                        ),
+                        "shadowsocks" => array(
+                            "Shadowsocks TCP"
+                        )
+                    )
+
+                ];
+
+                try {
+                    $response = Http::withHeaders([
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ])->withToken($auth_access_token)->post("$server_address/api/user", $settings);
+                    $user_res = json_decode($response->body());
+                    if ($response->successful()) {
+
+                        $sub_link = "{$server_address}$user_res->subscription_url";
+                        $sub_qrCode = QrCode::format('svg')->margin(2)->generate($sub_link);
+                        $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
+                        Storage::put($sub_path, $sub_qrCode);
+                        $sub_qrcode = Storage::url($sub_path);
+                        $reponse_data = [
+                            'link' => $sub_link,
+                            'sub' => $sub_link,
+                            'sub_qrcode' => $sub_qrcode,
+                            'v2ray_qrcode' => $sub_qrcode,
+                        ];
+                        return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
+                    }
+                } catch (\Throwable $th) {
+                    return $th->getMessage();
+                    $reponse_data = [];
+                    return $this->successResponse($subscription, "خطا در ایجاد اشتراک");
                 }
-            } catch (\Throwable $th) {
-                $reponse_data = [];
-                return $this->successResponse($subscription, "خطا در ایجاد اشتراک");
+            } else {
+                $res = Http::post("$server_address/login", [
+                    "username" => $service->server->username,
+                    "password" => $service->server->password
+                ]);
+                $cookieJar = $res->cookies();
+                $cookiesArray = [];
+                foreach ($cookieJar as $cookie) {
+                    $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+                }
+                $cookiesString = implode('; ', $cookiesArray);
+                $package_duration_time = $service->package_duration->value > 0 ? -$service->package_duration->value * 24 * 60 * 60 * 1000 : 0;
+                $settings = [
+                    "clients" => [
+                        [
+                            "id" => $subscription->uuid,
+                            "flow" => "",
+                            "email" => $subscription->code,
+                            "limitIp" => 0,
+                            "totalGB" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
+                            // "expire_at" => createDatetimeFromFormat($request->expire_date, 'Y/m/d'),
+                            "expire_at" => now()->addDays($service->package_duration->name),
+                            "enable" => true,
+                            "tgId" => "",
+                            "subId" => $subscription->subId
+                        ]
+                    ]
+                ];
+                $server_inbound_id = $service->server->inbound;
+                $response = Http::withHeaders([
+                    'Cookie' => $cookiesString,
+                ])->post("$server_address/panel/inbound/addClient", [
+                    "id" => intval($server_inbound_id),
+                    "settings" => json_encode($settings)
+                ]);
+                try {
+
+                    $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
+                    $inbound_res = json_decode($inbound->body());
+                    $inbound_obj = $inbound_res->obj;
+                    $network = json_decode($inbound_obj->streamSettings)->network;
+                    $inbound_port = $inbound_obj->port;
+                    $inbound_remark = $inbound_obj->remark;
+                    if ($response->successful()) {
+                        $location = $service->server->name;
+                        $volume = $service->package->name;
+                        $code = $subscription->code;
+                        $expire_date = $subscription->expire_at;
+                        $parts = parse_url($server_address);
+                        $clean_server_url = $parts['host'];
+                        $sub_link = GenerateConfigService::generateSubscription($subscription->id);
+                        $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
+                        $sub_qrCode = QrCode::format('svg')->generate($sub_link);
+                        $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
+                        Storage::put($sub_path, $sub_qrCode);
+                        $sub_qrcode = Storage::url($sub_path);
+                        $v2ray_qrCode = QrCode::format('svg')->generate($service_link);
+
+                        $v2ray_path = 'public/images/qrcodes/' . uniqid() . '.svg';
+                        Storage::put($v2ray_path, $v2ray_qrCode);
+                        $v2ray_qrcode = Storage::url($v2ray_path);
+                        $reponse_data = [
+                            'link' => $service_link,
+                            'sub' => $sub_link,
+                            'sub_qrcode' => $sub_qrcode,
+                            'v2ray_qrcode' => $v2ray_qrcode,
+                        ];
+                        return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
+                    }
+                } catch (\Throwable $th) {
+                    $reponse_data = [];
+                    return $this->successResponse($subscription, "خطا در ایجاد اشتراک");
+                }
             }
         }
     }
