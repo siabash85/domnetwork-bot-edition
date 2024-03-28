@@ -283,7 +283,7 @@ const route = useRoute();
 const handleCreate = async (event) => {
     const { valid } = await formRef.value.validate();
     if (valid) {
-        loading.value = true;
+        // loading.value = true;
         const form_data = new FormData();
         form_data.append("server_id", form.value.server_id);
         form_data.append("package_duration_id", form.value.package_duration_id);
