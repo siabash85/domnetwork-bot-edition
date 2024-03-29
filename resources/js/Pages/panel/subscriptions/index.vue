@@ -321,7 +321,7 @@ const handleShowExtensionDialog = (item) => {
 };
 
 const handleCreate = async (event) => {
-    // loader.value = true;
+    loader.value = true;
     const form_data = new FormData();
     form_data.append("subscription_id", selected_subscription.value.id);
     form_data.append("package_duration_id", form.value.package_duration_id);
