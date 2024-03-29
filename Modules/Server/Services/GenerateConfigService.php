@@ -2,10 +2,13 @@
 
 namespace Modules\Server\Services;
 
+use Illuminate\Support\Carbon;
+use Modules\Order\Entities\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Modules\Server\Entities\Subscription;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Modules\Server\Entities\PackageDuration;
 
 
 
@@ -108,5 +111,97 @@ class GenerateConfigService
         Storage::put($path, $qrCode);
         $qrcode = Storage::url($path);
         return $qrcode;
+    }
+
+    public static function extensionMarzbanService($package_duration, $volume, $subscription_id)
+    {
+        $sub = Subscription::query()->where('id', $subscription_id)->first();
+        $user = $sub->user;
+        $sub_package_duration = PackageDuration::query()->where('id', $package_duration)->first();
+        $server_address = $sub->service->server->address;
+        $service = $sub->service;
+        $res = Http::asForm()->post("$server_address/api/admin/token", [
+            "username" => $service->server->username,
+            "password" => $service->server->password,
+            "grant_type" => "password"
+        ]);
+
+        $auth_res = json_decode($res->body());
+
+        $auth_access_token = $auth_res->access_token;
+        $sub_username = $sub->code;
+
+        $res = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->withToken($auth_access_token)->get("$server_address/api/user/{$sub_username}");
+        $user_res = json_decode($res->body());
+        $volume_consumed = $user_res->used_traffic;
+        $total = $user_res->data_limit;
+        $remaining_volume = $total - $volume_consumed;
+        $extension_service_total = $volume * pow(1024, 3);
+        $today = Carbon::now();
+        $givenDate = Carbon::parse($sub->expire_at)->addDays($sub_package_duration->value);
+        $new_volume = $remaining_volume + $extension_service_total;
+        $added_deadline = $sub_package_duration->value;
+        $settings = [
+            "username" => $sub_username,
+            "note" => "",
+            "data_limit_reset_strategy" => "no_reset",
+            "data_limit" => $new_volume,
+            "expire" => $givenDate->timestamp,
+            "status" => "active",
+            "proxies" => array(
+                "vless" => array(
+                    "flow" => ""
+                ),
+                "trojan" => array(),
+                "shadowsocks" => array(
+                    "method" => "chacha20-ietf-poly1305"
+                ),
+                "vmess" => array()
+            ),
+            "inbounds" => array(
+                "vmess" => array(
+                    "VMess TCP",
+                    "VMess Websocket"
+                ),
+                "vless" => array(
+                    "VLESS TCP REALITY",
+                    "VLESS GRPC REALITY"
+                ),
+                "trojan" => array(
+                    "Trojan Websocket TLS"
+                ),
+                "shadowsocks" => array(
+                    "Shadowsocks TCP"
+                )
+            )
+        ];
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->withToken($auth_access_token)->put("$server_address/api/user/{$sub_username}", $settings);
+
+        if ($response->successful()) {
+            if ($givenDate->isPast()) {
+                Subscription::query()->where('id', $sub->id)->update(
+                    ['expire_at' => now()->addDays($added_deadline)]
+                );
+            } else {
+                Subscription::query()->where('id', $sub->id)->update(
+                    ['expire_at' => Carbon::parse($sub->expire_at)->addDays($added_deadline)]
+                );
+            }
+            $order = Order::query()->create([
+                "user_id" => $user->id,
+                "service_id" => $sub->service->id,
+                "status" => "success",
+                "payable_price" => $sub->service->price,
+                "price" => $sub->service->price,
+                "type" => "extension"
+            ]);
+        }
     }
 }

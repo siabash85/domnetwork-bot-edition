@@ -36,7 +36,7 @@ class SubscriptionController extends ApiController
                 $q->where("partner_id", $user->id);
             })->get();
         } else {
-            $services = Subscription::query()->get();
+            $services = Subscription::query()->orderByDesc('created_at')->get();
         }
 
         $services = SubscriptionResource::collection($services);
@@ -90,7 +90,7 @@ class SubscriptionController extends ApiController
                 $auth_res = json_decode($res->body());
                 $auth_access_token = $auth_res->access_token;
                 $settings = [
-                    "username" => $request->name,
+                    "username" => $subscription->code,
                     "note" => "",
                     "data_limit_reset_strategy" => "no_reset",
                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
@@ -233,79 +233,86 @@ class SubscriptionController extends ApiController
         $sub = Subscription::query()->where('id', $request->subscription_id)->first();
         $sub_package_duration = PackageDuration::query()->where('id', $request->package_duration_id)->first();
         $user = $sub->user;
-        $extension_price = $sub_package_duration->price *  intval($request->volume);;
+        $extension_price = $sub_package_duration->price *  intval($request->volume);
         if ($extension_price > $user->wallet) {
             return $this->successResponse($extension_price, "❌ موجودی شما برای خرید این سرویس کافی نمیباشد ", 204);
         } else {
             try {
                 $server_address = $sub->service->server->address;
                 $user->decrement("wallet", $extension_price);
-                $res = Http::post("$server_address/login", [
-                    "username" => $sub->service->server->username,
-                    "password" => $sub->service->server->password
-                ]);;
-                $cookieJar = $res->cookies();
-                $cookiesArray = [];
-                foreach ($cookieJar as $cookie) {
-                    $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
-                }
-                $cookiesString = implode('; ', $cookiesArray);
-                $inbound_obj = GenerateConfigService::getClientTraffics($sub->id);
-                $volume_consumed = $inbound_obj->up + $inbound_obj->down;
-                $total = $inbound_obj->total;
-                $remaining_volume = $total - $volume_consumed;
-                $extension_service_total = $request->volume * pow(1024, 3);
-                $today = Carbon::now();
-                $givenDate = Carbon::parse($sub->expire_at);
-                $diffInDays = $today->diffInDays($givenDate);
-                if ($givenDate->isPast()) {
-                    $diffInDays = 0;
-                    $new_volume = $extension_service_total;
+                $service = $sub->service;
+                $server_type = $sub->service->server->type;
+                if ($server_type == "marzban") {
+                    GenerateConfigService::extensionMarzbanService($request->package_duration_id, $request->volume, $request->subscription_id);
                 } else {
-                    $new_volume = $remaining_volume + $extension_service_total;
-                }
-                $added_deadline = $sub_package_duration->value;
-                $package_duration_time = ($diffInDays + $added_deadline) * 24 * 60 * 60 * 1000;
-                $settings = [
-                    "clients" => [
-                        [
-                            "id" => $sub->uuid,
-                            "flow" => "",
-                            "email" => $sub->code,
-                            "limitIp" => 0,
-                            "totalGB" => $new_volume,
-                            "expiryTime" => -$package_duration_time,
-                            "enable" => true,
-                            "tgId" => "",
-                            "subId" => $sub->subId
+                    $res = Http::post("$server_address/login", [
+                        "username" => $sub->service->server->username,
+                        "password" => $sub->service->server->password
+                    ]);;
+                    $cookieJar = $res->cookies();
+                    $cookiesArray = [];
+                    foreach ($cookieJar as $cookie) {
+                        $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+                    }
+                    $cookiesString = implode('; ', $cookiesArray);
+                    $inbound_obj = GenerateConfigService::getClientTraffics($sub->id);
+                    $volume_consumed = $inbound_obj->up + $inbound_obj->down;
+                    $total = $inbound_obj->total;
+                    $remaining_volume = $total - $volume_consumed;
+                    $extension_service_total = $request->volume * pow(1024, 3);
+                    $today = Carbon::now();
+                    $givenDate = Carbon::parse($sub->expire_at);
+                    $diffInDays = $today->diffInDays($givenDate);
+                    if ($givenDate->isPast()) {
+                        $diffInDays = 0;
+                        $new_volume = $extension_service_total;
+                    } else {
+                        $new_volume = $remaining_volume + $extension_service_total;
+                    }
+                    $added_deadline = $sub_package_duration->value;
+                    $package_duration_time = ($diffInDays + $added_deadline) * 24 * 60 * 60 * 1000;
+                    $settings = [
+                        "clients" => [
+                            [
+                                "id" => $sub->uuid,
+                                "flow" => "",
+                                "email" => $sub->code,
+                                "limitIp" => 0,
+                                "totalGB" => $new_volume,
+                                "expiryTime" => -$package_duration_time,
+                                "enable" => true,
+                                "tgId" => "",
+                                "subId" => $sub->subId
+                            ]
                         ]
-                    ]
-                ];
-                $server_inbound_id = $sub->service->server->inbound;
-                $response = Http::withHeaders([
-                    'Cookie' => $cookiesString,
-                ])->post("$server_address/panel/inbound/updateClient/$sub->uuid", [
-                    "id" => intval($server_inbound_id),
-                    "settings" => json_encode($settings)
-                ]);
-                $code = $sub->code;
-                if ($givenDate->isPast()) {
-                    Subscription::query()->where('id', $sub->id)->update(
-                        ['expire_at' => now()->addDays($added_deadline)]
-                    );
-                } else {
-                    Subscription::query()->where('id', $sub->id)->update(
-                        ['expire_at' => Carbon::parse($sub->expire_at)->addDays($added_deadline)]
-                    );
+                    ];
+                    $server_inbound_id = $sub->service->server->inbound;
+                    $response = Http::withHeaders([
+                        'Cookie' => $cookiesString,
+                    ])->post("$server_address/panel/inbound/updateClient/$sub->uuid", [
+                        "id" => intval($server_inbound_id),
+                        "settings" => json_encode($settings)
+                    ]);
+                    $code = $sub->code;
+                    if ($givenDate->isPast()) {
+                        Subscription::query()->where('id', $sub->id)->update(
+                            ['expire_at' => now()->addDays($added_deadline)]
+                        );
+                    } else {
+                        Subscription::query()->where('id', $sub->id)->update(
+                            ['expire_at' => Carbon::parse($sub->expire_at)->addDays($added_deadline)]
+                        );
+                    }
+                    $order = Order::query()->create([
+                        "user_id" => $user->id,
+                        "service_id" => $sub->service->id,
+                        "status" => "success",
+                        "payable_price" => $sub->service->price,
+                        "price" => $sub->service->price,
+                        "type" => "extension"
+                    ]);
                 }
-                $order = Order::query()->create([
-                    "user_id" => $user->id,
-                    "service_id" => $sub->service->id,
-                    "status" => "success",
-                    "payable_price" => $sub->service->price,
-                    "price" => $sub->service->price,
-                    "type" => "extension"
-                ]);
+
                 // if (is_null($user->uid)) {
                 //     $message = "✅ سرویس با کد {$code} تمدید شد.";
                 //     Telegram::sendMessage([
