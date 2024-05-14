@@ -177,6 +177,7 @@ class WebhookController extends Controller
                                 ]);
 
                                 $auth_res = json_decode($res->body());
+                                Log::debug($auth_res);
                                 $auth_access_token = $auth_res->access_token;
 
                                 $settings = [
