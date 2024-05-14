@@ -139,7 +139,7 @@ const visible_delete_message = ref(false);
 const servers = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/servers");
+    const { data } = await ApiService.get("api/panel/servers");
     servers.value = data.data;
     loading.value = false;
 };

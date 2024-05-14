@@ -306,7 +306,7 @@ const formRef = ref(null);
 const subscriptions = ref([]);
 
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/subscriptions");
+    const { data } = await ApiService.get("api/panel/subscriptions");
     subscriptions.value = data.data;
 
     let { data: durations_res } = await ApiService.get(

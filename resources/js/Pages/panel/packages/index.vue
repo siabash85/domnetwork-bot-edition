@@ -128,7 +128,7 @@ const loading = ref(true);
 const packages = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/packages");
+    const { data } = await ApiService.get("api/panel/packages");
     packages.value = data.data;
     loading.value = false;
 };

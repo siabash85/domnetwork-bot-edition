@@ -154,7 +154,7 @@ const visible_delete_message = ref(false);
 const services = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/services");
+    const { data } = await ApiService.get("api/panel/services");
     services.value = data.data;
     loading.value = false;
 };

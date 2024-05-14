@@ -137,7 +137,7 @@ const loading = ref(true);
 const platforms = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/guide/platforms");
+    const { data } = await ApiService.get("api/panel/guide/platforms");
     platforms.value = data.data;
     loading.value = false;
 };

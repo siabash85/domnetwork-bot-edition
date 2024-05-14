@@ -238,7 +238,7 @@ const headers = ref([
     { key: "actions", title: "عملیات", sortable: true },
 ]);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/users");
+    const { data } = await ApiService.get("api/panel/users");
     users.value = data.data;
     loading.value = false;
 };

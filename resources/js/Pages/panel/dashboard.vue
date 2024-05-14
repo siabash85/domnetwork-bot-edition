@@ -255,7 +255,7 @@ const { user } = storeToRefs(store);
 const statics = ref({});
 const loading = ref(true);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/dashboard");
+    const { data } = await ApiService.get("api/panel/dashboard");
     statics.value = data.data;
     loading.value = false;
 };

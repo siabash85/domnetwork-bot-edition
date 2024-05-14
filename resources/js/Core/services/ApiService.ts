@@ -42,6 +42,7 @@ class ApiService {
         ] = `Bearer ${JwtService.getToken()}`;
         ApiService.vueInstance.axios.defaults.headers.common["Accept"] =
             "application/json";
+
     }
 
     /**
@@ -64,9 +65,7 @@ class ApiService {
         resource: string,
         slug = "" as string
     ): Promise<AxiosResponse> {
-        if (resource.endsWith('/')) {
-            resource = resource.slice(0, -1);
-        }
+
         return ApiService.vueInstance.axios.get(`${resource}/${slug}`);
     }
 

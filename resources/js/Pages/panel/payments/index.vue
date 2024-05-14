@@ -291,7 +291,7 @@ const headers = ref([
 const payments = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/payments");
+    const { data } = await ApiService.get("api/panel/payments");
     payments.value = data.data;
     loading.value = false;
 };

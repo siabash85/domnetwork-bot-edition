@@ -120,7 +120,7 @@ const visible_delete_message = ref(false);
 const messages = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/support/messages");
+    const { data } = await ApiService.get("api/panel/support/messages");
     messages.value = data.data;
     loading.value = false;
 };

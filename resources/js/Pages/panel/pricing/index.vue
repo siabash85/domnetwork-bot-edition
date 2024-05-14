@@ -125,7 +125,7 @@ const loading = ref(true);
 const pricing = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/pricing");
+    const { data } = await ApiService.get("api/panel/pricing");
     pricing.value = data.data;
     loading.value = false;
 };

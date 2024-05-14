@@ -183,7 +183,7 @@ const loading = ref(true);
 const orders = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/orders");
+    const { data } = await ApiService.get("api/panel/orders");
     orders.value = data.data;
     loading.value = false;
 };

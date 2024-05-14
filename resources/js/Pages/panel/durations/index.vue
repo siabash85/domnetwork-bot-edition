@@ -110,7 +110,7 @@ const loading = ref(true);
 const durations = ref([]);
 const selected_item = ref(null);
 const fetchData = async () => {
-    const { data } = await ApiService.get("/api/panel/package/durations");
+    const { data } = await ApiService.get("api/panel/package/durations");
     durations.value = data.data;
     loading.value = false;
 };
