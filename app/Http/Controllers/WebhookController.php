@@ -175,9 +175,9 @@ class WebhookController extends Controller
                                     "password" => $service->server->password,
                                     "grant_type" => "password"
                                 ]);
-
+                                Log::debug($res->body());
                                 $auth_res = json_decode($res->body());
-                                Log::debug($auth_res);
+
                                 $auth_access_token = $auth_res->access_token;
 
                                 $settings = [
