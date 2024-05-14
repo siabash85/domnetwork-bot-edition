@@ -155,8 +155,8 @@ class WebhookController extends Controller
                             'service_id' => $order->service->id,
                             'status' => "active",
                             'name' => $pre_order->service_name,
-                            'code' => $rand_code,
-                            'slug' => $pre_order->service_name . " - " . $rand_code,
+                            'code' => $sub_code,
+                            'slug' => $pre_order->service_name . " - " . $sub_code,
                             "expire_at" => now()->addDays($order->service->package_duration->name),
                             'uuid' => Str::uuid(),
                             'subId' => Str::random(16)
@@ -182,7 +182,7 @@ class WebhookController extends Controller
                                 $auth_access_token = $auth_res["access_token"];
 
                                 $settings = [
-                                    "username" => $pre_order->service_name . $subscription->code,
+                                    "username" => $pre_order->service_name . $sub_code,
                                     "note" => "",
                                     "data_limit_reset_strategy" => "no_reset",
                                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
