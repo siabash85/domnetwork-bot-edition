@@ -238,7 +238,7 @@ class WebhookController extends Controller
 
                                 Log::debug("subscription_url " . $user_res->subscription_url);
 
-                                Log::debug($user_res);
+                                // Log::debug($user_res);
                                 if ($response->successful()) {
 
                                     $sub_link = "{$server_address}$user_res->subscription_url";
