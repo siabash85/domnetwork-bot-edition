@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Guide\Entities\GuidePlatform;
 use Modules\Server\Entities\Subscription;
 use App\Telegram\Keyboard\KeyboardHandler;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Modules\Payment\Entities\PaymentMethod;
 use Modules\Server\Entities\PackageDuration;
@@ -142,246 +143,251 @@ class WebhookController extends Controller
                         // 'reply_markup' => $encodedMarkup,
                     ]);
                 } else {
-                    Telegram::sendMessage([
-                        'text' => "🔄 در حال ساخت سرویس شما . . .",
-                        "chat_id" => $sender->id,
-                    ]);
+                    try {
+                        Telegram::sendMessage([
+                            'text' => "🔄 در حال ساخت سرویس شما . . .",
+                            "chat_id" => $sender->id,
+                        ]);
 
-                    $sub_code = random_int(1000000, 10000000);
-                    $rand_code = Str::random(8);
-                    $subscription = Subscription::query()->create([
-                        'user_id' => $user->id,
-                        'service_id' => $order->service->id,
-                        'status' => "active",
-                        'name' => $pre_order->service_name,
-                        'code' => $rand_code,
-                        'slug' => $pre_order->service_name . " - " . $rand_code,
-                        "expire_at" => now()->addDays($order->service->package_duration->name),
-                        'uuid' => Str::uuid(),
-                        'subId' => Str::random(16)
-                    ]);
-                    $server_address = $order->service->server->address;
-                    $order->update(["status" => "success"]);
-                    $user->decrement("wallet", $order->payable_price);
-                    $service = $order->service;
-                    $server_type = $order->service->server->type;
+                        $sub_code = random_int(1000000, 10000000);
+                        $rand_code = Str::random(8);
+                        $subscription = Subscription::query()->create([
+                            'user_id' => $user->id,
+                            'service_id' => $order->service->id,
+                            'status' => "active",
+                            'name' => $pre_order->service_name,
+                            'code' => $rand_code,
+                            'slug' => $pre_order->service_name . " - " . $rand_code,
+                            "expire_at" => now()->addDays($order->service->package_duration->name),
+                            'uuid' => Str::uuid(),
+                            'subId' => Str::random(16)
+                        ]);
+                        $server_address = $order->service->server->address;
+                        $order->update(["status" => "success"]);
+                        $user->decrement("wallet", $order->payable_price);
+                        $service = $order->service;
+                        $server_type = $order->service->server->type;
 
-                    if ($server_type == "marzban") {
-                        try {
-                            $res = Http::asForm()->post("$server_address/api/admin/token", [
-                                "username" => $service->server->username,
-                                "password" => $service->server->password,
-                                "grant_type" => "password"
-                            ]);
+                        if ($server_type == "marzban") {
+                            try {
+                                $res = Http::asForm()->post("$server_address/api/admin/token", [
+                                    "username" => $service->server->username,
+                                    "password" => $service->server->password,
+                                    "grant_type" => "password"
+                                ]);
 
-                            $auth_res = json_decode($res->body());
-                            $auth_access_token = $auth_res->access_token;
+                                $auth_res = json_decode($res->body());
+                                $auth_access_token = $auth_res->access_token;
 
-                            $settings = [
-                                "username" => $subscription->code,
-                                "note" => "",
-                                "data_limit_reset_strategy" => "no_reset",
-                                "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
-                                "expire" => now()->addDays($service->package_duration->name)->timestamp,
-                                "status" => "active",
-                                "proxies" => array(
-                                    "vless" => array(
-                                        "flow" => ""
+                                $settings = [
+                                    "username" => $subscription->code,
+                                    "note" => "",
+                                    "data_limit_reset_strategy" => "no_reset",
+                                    "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
+                                    "expire" => now()->addDays($service->package_duration->name)->timestamp,
+                                    "status" => "active",
+                                    "proxies" => array(
+                                        "vless" => array(
+                                            "flow" => ""
+                                        ),
+                                        "trojan" => array(),
+                                        "shadowsocks" => array(
+                                            "method" => "chacha20-ietf-poly1305"
+                                        ),
+                                        "vmess" => array()
                                     ),
-                                    "trojan" => array(),
-                                    "shadowsocks" => array(
-                                        "method" => "chacha20-ietf-poly1305"
-                                    ),
-                                    "vmess" => array()
-                                ),
-                                "inbounds" => array(
-                                    "vmess" => array(
-                                        "VMess TCP",
-                                        "VMess Websocket"
-                                    ),
-                                    "vless" => array(
-                                        "VLESS TCP REALITY",
-                                        "VLESS GRPC REALITY"
-                                    ),
-                                    "trojan" => array(
-                                        "Trojan Websocket TLS"
-                                    ),
-                                    "shadowsocks" => array(
-                                        "Shadowsocks TCP"
+                                    "inbounds" => array(
+                                        "vmess" => array(
+                                            "VMess TCP",
+                                            "VMess Websocket"
+                                        ),
+                                        "vless" => array(
+                                            "VLESS TCP REALITY",
+                                            "VLESS GRPC REALITY"
+                                        ),
+                                        "trojan" => array(
+                                            "Trojan Websocket TLS"
+                                        ),
+                                        "shadowsocks" => array(
+                                            "Shadowsocks TCP"
+                                        )
                                     )
-                                )
 
-                            ];
-                        } catch (\Throwable $th) {
-                            //throw $th;
-                            return $th->getMessage();
-                        }
-
-
-
-                        try {
-                            $response = Http::withHeaders([
-                                'Accept' => 'application/json',
-                                'Content-Type' => 'application/json',
-                            ])->withToken($auth_access_token)->post("$server_address/api/user", $settings);
-                            $user_res = json_decode($response->body());
-                            if ($response->successful()) {
-
-                                $sub_link = "{$server_address}$user_res->subscription_url";
-                                $sub_qrCode = QrCode::format('svg')->margin(2)->generate($sub_link);
-                                $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
-                                Storage::put($sub_path, $sub_qrCode);
-                                $sub_qrcode = Storage::url($sub_path);
-                                // $reponse_data = [
-                                //     'link' => $sub_link,
-                                //     'sub' => $sub_link,
-                                //     'sub_qrcode' => $sub_qrcode,
-                                //     'v2ray_qrcode' => $sub_qrcode,
-                                // ];
-                                // return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
-                                $location = $order->service->server->name;
-                                $volume = $order->service->package->name;
-                                $code = $subscription->code;
-                                $expire_date = formatGregorian($subscription->expire_at);
-                                $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
-                                    "💎 *کد سرویس:* `$code`\n" .
-                                    "🌎 *لوکیشن:* `$location`\n" .
-                                    "⏳ *تاریخ انقضا:* `$expire_date`\n" .
-                                    "♾ *حجم کل:* `$volume` \n\n" .
-                                    "📌 *لینک اشتراک* \n\n" .
-                                    "`$sub_link` \n\n";
-                                Telegram::sendPhoto([
-                                    "chat_id" => $sender->id,
-                                    'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
-                                    'caption' => $message,
-                                    'reply_markup' => KeyboardHandler::home(),
-                                    'parse_mode' => 'MarkdownV2',
-                                    'width' => 300,
-                                    'height' => 300,
-                                ]);
-                                $owner_users = User::query()->where('is_notifable', true)->get();
-                                $order_user = $user->username . " - " . $user->uid;
-                                $notif_message = "⚠️ * سرویس جدیدی با مشخصات زیر خریداری شد*\n\n" .
-                                    "♾ * کاربر:* `$order_user` \n\n" .
-                                    "💎 *کد سرویس:* `$code`\n" .
-                                    "🌎 *لوکیشن:* `$location`\n" .
-                                    "⏳ *تاریخ انقضا:* `$expire_date`\n" .
-                                    "♾ *حجم کل:* `$volume` \n\n";
-
-                                foreach ($owner_users as $key => $owner_user) {
-                                    Telegram::sendMessage([
-                                        'text' => $notif_message,
-                                        "chat_id" => $owner_user->uid,
-                                        'parse_mode' => 'MarkdownV2',
-                                        'reply_markup' => KeyboardHandler::home(),
-                                    ]);
-                                }
+                                ];
+                            } catch (\Throwable $th) {
+                                //throw $th;
+                                Log::debug($th->getMessage());
                             }
-                        } catch (\Throwable $th) {
 
-                            Telegram::sendMessage([
-                                'text' => $th->getMessage(),
-                                "chat_id" => $sender->id,
-                                'parse_mode' => 'MarkdownV2',
-                                'reply_markup' => KeyboardHandler::home(),
+
+
+                            try {
+                                $response = Http::withHeaders([
+                                    'Accept' => 'application/json',
+                                    'Content-Type' => 'application/json',
+                                ])->withToken($auth_access_token)->post("$server_address/api/user", $settings);
+                                $user_res = json_decode($response->body());
+                                if ($response->successful()) {
+
+                                    $sub_link = "{$server_address}$user_res->subscription_url";
+                                    $sub_qrCode = QrCode::format('svg')->margin(2)->generate($sub_link);
+                                    $sub_path = 'public/images/qrcodes/' . uniqid() . '.svg';
+                                    Storage::put($sub_path, $sub_qrCode);
+                                    $sub_qrcode = Storage::url($sub_path);
+                                    // $reponse_data = [
+                                    //     'link' => $sub_link,
+                                    //     'sub' => $sub_link,
+                                    //     'sub_qrcode' => $sub_qrcode,
+                                    //     'v2ray_qrcode' => $sub_qrcode,
+                                    // ];
+                                    // return $this->successResponse($reponse_data, "ایجاد  با موفقیت انجام شد");
+                                    $location = $order->service->server->name;
+                                    $volume = $order->service->package->name;
+                                    $code = $subscription->code;
+                                    $expire_date = formatGregorian($subscription->expire_at);
+                                    $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
+                                        "💎 *کد سرویس:* `$code`\n" .
+                                        "🌎 *لوکیشن:* `$location`\n" .
+                                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                        "♾ *حجم کل:* `$volume` \n\n" .
+                                        "📌 *لینک اشتراک* \n\n" .
+                                        "`$sub_link` \n\n";
+                                    Telegram::sendPhoto([
+                                        "chat_id" => $sender->id,
+                                        'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
+                                        'caption' => $message,
+                                        'reply_markup' => KeyboardHandler::home(),
+                                        'parse_mode' => 'MarkdownV2',
+                                        'width' => 300,
+                                        'height' => 300,
+                                    ]);
+                                    $owner_users = User::query()->where('is_notifable', true)->get();
+                                    $order_user = $user->username . " - " . $user->uid;
+                                    $notif_message = "⚠️ * سرویس جدیدی با مشخصات زیر خریداری شد*\n\n" .
+                                        "♾ * کاربر:* `$order_user` \n\n" .
+                                        "💎 *کد سرویس:* `$code`\n" .
+                                        "🌎 *لوکیشن:* `$location`\n" .
+                                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                        "♾ *حجم کل:* `$volume` \n\n";
+
+                                    foreach ($owner_users as $key => $owner_user) {
+                                        Telegram::sendMessage([
+                                            'text' => $notif_message,
+                                            "chat_id" => $owner_user->uid,
+                                            'parse_mode' => 'MarkdownV2',
+                                            'reply_markup' => KeyboardHandler::home(),
+                                        ]);
+                                    }
+                                }
+                            } catch (\Throwable $th) {
+
+                                Telegram::sendMessage([
+                                    'text' => $th->getMessage(),
+                                    "chat_id" => $sender->id,
+                                    'parse_mode' => 'MarkdownV2',
+                                    'reply_markup' => KeyboardHandler::home(),
+                                ]);
+                                // $reponse_data = [];
+                                // return $this->successResponse($subscription, "خطا در ایجاد اشتراک");
+                            }
+                        } else {
+                            $res = Http::post("$server_address/login", [
+                                "username" => $order->service->server->username,
+                                "password" => $order->service->server->password
                             ]);
-                            // $reponse_data = [];
-                            // return $this->successResponse($subscription, "خطا در ایجاد اشتراک");
-                        }
-                    } else {
-                        $res = Http::post("$server_address/login", [
-                            "username" => $order->service->server->username,
-                            "password" => $order->service->server->password
-                        ]);
-                        $cookieJar = $res->cookies();
-                        $cookiesArray = [];
-                        foreach ($cookieJar as $cookie) {
-                            $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
-                        }
-                        $cookiesString = implode('; ', $cookiesArray);
-                        $package_duration_time = $order->service->package_duration->value > 0 ? -$order->service->package_duration->value * 24 * 60 * 60 * 1000 : 0;
-                        $settings = [
-                            "clients" => [
-                                [
-                                    "id" => $subscription->uuid,
-                                    "flow" => "",
-                                    "email" => $subscription->code,
-                                    "limitIp" => 0,
-                                    "totalGB" => $order->service->package->value > 0 ? $order->service->package->value * pow(1024, 3) : 0,
-                                    "expiryTime" => $package_duration_time,
-                                    "enable" => true,
-                                    "tgId" => "",
-                                    "subId" => $subscription->subId
+                            $cookieJar = $res->cookies();
+                            $cookiesArray = [];
+                            foreach ($cookieJar as $cookie) {
+                                $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
+                            }
+                            $cookiesString = implode('; ', $cookiesArray);
+                            $package_duration_time = $order->service->package_duration->value > 0 ? -$order->service->package_duration->value * 24 * 60 * 60 * 1000 : 0;
+                            $settings = [
+                                "clients" => [
+                                    [
+                                        "id" => $subscription->uuid,
+                                        "flow" => "",
+                                        "email" => $subscription->code,
+                                        "limitIp" => 0,
+                                        "totalGB" => $order->service->package->value > 0 ? $order->service->package->value * pow(1024, 3) : 0,
+                                        "expiryTime" => $package_duration_time,
+                                        "enable" => true,
+                                        "tgId" => "",
+                                        "subId" => $subscription->subId
+                                    ]
                                 ]
-                            ]
-                        ];
-                        $server_inbound_id = $order->service->server->inbound;
-                        $response = Http::withHeaders([
-                            'Cookie' => $cookiesString,
-                        ])->post("$server_address/panel/inbound/addClient", [
-                            "id" => intval($server_inbound_id),
-                            "settings" => json_encode($settings)
-                        ]);
-                        try {
-
-                            $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
-                            $inbound_res = json_decode($inbound->body());
-                            $inbound_obj = $inbound_res->obj;
-                            $network = json_decode($inbound_obj->streamSettings)->network;
-                            $inbound_port = $inbound_obj->port;
-                            $inbound_remark = $inbound_obj->remark;
-                            if ($response->successful()) {
-                                $location = $order->service->server->name;
-                                $volume = $order->service->package->name;
-                                $code = $subscription->code;
-                                $expire_date = formatGregorian($subscription->expire_at);
-                                $parts = parse_url($server_address);
-                                $clean_server_url = $parts['host'];
-                                $sub_link = GenerateConfigService::generateSubscription($subscription->id);
-                                $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
-                                $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
-                                    "💎 *کد سرویس:* `$code`\n" .
-                                    "🌎 *لوکیشن:* `$location`\n" .
-                                    "⏳ *تاریخ انقضا:* `$expire_date`\n" .
-                                    "♾ *حجم کل:* `$volume` \n\n" .
-                                    "📌 *لینک v2ray* \n\n" .
-                                    "`$service_link` \n\n" .
-                                    "📌 *لینک اشتراک* \n\n" .
-                                    "`$sub_link` \n\n";
-                                Telegram::sendPhoto([
-                                    "chat_id" => $sender->id,
-                                    'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
-                                    'caption' => $message,
-                                    'reply_markup' => KeyboardHandler::home(),
-                                    'parse_mode' => 'MarkdownV2',
-                                    'width' => 300,
-                                    'height' => 300,
-                                ]);
-                                $owner_users = User::query()->where('is_notifable', true)->get();
-                                $order_user = $user->username . " - " . $user->uid;
-                                $notif_message = "⚠️ * سرویس جدیدی با مشخصات زیر خریداری شد*\n\n" .
-                                    "♾ * کاربر:* `$order_user` \n\n" .
-                                    "💎 *کد سرویس:* `$code`\n" .
-                                    "🌎 *لوکیشن:* `$location`\n" .
-                                    "⏳ *تاریخ انقضا:* `$expire_date`\n" .
-                                    "♾ *حجم کل:* `$volume` \n\n";
-
-                                foreach ($owner_users as $key => $owner_user) {
-                                    Telegram::sendMessage([
-                                        'text' => $notif_message,
-                                        "chat_id" => $owner_user->uid,
-                                        'parse_mode' => 'MarkdownV2',
-                                        'reply_markup' => KeyboardHandler::home(),
-                                    ]);
-                                }
-                            }
-                        } catch (\Throwable $th) {
-                            // dd($th->getMessage());
-                            Telegram::sendMessage([
-                                'text' => $th->getMessage(),
-                                "chat_id" => $sender->id,
+                            ];
+                            $server_inbound_id = $order->service->server->inbound;
+                            $response = Http::withHeaders([
+                                'Cookie' => $cookiesString,
+                            ])->post("$server_address/panel/inbound/addClient", [
+                                "id" => intval($server_inbound_id),
+                                "settings" => json_encode($settings)
                             ]);
+                            try {
+
+                                $inbound = Http::withHeaders(['Cookie' => $cookiesString])->get("$server_address/xui/API/inbounds/get/$server_inbound_id");
+                                $inbound_res = json_decode($inbound->body());
+                                $inbound_obj = $inbound_res->obj;
+                                $network = json_decode($inbound_obj->streamSettings)->network;
+                                $inbound_port = $inbound_obj->port;
+                                $inbound_remark = $inbound_obj->remark;
+                                if ($response->successful()) {
+                                    $location = $order->service->server->name;
+                                    $volume = $order->service->package->name;
+                                    $code = $subscription->code;
+                                    $expire_date = formatGregorian($subscription->expire_at);
+                                    $parts = parse_url($server_address);
+                                    $clean_server_url = $parts['host'];
+                                    $sub_link = GenerateConfigService::generateSubscription($subscription->id);
+                                    $service_link = "vless://$subscription->uuid@$clean_server_url:$inbound_port?type=$network&path=%2F&security=none#$inbound_remark-$subscription->code";
+                                    $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
+                                        "💎 *کد سرویس:* `$code`\n" .
+                                        "🌎 *لوکیشن:* `$location`\n" .
+                                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                        "♾ *حجم کل:* `$volume` \n\n" .
+                                        "📌 *لینک v2ray* \n\n" .
+                                        "`$service_link` \n\n" .
+                                        "📌 *لینک اشتراک* \n\n" .
+                                        "`$sub_link` \n\n";
+                                    Telegram::sendPhoto([
+                                        "chat_id" => $sender->id,
+                                        'photo' => InputFile::create(asset(GenerateConfigService::generateConfigQrCode($sub_link))),
+                                        'caption' => $message,
+                                        'reply_markup' => KeyboardHandler::home(),
+                                        'parse_mode' => 'MarkdownV2',
+                                        'width' => 300,
+                                        'height' => 300,
+                                    ]);
+                                    $owner_users = User::query()->where('is_notifable', true)->get();
+                                    $order_user = $user->username . " - " . $user->uid;
+                                    $notif_message = "⚠️ * سرویس جدیدی با مشخصات زیر خریداری شد*\n\n" .
+                                        "♾ * کاربر:* `$order_user` \n\n" .
+                                        "💎 *کد سرویس:* `$code`\n" .
+                                        "🌎 *لوکیشن:* `$location`\n" .
+                                        "⏳ *تاریخ انقضا:* `$expire_date`\n" .
+                                        "♾ *حجم کل:* `$volume` \n\n";
+
+                                    foreach ($owner_users as $key => $owner_user) {
+                                        Telegram::sendMessage([
+                                            'text' => $notif_message,
+                                            "chat_id" => $owner_user->uid,
+                                            'parse_mode' => 'MarkdownV2',
+                                            'reply_markup' => KeyboardHandler::home(),
+                                        ]);
+                                    }
+                                }
+                            } catch (\Throwable $th) {
+                                // dd($th->getMessage());
+                                Telegram::sendMessage([
+                                    'text' => $th->getMessage(),
+                                    "chat_id" => $sender->id,
+                                ]);
+                            }
                         }
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                        Log::debug($th->getMessage());
                     }
                 }
 
