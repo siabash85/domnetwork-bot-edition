@@ -182,7 +182,7 @@ class WebhookController extends Controller
                                 $auth_access_token = $auth_res["access_token"];
 
                                 $settings = [
-                                    "username" => $subscription->code,
+                                    "username" => $pre_order->service_name . ' ' . $subscription->code,
                                     "note" => "",
                                     "data_limit_reset_strategy" => "no_reset",
                                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
