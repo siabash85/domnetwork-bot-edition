@@ -230,6 +230,7 @@ class WebhookController extends Controller
                                     'Content-Type' => 'application/json',
                                 ])->withToken($auth_access_token)->post("$server_address/api/user", $settings);
                                 $user_res = json_decode($response->body());
+                                Log::debug($user_res);
                                 if ($response->successful()) {
 
                                     $sub_link = "{$server_address}$user_res->subscription_url";
@@ -283,7 +284,7 @@ class WebhookController extends Controller
                                     }
                                 }
                             } catch (\Throwable $th) {
-
+                                Log::debug($th->getMessage());
                                 Telegram::sendMessage([
                                     'text' => $th->getMessage(),
                                     "chat_id" => $sender->id,
