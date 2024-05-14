@@ -17,7 +17,7 @@ use Modules\User\Transformers\Panel\UserResource;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('user', function (Request $request) {
     return new UserResource($request->user());
 });
 Route::prefix('/auth')->group(function () {
