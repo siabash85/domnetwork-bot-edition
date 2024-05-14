@@ -233,7 +233,9 @@ class WebhookController extends Controller
 
                                 Log::debug($response);
 
-                                $user_res = json_decode($response->body());
+                                $user_res = json_decode($response->body(), true);
+
+                                Log::debug("subscription_url " . $user_res["subscription_url"]);
 
                                 Log::debug($user_res);
                                 if ($response->successful()) {
