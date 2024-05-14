@@ -27,7 +27,7 @@ class ApiService {
 
         ApiService.vueInstance = app;
         ApiService.vueInstance.axios = axios;
-        // ApiService.vueInstance.axios.defaults.baseURL = process.env.API_URL;
+        ApiService.vueInstance.axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;;
         ApiService.vueInstance.axios.defaults.withCredentials = true;
     }
 
