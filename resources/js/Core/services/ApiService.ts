@@ -74,9 +74,11 @@ class ApiService {
      * @returns Promise<AxiosResponse>
      */
     public static post(resource: string, params: any): Promise<AxiosResponse> {
+        if (resource.endsWith('/')) {
+            resource = resource.slice(0, -1);
+        }
         return ApiService.vueInstance.axios.post(`${resource}`, params);
     }
-
     /**
      * @description send the UPDATE HTTP request
      * @param resource: string
