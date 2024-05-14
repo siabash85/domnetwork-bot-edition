@@ -231,11 +231,12 @@ class WebhookController extends Controller
                                     'Content-Type' => 'application/json',
                                 ])->withToken($auth_access_token)->post("$server_address/api/user", $settings);
 
-                                Log::debug($response);
+                                // Log::debug($response);
 
                                 $user_res = json_decode($response->body(), true);
+                                $user_res = (object)  $user_res;
 
-                                Log::debug("subscription_url " . $user_res["subscription_url"]);
+                                Log::debug("subscription_url " . $user_res->subscription_url);
 
                                 Log::debug($user_res);
                                 if ($response->successful()) {
