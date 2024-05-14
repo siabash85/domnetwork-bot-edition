@@ -165,49 +165,57 @@ class WebhookController extends Controller
                     $server_type = $order->service->server->type;
 
                     if ($server_type == "marzban") {
-                        $res = Http::asForm()->post("$server_address/api/admin/token", [
-                            "username" => $service->server->username,
-                            "password" => $service->server->password,
-                            "grant_type" => "password"
-                        ]);
+                        try {
+                            $res = Http::asForm()->post("$server_address/api/admin/token", [
+                                "username" => $service->server->username,
+                                "password" => $service->server->password,
+                                "grant_type" => "password"
+                            ]);
 
-                        $auth_res = json_decode($res->body());
-                        $auth_access_token = $auth_res->access_token;
-                        $settings = [
-                            "username" => $subscription->code,
-                            "note" => "",
-                            "data_limit_reset_strategy" => "no_reset",
-                            "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
-                            "expire" => now()->addDays($service->package_duration->name)->timestamp,
-                            "status" => "active",
-                            "proxies" => array(
-                                "vless" => array(
-                                    "flow" => ""
+                            $auth_res = json_decode($res->body());
+                            $auth_access_token = $auth_res->access_token;
+
+                            $settings = [
+                                "username" => $subscription->code,
+                                "note" => "",
+                                "data_limit_reset_strategy" => "no_reset",
+                                "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
+                                "expire" => now()->addDays($service->package_duration->name)->timestamp,
+                                "status" => "active",
+                                "proxies" => array(
+                                    "vless" => array(
+                                        "flow" => ""
+                                    ),
+                                    "trojan" => array(),
+                                    "shadowsocks" => array(
+                                        "method" => "chacha20-ietf-poly1305"
+                                    ),
+                                    "vmess" => array()
                                 ),
-                                "trojan" => array(),
-                                "shadowsocks" => array(
-                                    "method" => "chacha20-ietf-poly1305"
-                                ),
-                                "vmess" => array()
-                            ),
-                            "inbounds" => array(
-                                "vmess" => array(
-                                    "VMess TCP",
-                                    "VMess Websocket"
-                                ),
-                                "vless" => array(
-                                    "VLESS TCP REALITY",
-                                    "VLESS GRPC REALITY"
-                                ),
-                                "trojan" => array(
-                                    "Trojan Websocket TLS"
-                                ),
-                                "shadowsocks" => array(
-                                    "Shadowsocks TCP"
+                                "inbounds" => array(
+                                    "vmess" => array(
+                                        "VMess TCP",
+                                        "VMess Websocket"
+                                    ),
+                                    "vless" => array(
+                                        "VLESS TCP REALITY",
+                                        "VLESS GRPC REALITY"
+                                    ),
+                                    "trojan" => array(
+                                        "Trojan Websocket TLS"
+                                    ),
+                                    "shadowsocks" => array(
+                                        "Shadowsocks TCP"
+                                    )
                                 )
-                            )
 
-                        ];
+                            ];
+                        } catch (\Throwable $th) {
+                            //throw $th;
+                            return $th->getMessage();
+                        }
+
+
 
                         try {
                             $response = Http::withHeaders([
