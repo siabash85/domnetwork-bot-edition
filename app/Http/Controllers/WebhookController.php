@@ -130,12 +130,12 @@ class WebhookController extends Controller
                 return true;
             } else if ($callbackData == "purchase_wallet") {
 
-                $order = Order::query()->where('user_id', $user->id)->where("status", "pending")->latest()->first();
+                // $order = Order::query()->where('user_id', $user->id)->where("status", "pending")->latest()->first();
                 $order = Order::query()->where('id', 543)->first();
 
 
                 $pre_order = PreOrder::query()->where('user_id', $user->id)->first();
-                if ($order->payable_price > $user->wallet) {
+                if (2 < 1) {
                     Telegram::sendMessage([
                         'text' => "❌ موجودی شما برای خرید این سرویس کافی نمیباشد ",
                         "chat_id" => $sender->id,
