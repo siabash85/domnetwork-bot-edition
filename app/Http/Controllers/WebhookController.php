@@ -189,6 +189,7 @@ class WebhookController extends Controller
                                     "expire" => now()->addDays($service->package_duration->name)->timestamp,
                                     "status" => "hold",
                                     "on_hold_expire_duration" =>  0,
+                                    "on_hold_timeout" => now()->addDays($service->package_duration->name),
                                     "proxies" => array(
                                         "vless" => array(
                                             "flow" => ""
