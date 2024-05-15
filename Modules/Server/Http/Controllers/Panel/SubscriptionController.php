@@ -100,23 +100,24 @@ class SubscriptionController extends ApiController
                         "vless" => array(
                             "flow" => ""
                         ),
+                        "vmess" => array(),
                         "trojan" => array(),
                         "shadowsocks" => array(
                             "method" => "chacha20-ietf-poly1305"
-                        ),
-                        "vmess" => array()
+                        )
                     ),
                     "inbounds" => array(
-                        "vmess" => array(
-                            "VMess TCP",
-                            "VMess Websocket"
-                        ),
                         "vless" => array(
+                            "VLESS + WS + TLS",
+                            "VLESS + WS",
                             "VLESS TCP REALITY",
                             "VLESS GRPC REALITY"
                         ),
+                        "vmess" => array(
+                            "VMess TCP"
+                        ),
                         "trojan" => array(
-                            "Trojan Websocket TLS"
+                            "TROJAN + WS"
                         ),
                         "shadowsocks" => array(
                             "Shadowsocks TCP"
