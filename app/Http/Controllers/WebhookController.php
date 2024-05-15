@@ -183,9 +183,10 @@ class WebhookController extends Controller
 
                                 $s_name = $pre_order->service_name;
                                 $s_name = preg_replace('/\s+/', '', $s_name);
+                                $s_name = $s_name . '@' . $subscription->id;
 
                                 $settings = [
-                                    "username" => $s_name . '@' . $sub_code,
+                                    "username" => $s_name,
                                     "note" => "",
                                     "data_limit_reset_strategy" => "no_reset",
                                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
@@ -264,6 +265,7 @@ class WebhookController extends Controller
                                     $expire_date = formatGregorian($subscription->expire_at);
                                     $message = "📣 * سرویس شما با موفقیت ایجاد شد*\n\n" .
                                         "💎 *کد سرویس:* `$code`\n" .
+                                        "🌿 *نام سرویس:* `$s_name`\n" .
                                         "🌎 *لوکیشن:* `$location`\n" .
                                         "⏳ *تاریخ انقضا:* `$expire_date`\n" .
                                         "♾ *حجم کل:* `$volume` \n\n" .
