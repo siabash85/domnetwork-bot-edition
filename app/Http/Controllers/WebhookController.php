@@ -187,9 +187,10 @@ class WebhookController extends Controller
                                     "data_limit_reset_strategy" => "no_reset",
                                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
                                     "expire" => now()->addDays($service->package_duration->name)->timestamp,
-                                    "status" => "hold",
-                                    "on_hold_expire_duration" =>  0,
-                                    "on_hold_timeout" => now()->addDays($service->package_duration->name),
+                                    // "status" => "hold",
+                                    "status" => "active",
+                                    // "on_hold_expire_duration" =>  0,
+                                    // "on_hold_timeout" => now()->addDays($service->package_duration->name),
                                     "proxies" => array(
                                         "vless" => array(
                                             "flow" => ""
