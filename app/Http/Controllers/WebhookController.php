@@ -148,7 +148,7 @@ class WebhookController extends Controller
                             "chat_id" => $sender->id,
                         ]);
 
-                        $sub_code = random_int(1000000, 10000000);
+                        $sub_code = random_int(1000, 10000);
                         $rand_code = Str::random(8);
                         $subscription = Subscription::query()->create([
                             'user_id' => $user->id,
@@ -181,8 +181,11 @@ class WebhookController extends Controller
 
                                 $auth_access_token = $auth_res["access_token"];
 
+                                $s_name = $pre_order->service_name;
+                                $s_name = preg_replace('/\s+/', '', $s_name);
+
                                 $settings = [
-                                    "username" => $pre_order->service_name . $sub_code,
+                                    "username" => $s_name . '@' . $sub_code,
                                     "note" => "",
                                     "data_limit_reset_strategy" => "no_reset",
                                     "data_limit" => $service->package->value > 0 ? $service->package->value * pow(1024, 3) : 0,
